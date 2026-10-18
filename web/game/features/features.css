@@ -159,8 +159,8 @@
 
 #shield-btn {
     position: absolute;
-    top: calc(14px + var(--safe-t));
-    right: calc(290px + var(--safe-r));
+    top: calc(128px + var(--safe-t));
+    right: calc(126px + var(--safe-r));
     width: 48px;
     height: 48px;
     padding: 0;
