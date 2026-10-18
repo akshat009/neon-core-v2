@@ -122,16 +122,20 @@ function burstPowerup(p, type) {
     burst(p, 0xffffff, 6, 0.12, 0.22, 0.25, { shape: 1 });
 }
 
-function shatterMine(mine) {
+// keepBall: a shield blocked the hit, so only the hurdle breaks
+function shatterMine(mine, opts) {
+    const keepBall = opts && opts.keepBall;
     const p = mine.position;
     mine.visible = false;
-    ball.visible = false;
-    resetTrail();
     burst(p, 0xff1a35, 70, 0.36, 0.26, 1.1, { shape: 1, gravity: 0.008, lift: 0.08 });
     burst(p, 0xff6040, 24, 0.26, 0.16, 0.7, { shape: 1 });
-    burst(ball.position, BALL_LOOKS[ballState].glow, 30, 0.3, 0.16, 0.8, { shape: 1 });
     burst(p, 0xffffff, 8, 0.15, 0.35, 0.2);
-    addShake(0.7);
+    if (!keepBall) {
+        ball.visible = false;
+        resetTrail();
+        burst(ball.position, BALL_LOOKS[ballState].glow, 30, 0.3, 0.16, 0.8, { shape: 1 });
+    }
+    addShake(keepBall ? 0.35 : 0.7);
 }
 
 // ---------- Tron light trail: a thin wall of light left behind the ball ----------
@@ -268,7 +272,7 @@ let composer = null, bloomPass = null, useBloom = false;
 
 let perfFrames = 0, perfTime = 0, perfChecked = qualityParam === 'high';
 function trackPerformance(dt) {
-    if (perfChecked || !isPlaying) return;
+    if (perfChecked || !isPlaying || Pause.paused) return;
     perfFrames++; perfTime += dt;
     if (perfFrames < 120) return;
     perfChecked = true;
@@ -310,10 +314,11 @@ function updateEffects(dt, timeScale) {
     // Ball circuit pulse + faint halo
     ballMat.uniforms.uTime.value = t;
     ballGlow.material.opacity = 0.18 + Math.sin(t * 6) * 0.04;
+    ballMat.uniforms.uBlink.value = invulnTime > 0 ? (Math.sin(t * 28) > 0 ? 1 : 0.25) : 1;   // blink while protected
 
     // Light trail + tiny ground sparks
-    updateTrail(dt);
-    if (isPlaying && !isGameOver && ball.visible) {
+    if (!Pause.paused) updateTrail(dt);
+    if (isPlaying && !isGameOver && ball.visible && !Pause.paused) {
         const speed = Math.hypot(vel.x, vel.z);
         if (onGround && speed > 0.1 && Math.random() < 0.4 * timeScale) {
             emitParticle(pos.x, pos.y - ballRadius * 0.9, pos.z,

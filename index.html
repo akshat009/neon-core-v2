@@ -9,6 +9,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;700;800&family=Rajdhani:wght@600;700&display=swap">
     <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="features/features.css">
 </head>
 <body>
 
@@ -21,26 +22,44 @@
 
 <!-- Start menu -->
 <div id="start-menu" class="fullscreen-menu">
-    <div class="menu-box glass-panel">
-        <h1>NEON CORE</h1>
-        <p class="menu-subtitle">[ CYBER RUNNER ]</p>
+    <div class="menu-box glass-panel start-box">
+        <div class="start-left">
+            <h1>NEON CORE</h1>
+            <p class="menu-subtitle">[ CYBER RUNNER ]</p>
 
-        <div class="diff-container">
-            <button class="diff-btn" id="diff-easy" data-diff="EASY">EASY</button>
-            <button class="diff-btn active" id="diff-medium" data-diff="MEDIUM">MEDIUM</button>
-            <button class="diff-btn" id="diff-hard" data-diff="HARD">HARD</button>
+            <div class="diff-container">
+                <button class="diff-btn" id="diff-easy" data-diff="EASY">EASY</button>
+                <button class="diff-btn active" id="diff-medium" data-diff="MEDIUM">MEDIUM</button>
+                <button class="diff-btn" id="diff-hard" data-diff="HARD">HARD</button>
+            </div>
+
+            <button id="start-btn" class="btn">START RUN</button>
+            <div id="continue-info" class="continue-info"></div>
+            <button id="new-run-btn" class="btn btn-secondary">NEW RUN</button>
         </div>
 
-        <div class="rules-list">
-            <b>[ POWERUPS &amp; RULES ]</b>
-            <ul>
-                <li><b class="c-cyan">CYAN DATA:</b> Collect all to win.</li>
-                <li><b class="c-red">RED MINES:</b> Touching them = Game Over.</li>
-                <li>🟩 <b class="c-green">GREEN BOX:</b> Micro Ball (Fast Speed)</li>
-                <li>🟧 <b class="c-orange">ORANGE BOX:</b> Heavy Ball (High Jump)</li>
-            </ul>
+        <div class="start-right">
+            <div class="rules-list">
+                <b>[ POWERUPS &amp; RULES ]</b>
+                <ul>
+                    <li><b class="c-cyan">CYAN DATA:</b> Collect all to win.</li>
+                    <li><b class="c-red">RED MINES:</b> Cost a shield, or a life.</li>
+                    <li><b class="c-blue">SHIELD:</b> Blocks one hit. 2 free every day.</li>
+                    <li><b class="c-cyan">LIVES:</b> 3 per run. Falling costs a life.</li>
+                    <li>🟩 <b class="c-green">GREEN BOX:</b> Micro Ball (Fast Speed)</li>
+                    <li>🟧 <b class="c-orange">ORANGE BOX:</b> Heavy Ball (High Jump)</li>
+                </ul>
+            </div>
+
+            <!-- features/shield.js: shields you own + watch an ad for one more -->
+            <div class="reward-strip">
+                <div class="reward-info">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.5 4.5 5.5v6c0 4.6 3.2 8.6 7.5 10 4.3-1.4 7.5-5.4 7.5-10v-6z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M12 6.5 8 8.1v3.6c0 2.6 1.7 4.9 4 5.8 2.3-.9 4-3.2 4-5.8V8.1z" fill="currentColor" opacity=".35"/></svg>
+                    <div><b>SHIELDS <span id="menu-shield-count">2</span></b><small>2 free every day</small></div>
+                </div>
+                <button id="menu-shield-ad" class="reward-btn"><span class="play">▶</span> AD · +1</button>
+            </div>
         </div>
-        <button id="start-btn" class="btn">START RUN</button>
     </div>
 </div>
 
@@ -63,13 +82,32 @@
     </div>
 </div>
 
-<!-- Game over menu -->
+<!-- Out of lives (features/run.js) -->
 <div id="gameover-menu" class="fullscreen-menu">
     <div class="menu-box glass-panel danger">
         <h1>SYSTEM FAILURE</h1>
         <p id="death-reason">Connection lost.</p>
-        <p>ARCHIVED DATA: <b id="go-total" class="c-red">0</b></p>
-        <button id="restart-btn" class="btn btn-danger">REBOOT</button>
+        <p class="go-stats">NO LIVES LEFT · SECTOR <b id="go-sector">01</b> · DATA <b id="go-data">00/05</b></p>
+        <button id="continue-ad-btn" class="btn btn-reward"><span class="play">▶</span> WATCH AD · +1 LIFE &amp; CONTINUE</button>
+        <button id="skip-continue-btn" class="btn btn-secondary">SKIP</button>
+        <p class="go-total">ARCHIVED DATA: <b id="go-total" class="c-red">0</b></p>
+    </div>
+</div>
+
+<!-- Ad skipped → back to Sector 1, with a banner ad (features/run.js) -->
+<div id="restart-menu" class="fullscreen-menu">
+    <div class="menu-box glass-panel">
+        <h1>RUN RESET</h1>
+        <p class="restart-note">You skipped the ad, so this run starts again from <b class="c-cyan">Sector 1</b>.</p>
+        <div class="rules-list stats-list">
+            <p>REACHED: <b>SECTOR <span id="rs-sector">01</span></b></p>
+            <p>BEST: <b>SECTOR <span id="rs-best">01</span></b></p>
+            <p>TOTAL ARCHIVE: <b id="rs-total" class="highlight">0</b></p>
+        </div>
+        <button id="restart-btn" class="btn">RESTART FROM SECTOR 1</button>
+    </div>
+    <div id="banner-slot" class="ad-banner" aria-label="Advertisement">
+        <span class="ad-tag">AD</span> DEMO BANNER · 320×50 · your AdMob banner shows here
     </div>
 </div>
 
@@ -86,7 +124,16 @@
         <div id="score-txt">DATA: 00/05</div>
         <div class="data-bar"><div id="data-fill"></div></div>
         <div id="status-txt">CHASSIS: STANDARD</div>
+        <div class="lives-wrap"><span class="lives-label">LIVES</span><div id="lives-row"></div></div>
     </div>
+
+    <!-- features/shield.js: shield count; shows AD when empty -->
+    <button id="shield-btn" aria-label="Shield">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.5 4.5 5.5v6c0 4.6 3.2 8.6 7.5 10 4.3-1.4 7.5-5.4 7.5-10v-6z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M12 6.5 8 8.1v3.6c0 2.6 1.7 4.9 4 5.8 2.3-.9 4-3.2 4-5.8V8.1z" fill="currentColor" opacity=".35"/></svg>
+        <span id="shield-count" class="shield-count">2</span>
+        <span class="ad-badge">AD</span>
+        <span class="shield-label">SHIELD</span>
+    </button>
 
     <div class="hud-right">
         <div class="hud-panel">
@@ -117,6 +164,34 @@
     </button>
 </div>
 
+
+<!-- Shield offer when you crash with 0 shields (features/shield.js) -->
+<div id="shield-offer" class="feature-modal">
+    <div class="modal-card">
+        <div class="modal-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.5 4.5 5.5v6c0 4.6 3.2 8.6 7.5 10 4.3-1.4 7.5-5.4 7.5-10v-6z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M12 6.5 8 8.1v3.6c0 2.6 1.7 4.9 4 5.8 2.3-.9 4-3.2 4-5.8V8.1z" fill="currentColor" opacity=".35"/></svg></div>
+        <h2>NO SHIELDS LEFT</h2>
+        <p>Watch a short ad to get a shield and keep your run going.</p>
+        <button id="shield-offer-watch" class="btn btn-reward"><span class="play">▶</span> WATCH AD · +1 SHIELD</button>
+        <button id="shield-offer-skip" class="btn btn-secondary">SKIP · LOSE 1 LIFE</button>
+        <div class="modal-timer"><div id="shield-offer-bar"></div></div>
+    </div>
+</div>
+
+<!-- Demo rewarded video (features/ads.js) -->
+<div id="demo-ad" class="demo-ad" role="dialog" aria-label="Advertisement">
+    <div class="demo-ad-top">
+        <span class="ad-tag">DEMO AD</span>
+        <span class="demo-ad-count"><span id="demo-ad-count">5</span>s</span>
+        <button id="demo-ad-close" class="demo-ad-close" aria-label="Close ad">✕</button>
+    </div>
+    <div class="demo-ad-body">
+        <div class="demo-ad-art"></div>
+        <h3>Your AdMob rewarded video plays here</h3>
+        <p id="demo-ad-status">Rewarded video</p>
+        <div class="demo-ad-progress"><div id="demo-ad-fill"></div></div>
+    </div>
+</div>
+
 <!-- Three.js r128 + bloom add-ons (the game still runs, without glow, if the add-ons fail to load) -->
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/CopyShader.js"></script>
@@ -134,6 +209,17 @@
 <script src="js/level.js"></script>
 <script src="js/input.js"></script>
 <script src="js/ui.js"></script>
+
+<!-- Features: shield, lives, ads, run flow (see features/README.md) -->
+<script src="features/config.js"></script>
+<script src="features/storage.js"></script>
+<script src="features/pause.js"></script>
+<script src="features/ads.js"></script>
+<script src="features/shield.js"></script>
+<script src="features/lives.js"></script>
+<script src="features/run.js"></script>
+
+<!-- Main loop (boots the game) -->
 <script src="js/game.js"></script>
 </body>
 </html>

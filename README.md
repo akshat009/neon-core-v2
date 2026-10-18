@@ -22,6 +22,7 @@
 ### Mobile / Touch
 * **Virtual Joystick (left)**: Analog steer & move
 * **JUMP Button (right)**: Jump — works together with the joystick (multi-touch)
+* **SHIELD Button**: Shows your shields; at 0, tap to watch an ad for one more
 
 ---
 
@@ -33,6 +34,7 @@
   * 🟩 **Micro Core (Green)**: Ultra-compact chassis with high speed.
   * 🟧 **Heavy Core (Orange)**: Heavyweight chassis with massive jump strength.
 * **Dynamic Star Rating & Scoring**: Par-time scoring and star rating across 3 difficulty tiers.
+* **Shields, Lives & Saved Runs**: 2 free shields a day, 3 lives per run, continue where you left off. Rewarded and banner ad placements (demo ads for now) — see [`features/README.md`](features/README.md).
 
 ---
 
@@ -51,6 +53,8 @@ js/level.js       Game state, level generation, ball power-ups
 js/input.js       Keyboard and touch input
 js/ui.js          HUD, menus, buttons, fullscreen
 js/game.js        Main loop: physics (sub-stepped), collisions, win / lose
+
+features/         Shields, lives, ads, run progress, time freeze (own README inside)
 ```
 
 The scripts are loaded in the order above and share globals, so keep that order in `index.html`.

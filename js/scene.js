@@ -240,6 +240,7 @@ const BALL_LOOKS = {
 const ballMat = new THREE.ShaderMaterial({
     uniforms: {
         uTime:  { value: 0 },
+        uBlink: { value: 1 },
         uColor: { value: new THREE.Color(BALL_LOOKS.normal.glow) }
     },
     extensions: { derivatives: true },
@@ -254,7 +255,7 @@ const ballMat = new THREE.ShaderMaterial({
         }`,
     fragmentShader: `
         #define PI 3.14159265
-        uniform float uTime; uniform vec3 uColor;
+        uniform float uTime; uniform float uBlink; uniform vec3 uColor;
         varying vec3 vPos; varying vec3 vNormal; varying vec3 vView;
 
         // Anti-aliased line: stays ~the same pixel width at any distance
@@ -287,7 +288,7 @@ const ballMat = new THREE.ShaderMaterial({
 
             float rim = pow(1.0 - facing, 3.0);
             col += uColor * min(lines, 1.3) * 1.7 + uColor * rim * 0.7;
-            gl_FragColor = vec4(col, 1.0);
+            gl_FragColor = vec4(col * uBlink, 1.0);
         }`
 });
 

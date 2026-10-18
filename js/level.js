@@ -19,7 +19,6 @@ let gravity = 0.02, jumpStrength = 0.45, maxSpeed = 0.3;
 let levelStartTime = 0;
 let currentTimeStr = "0.0";
 const clock = new THREE.Clock();
-let gameOverTimer = null;
 
 function generateLevel() {
     [platforms, edges, rings, spikes, movPlatforms, powerups].forEach(arr => arr.forEach(obj => scene.remove(obj)));
@@ -30,7 +29,6 @@ function generateLevel() {
     targetRings = (selectedDifficulty === 'EASY' ? 2 : 3) + level * 2;
     ringsCollected = 0;
 
-    clearTimeout(gameOverTimer);
     pos.set(0, 5, -2); vel.set(0,0,0);
     ball.position.copy(pos);
     ball.visible = true;

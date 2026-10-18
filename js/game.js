@@ -9,7 +9,7 @@ function animate() {
     if (dt > 0.1) dt = 0.1;
     let timeScale = dt * 60;
 
-    if(isPlaying && !isGameOver) {
+    if(isPlaying && !isGameOver && !Pause.paused) {
         let timeElapsed = (Date.now() - levelStartTime) / 1000;
         currentTimeStr = timeElapsed.toFixed(1);
         document.getElementById('timer-txt').innerText = `TIME: ${currentTimeStr}s`;
@@ -17,7 +17,7 @@ function animate() {
         // Physics runs in steps of at most one 60fps frame, so a slow frame on a weak phone
         // can't move the ball far enough to pass straight through a platform.
         const steps = Math.max(1, Math.ceil(timeScale - 0.001));
-        for(let s = 0; s < steps && isPlaying && !isGameOver; s++) stepPhysics(timeScale / steps);
+        for(let s = 0; s < steps && isPlaying && !isGameOver && !Pause.paused; s++) stepPhysics(timeScale / steps);
     }
 
     // --- Camera follow ---
@@ -30,6 +30,8 @@ function animate() {
 }
 
 function stepPhysics(timeScale) {
+    if(invulnTime > 0) invulnTime -= timeScale / 60;   // respawn / shield grace time
+
     // --- Movement (keyboard gives -1/0/1, touch joystick gives analog values) ---
     let currentMaxSpeed = maxSpeed;
     if(ballState === 'small') currentMaxSpeed *= 1.4;
@@ -64,6 +66,7 @@ function stepPhysics(timeScale) {
             if(pos.x > p.position.x - w/2 && pos.x < p.position.x + w/2 && pos.z < p.position.z + d/2 && pos.z > p.position.z - d/2) {
                 if(pos.y - ballRadius <= 0.5 && pos.y > 0.2 && vel.y <= 0) {
                     pos.y = 0.5 + ballRadius; vel.y = 0; onGround = true;
+                lastSafe.x = pos.x; lastSafe.z = pos.z; lastSafe.plat = p;   // respawn point after a fall
                 }
             }
         }
@@ -81,7 +84,7 @@ function stepPhysics(timeScale) {
         }
     }
 
-    if(pos.y < -3) die("GRID BREACH DETECTED!");
+    if(pos.y < -3) { onFall(); return; }   // costs a life (features/lives.js)
     if(pos.x > 6) { pos.x = 6; vel.x = 0; }
     if(pos.x < -6) { pos.x = -6; vel.x = 0; }
 
@@ -120,9 +123,9 @@ function stepPhysics(timeScale) {
             if(sp.position.x > sp.userData.endX || sp.position.x < sp.userData.startX) sp.userData.dir *= -1;
         }
         sp.rotation.y += 0.02 * timeScale; sp.rotation.x += 0.02 * timeScale;
-        if(isPlaying && !isGameOver && pos.distanceTo(sp.position) < ballRadius + 0.8) {
-            shatterMine(sp);
-            die("LASER COLLISION!", 700); // let the shatter play before the menu
+        if(isPlaying && !sp.userData.dead && invulnTime <= 0 && pos.distanceTo(sp.position) < ballRadius + 0.8) {
+            onHurdleHit(sp);                              // shield or life (features/shield.js)
+            if(Pause.paused || !isPlaying) return;
         }
     }
 }
@@ -151,6 +154,7 @@ function showLevelComplete() {
 
     totalScore += levelScore;
     saveScore(totalScore);
+    onSectorComplete();   // saves run progress (features/run.js)
 
     document.getElementById('lc-title').innerText = `SECTOR ${level} SECURED`;
     document.getElementById('stars-display').innerHTML = starHtml;
@@ -163,18 +167,6 @@ function showLevelComplete() {
     document.getElementById('lc-total').innerText = totalScore;
 
     document.getElementById('level-menu').style.display = 'flex';
-}
-
-function die(reason, menuDelay = 0) {
-    if(isGameOver) return;
-    isGameOver = true; isPlaying = false; playDie();
-    keys.w = keys.a = keys.s = keys.d = keys.space = false;
-    document.getElementById('death-reason').innerText = reason;
-    document.getElementById('go-total').innerText = totalScore;
-    clearTimeout(gameOverTimer);
-    gameOverTimer = setTimeout(() => {
-        if(isGameOver) document.getElementById('gameover-menu').style.display = 'flex';
-    }, menuDelay);
 }
 
 window.addEventListener('resize', () => {
