@@ -20,7 +20,7 @@
 body {
     margin: 0;
     overflow: hidden;
-    font-family: 'Courier New', Courier, monospace;
+    font-family: var(--font-ui), system-ui, -apple-system, sans-serif;
     touch-action: none;
     background-color: #03060d;
     -webkit-tap-highlight-color: transparent;
@@ -269,21 +269,25 @@ body {
 }
 
 .menu-box h1 {
+    font-family: var(--font-hud);
     color: #00ffff;
     margin-top: 0;
     font-size: 32px;
-    text-shadow: 0 0 20px #00ffff;
-    letter-spacing: 2px;
+    font-weight: 800;
+    text-shadow: 0 0 20px #00ffff, 0 0 35px rgba(0, 255, 255, 0.4);
+    letter-spacing: 3px;
     text-transform: uppercase;
     margin-bottom: 5px;
 }
 
 .menu-subtitle {
+    font-family: var(--font-hud);
     color: #ff00ff;
-    font-size: 13px;
-    letter-spacing: 3px;
-    font-weight: bold;
+    font-size: 14px;
+    letter-spacing: 4px;
+    font-weight: 700;
     margin-bottom: 15px;
+    text-shadow: 0 0 10px rgba(255, 0, 255, 0.5);
 }
 
 /* Game-over variant */
@@ -298,7 +302,9 @@ body {
 }
 
 #death-reason {
-    font-size: 16px;
+    font-family: var(--font-ui);
+    font-size: 18px;
+    font-weight: 600;
     color: #fff;
     letter-spacing: 1px;
 }
@@ -308,30 +314,85 @@ body {
 .rules-list {
     text-align: left;
     margin-bottom: 20px;
-    font-size: 13px;
-    border-left: 3px solid #ff00ff;
-    padding-left: 15px;
-    color: #e0e0e0;
-    background: rgba(0, 0, 0, 0.3);
-    padding-top: 10px;
-    padding-bottom: 10px;
-    border-radius: 0 8px 8px 0;
+    font-family: var(--font-ui);
+    font-size: clamp(14px, 1.3vw, 17px);
+    font-weight: 600;
+    line-height: 1.6;
+    letter-spacing: 0.5px;
+    border-left: 4px solid #ff00ff;
+    padding: 12px 16px;
+    color: #e6f7ff;
+    background: rgba(0, 0, 0, 0.45);
+    border-radius: 0 10px 10px 0;
+    box-shadow: inset 0 0 15px rgba(255, 0, 255, 0.08);
+}
+
+.rules-list b {
+    font-family: var(--font-hud);
+    font-size: clamp(13px, 1.2vw, 15px);
+    letter-spacing: 1px;
 }
 
 .rules-list ul {
     padding-left: 20px;
-    margin-top: 5px;
+    margin: 8px 0 0 0;
 }
 
 .rules-list li {
     margin-bottom: 8px;
+    line-height: 1.5;
+}
+
+.rules-list li:last-child {
+    margin-bottom: 0;
+}
+
+.pause-desc {
+    font-family: var(--font-ui);
+    font-size: clamp(15px, 1.5vw, 19px);
+    font-weight: 600;
+    letter-spacing: 1.5px;
+    color: rgba(200, 240, 255, 0.9);
+    margin: 12px 0 24px;
+    line-height: 1.5;
 }
 
 .rules-list.stats-list {
-    text-align: center;
-    border: none;
-    padding: 0;
-    background: transparent;
+    text-align: left;
+    border: 1px solid rgba(41, 243, 255, 0.35);
+    background: rgba(3, 14, 30, 0.7);
+    border-radius: 8px;
+    padding: 14px 20px;
+    margin: 14px auto 20px;
+    box-shadow: inset 0 0 20px rgba(0, 255, 255, 0.1), 0 4px 20px rgba(0, 0, 0, 0.6);
+}
+
+.rules-list.stats-list p {
+    margin: 10px 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-family: var(--font-hud);
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    color: rgba(195, 240, 255, 0.85);
+    border-bottom: 1px dashed rgba(41, 243, 255, 0.2);
+    padding-bottom: 8px;
+}
+
+.rules-list.stats-list p:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+    margin-bottom: 2px;
+}
+
+.rules-list.stats-list p b {
+    font-family: var(--font-hud);
+    font-size: 18px;
+    font-weight: 800;
+    letter-spacing: 1.5px;
+    text-shadow: 0 0 10px currentColor;
 }
 
 .highlight {
@@ -350,45 +411,45 @@ body {
 
 .diff-btn {
     flex: 1;
-    padding: 10px 5px;
-    font-size: 14px;
-    font-weight: bold;
+    padding: 11px 6px;
+    font-size: 15px;
+    font-weight: 800;
     background: rgba(255, 255, 255, 0.05);
-    color: #fff;
-    border: 1px solid #555;
+    color: #aaeaff;
+    border: 1px solid rgba(41, 243, 255, 0.3);
     border-radius: 6px;
     cursor: pointer;
     transition: 0.3s;
-    font-family: 'Courier New';
-    letter-spacing: 1px;
+    font-family: var(--font-hud);
+    letter-spacing: 2px;
 }
 
 .diff-btn.active {
     border-color: #00ffff;
     background: rgba(0, 255, 255, 0.2);
     color: #00ffff;
-    box-shadow: 0 0 15px rgba(0, 255, 255, 0.4);
-    text-shadow: 0 0 5px #00ffff;
+    box-shadow: 0 0 18px rgba(0, 255, 255, 0.5);
+    text-shadow: 0 0 8px #00ffff;
 }
 
 /* ---------- Buttons ---------- */
 
 .btn {
     padding: 15px 30px;
-    font-size: 18px;
-    font-weight: bold;
-    color: #000;
-    background: linear-gradient(90deg, #00ffff, #00cccc);
+    font-size: 17px;
+    font-weight: 800;
+    color: #03060d;
+    background: linear-gradient(90deg, #00ffff, #00d9ff);
     border: none;
     cursor: pointer;
     text-transform: uppercase;
-    letter-spacing: 2px;
+    letter-spacing: 3px;
     transition: 0.3s;
-    box-shadow: 0 0 20px rgba(0, 255, 255, 0.4);
+    box-shadow: 0 0 24px rgba(0, 255, 255, 0.5);
     width: 100%;
-    margin-bottom: 10px;
+    margin-bottom: 12px;
     border-radius: 6px;
-    font-family: 'Courier New', Courier, monospace;
+    font-family: var(--font-hud);
 }
 
 .btn:active {
@@ -398,9 +459,10 @@ body {
 
 .btn-secondary {
     background: transparent;
-    color: #ff00ff;
-    border: 1px solid #ff00ff;
-    box-shadow: 0 0 15px rgba(255, 0, 255, 0.2);
+    color: #ff33cc;
+    border: 1px solid #ff33cc;
+    box-shadow: 0 0 15px rgba(255, 51, 204, 0.25);
+    text-shadow: 0 0 8px rgba(255, 51, 204, 0.4);
 }
 
 .btn-danger,
@@ -422,11 +484,13 @@ body {
 }
 
 #remark-txt {
+    font-family: var(--font-hud);
     color: #00ffff;
-    font-size: 20px;
-    margin-bottom: 20px;
-    font-weight: bold;
-    letter-spacing: 2px;
+    font-size: 22px;
+    margin-bottom: 16px;
+    font-weight: 800;
+    letter-spacing: 4px;
+    text-shadow: 0 0 15px rgba(41, 243, 255, 0.7);
 }
 
 /* ---------- Joystick sensitivity picker (start menu, touch only) ---------- */
@@ -441,8 +505,9 @@ body.touch .touch-only { display: flex; }
     margin: -4px 0 12px;
 }
 .sens-label {
+    font-family: var(--font-hud);
     font-size: 11px;
-    font-weight: bold;
+    font-weight: 700;
     letter-spacing: 2px;
     color: rgba(200, 240, 255, 0.75);
 }
@@ -451,7 +516,7 @@ body.touch .touch-only { display: flex; }
     width: 32px;
     height: 30px;
     padding: 0;
-    font: bold 13px 'Courier New', monospace;
+    font: 800 14px var(--font-hud);
     color: #9adfe6;
     background: rgba(255, 255, 255, 0.05);
     border: 1px solid #44575c;
@@ -596,8 +661,11 @@ body.touch .touch-only { display: flex; }
 
 @media (orientation: portrait) {
     .menu-box h1 { font-size: 28px; }
-    .rules-list { font-size: 11px; }
-    .btn { font-size: 16px; padding: 12px 20px; }
+    .rules-list { font-size: 13px; }
+    .rules-list.stats-list { padding: 12px 16px; margin: 10px auto 16px; }
+    .rules-list.stats-list p { font-size: 13px; }
+    .rules-list.stats-list p b { font-size: 16px; }
+    .btn { font-size: 16px; padding: 13px 20px; }
 
     .hud-left { width: 40vw; left: calc(18px + var(--safe-l)); top: calc(18px + var(--safe-t)); }
     #score-txt { font-size: 14px; letter-spacing: 1px; }
@@ -631,13 +699,105 @@ body.touch .touch-only { display: flex; }
     .menu-box h1 { font-size: 24px; }
     .menu-subtitle { margin: 4px 0 10px; }
     .diff-container { margin-bottom: 10px; }
-    .diff-btn { padding: 7px 5px; }
-    .rules-list { font-size: 11px; margin-bottom: 12px; padding-top: 6px; padding-bottom: 6px; }
+    .diff-btn { padding: 7px 5px; font-size: 13px; }
+    .rules-list { font-size: 12px; margin-bottom: 12px; padding-top: 6px; padding-bottom: 6px; }
     .rules-list li { margin-bottom: 4px; }
-    .rules-list.stats-list p { margin: 6px 0; }
+    .rules-list.stats-list { padding: 8px 14px; margin: 8px auto 12px; }
+    .rules-list.stats-list p { margin: 4px 0; font-size: 12px; padding-bottom: 4px; }
+    .rules-list.stats-list p b { font-size: 14px; }
     #stars-display { font-size: 26px; margin: 4px 0; }
-    #remark-txt { font-size: 16px; margin-bottom: 8px; }
+    #remark-txt { font-size: 17px; margin-bottom: 8px; }
     .btn { font-size: 15px; padding: 10px 20px; margin-bottom: 8px; }
     .sens-row { margin: -2px 0 8px; }
     .sens-step { height: 26px; }
 }
+
+/* =========================================================
+   Desktop & Large Screens (Responsive 2-column Start Box)
+   ========================================================= */
+
+@media (min-width: 768px) {
+    .menu-box {
+        max-width: 540px;
+        padding: 30px;
+    }
+
+    .start-box {
+        max-width: 860px;
+        width: 90%;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 28px;
+        padding: 34px 38px;
+        text-align: left;
+        align-items: center;
+    }
+
+    .start-left {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
+
+    .start-box h1 {
+        text-align: left;
+        font-size: 36px;
+    }
+
+    .start-box .menu-subtitle {
+        text-align: left;
+        margin-bottom: 18px;
+    }
+
+    .start-right {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
+
+    .rules-list {
+        margin-bottom: 14px;
+        font-size: 15px;
+        padding: 14px 18px;
+    }
+
+    .rules-list li {
+        margin-bottom: 8px;
+    }
+}
+
+@media (min-width: 1200px) {
+    .start-box {
+        max-width: 960px;
+        gap: 36px;
+        padding: 40px 46px;
+    }
+
+    .start-box h1 {
+        font-size: 42px;
+    }
+
+    .rules-list {
+        font-size: 17px;
+        padding: 18px 22px;
+    }
+
+    .rules-list b {
+        font-size: 15px;
+    }
+
+    .rules-list li {
+        margin-bottom: 10px;
+    }
+
+    .diff-btn {
+        padding: 13px 8px;
+        font-size: 16px;
+    }
+
+    .btn {
+        padding: 17px 32px;
+        font-size: 19px;
+    }
+}
+

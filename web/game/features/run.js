@@ -12,8 +12,9 @@
 document.body.classList.toggle('touch', IS_TOUCH);
 
 function showOnly(id) {
-    ['start-menu', 'level-menu', 'gameover-menu', 'restart-menu'].forEach(m => {
-        document.getElementById(m).style.display = (m === id) ? 'flex' : 'none';
+    ['start-menu', 'level-menu', 'gameover-menu', 'restart-menu', 'pause-modal'].forEach(m => {
+        const el = document.getElementById(m);
+        if (el) el.style.display = (m === id) ? 'flex' : 'none';
     });
 }
 
@@ -144,6 +145,44 @@ attachButtonAction('exit-btn', () => {
     isPlaying = false;
     keys.w = keys.a = keys.s = keys.d = keys.space = false;
     level = 1;
+    refreshStartMenu();
+});
+
+function togglePauseMenu() {
+    if (!isPlaying || isGameOver) return;
+    const modal = document.getElementById('pause-modal');
+    if (!modal) return;
+    if (Pause.reasons.has('esc-pause')) {
+        resumeGame('esc-pause');
+        modal.style.display = 'none';
+    } else {
+        pauseGame('esc-pause');
+        modal.style.display = 'flex';
+    }
+}
+
+attachButtonAction('resume-btn', () => {
+    const modal = document.getElementById('pause-modal');
+    if (modal) modal.style.display = 'none';
+    resumeGame('esc-pause');
+});
+
+attachButtonAction('pause-exit-btn', async () => {
+    const modal = document.getElementById('pause-modal');
+    if (modal) modal.style.display = 'none';
+    resumeGame('esc-pause');
+
+    // Show Demo Ad when exiting to menu
+    try {
+        await Ads.showRewarded('exit');
+    } catch (e) {}
+
+    if (document.fullscreenElement && document.exitFullscreen) document.exitFullscreen();
+    document.getElementById('ui').style.display = 'none';
+    document.getElementById('mobile-controls').style.display = 'none';
+    showOnly('start-menu');
+    isPlaying = false;
+    keys.w = keys.a = keys.s = keys.d = keys.space = false;
     refreshStartMenu();
 });
 

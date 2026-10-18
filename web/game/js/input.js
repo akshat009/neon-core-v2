@@ -5,6 +5,11 @@
 const keys = { w: false, a: false, s: false, d: false, space: false };
 
 window.addEventListener('keydown', (e) => {
+    if(e.code === 'Escape') {
+        if (typeof togglePauseMenu === 'function') togglePauseMenu();
+        e.preventDefault();
+        return;
+    }
     if(['ArrowUp','KeyW'].includes(e.code)) keys.w = true;
     if(['ArrowDown','KeyS'].includes(e.code)) keys.s = true;
     if(['ArrowLeft','KeyA'].includes(e.code)) keys.a = true;

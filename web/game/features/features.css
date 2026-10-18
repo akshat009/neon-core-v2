@@ -18,10 +18,13 @@
 
 .continue-info {
     min-height: 0;
-    margin: -4px 0 8px;
-    font-size: 11px;
+    margin: -2px 0 10px;
+    font-family: var(--font-hud);
+    font-size: clamp(12px, 1.2vw, 14px);
     letter-spacing: 2px;
-    color: rgba(200, 240, 255, 0.7);
+    font-weight: 700;
+    color: #92ecf5;
+    text-shadow: 0 0 8px rgba(41, 243, 255, 0.4);
 }
 .continue-info:empty { display: none; }
 
@@ -29,23 +32,23 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 10px;
-    margin: -4px 0 4px;
-    padding: 9px 10px 9px 12px;
+    gap: 12px;
+    margin: 2px 0 6px;
+    padding: 10px 14px;
     text-align: left;
     border: 1px solid rgba(74, 168, 255, 0.45);
-    background: linear-gradient(90deg, rgba(74, 168, 255, 0.12), rgba(74, 168, 255, 0.03));
-    border-radius: 6px;
+    background: linear-gradient(90deg, rgba(74, 168, 255, 0.15), rgba(74, 168, 255, 0.04));
+    border-radius: 8px;
 }
 .reward-info { display: flex; align-items: center; gap: 10px; color: #cfe8ff; }
-.reward-info svg { width: 26px; height: 26px; color: var(--shield); filter: drop-shadow(0 0 5px rgba(74, 168, 255, 0.7)); flex: none; }
-.reward-info b { display: block; font-size: 14px; letter-spacing: 2px; color: #e4f2ff; }
-.reward-info small { display: block; font-size: 10px; letter-spacing: 1px; color: rgba(200, 225, 255, 0.6); }
+.reward-info svg { width: 28px; height: 28px; color: var(--shield); filter: drop-shadow(0 0 6px rgba(74, 168, 255, 0.8)); flex: none; }
+.reward-info b { display: block; font-family: var(--font-hud); font-size: 15px; letter-spacing: 2px; color: #e4f2ff; }
+.reward-info small { display: block; font-family: var(--font-ui); font-size: 12px; letter-spacing: 1.5px; font-weight: 600; color: rgba(200, 235, 255, 0.7); }
 
 .reward-btn {
     flex: none;
     padding: 9px 12px;
-    font: 700 13px 'Courier New', Courier, monospace;
+    font: 700 13px var(--font-hud);
     letter-spacing: 1px;
     color: #1a1000;
     background: linear-gradient(90deg, var(--reward-a), var(--reward-b));
@@ -67,11 +70,11 @@
 
 /* ---------- Out of lives / restart screens ---------- */
 
-.go-stats { font-size: 12px; letter-spacing: 1px; color: rgba(255, 220, 220, 0.85); margin: 6px 0 16px; }
+.go-stats { font-family: var(--font-hud); font-size: 14px; letter-spacing: 1.5px; color: rgba(255, 220, 220, 0.85); margin: 6px 0 16px; }
 .go-stats b { color: #fff; }
-.go-total { font-size: 13px; color: #ddd; margin: 6px 0 0; }
+.go-total { font-family: var(--font-hud); font-size: 15px; letter-spacing: 1.5px; color: #ddd; margin: 8px 0 0; }
 
-.restart-note { font-size: 14px; line-height: 1.5; color: #e6f7ff; margin: 6px 0 14px; }
+.restart-note { font-family: var(--font-ui); font-size: 16px; font-weight: 600; line-height: 1.5; color: #e6f7ff; margin: 6px 0 14px; }
 
 #restart-menu { box-sizing: border-box; padding-bottom: 76px; }   /* keep the button well above the banner */
 
@@ -88,7 +91,7 @@
     align-items: center;
     justify-content: center;
     gap: 8px;
-    font: 600 11px 'Courier New', monospace;
+    font: 600 11px var(--font-hud);
     color: #555;
     background: repeating-linear-gradient(45deg, #f2f2f2 0 10px, #e8e8e8 10px 20px);
     border: 1px solid #ccc;
@@ -105,7 +108,7 @@
     transform: translate(-50%, -12px);
     padding: 9px 16px;
     max-width: 86vw;
-    font: 700 12px 'Courier New', monospace;
+    font: 700 12px var(--font-hud);
     letter-spacing: 1px;
     color: #1a1000;
     background: linear-gradient(90deg, var(--reward-a), var(--reward-b));
@@ -120,7 +123,7 @@
 .ad-tag {
     display: inline-block;
     padding: 2px 5px;
-    font: 700 10px 'Courier New', monospace;
+    font: 700 10px var(--font-hud);
     letter-spacing: 1px;
     color: #1a1000;
     background: var(--reward-a);
@@ -290,7 +293,7 @@ body.touch #shield-btn { right: calc(166px + var(--safe-r)); bottom: calc(108px 
     flex-direction: column;
     background: #0b0b0f;
     color: #eee;
-    font-family: 'Courier New', monospace;
+    font-family: var(--font-ui);
 }
 .demo-ad.show { display: flex; }
 
