@@ -45,7 +45,7 @@
 .reward-btn {
     flex: none;
     padding: 9px 12px;
-    font: 700 13px 'Courier New', Courier, monospace;
+    font: 700 13px var(--font-hud);
     letter-spacing: 1px;
     color: #1a1000;
     background: linear-gradient(90deg, var(--reward-a), var(--reward-b));
@@ -67,11 +67,11 @@
 
 /* ---------- Out of lives / restart screens ---------- */
 
-.go-stats { font-size: 12px; letter-spacing: 1px; color: rgba(255, 220, 220, 0.85); margin: 6px 0 16px; }
+.go-stats { font-family: var(--font-hud); font-size: 14px; letter-spacing: 1.5px; color: rgba(255, 220, 220, 0.85); margin: 6px 0 16px; }
 .go-stats b { color: #fff; }
-.go-total { font-size: 13px; color: #ddd; margin: 6px 0 0; }
+.go-total { font-family: var(--font-hud); font-size: 15px; letter-spacing: 1.5px; color: #ddd; margin: 8px 0 0; }
 
-.restart-note { font-size: 14px; line-height: 1.5; color: #e6f7ff; margin: 6px 0 14px; }
+.restart-note { font-family: var(--font-ui); font-size: 16px; font-weight: 600; line-height: 1.5; color: #e6f7ff; margin: 6px 0 14px; }
 
 #restart-menu { box-sizing: border-box; padding-bottom: 76px; }   /* keep the button well above the banner */
 
@@ -88,7 +88,7 @@
     align-items: center;
     justify-content: center;
     gap: 8px;
-    font: 600 11px 'Courier New', monospace;
+    font: 600 11px var(--font-hud);
     color: #555;
     background: repeating-linear-gradient(45deg, #f2f2f2 0 10px, #e8e8e8 10px 20px);
     border: 1px solid #ccc;
@@ -105,7 +105,7 @@
     transform: translate(-50%, -12px);
     padding: 9px 16px;
     max-width: 86vw;
-    font: 700 12px 'Courier New', monospace;
+    font: 700 12px var(--font-hud);
     letter-spacing: 1px;
     color: #1a1000;
     background: linear-gradient(90deg, var(--reward-a), var(--reward-b));
@@ -120,7 +120,7 @@
 .ad-tag {
     display: inline-block;
     padding: 2px 5px;
-    font: 700 10px 'Courier New', monospace;
+    font: 700 10px var(--font-hud);
     letter-spacing: 1px;
     color: #1a1000;
     background: var(--reward-a);
@@ -290,7 +290,7 @@ body.touch #shield-btn { right: calc(166px + var(--safe-r)); bottom: calc(108px 
     flex-direction: column;
     background: #0b0b0f;
     color: #eee;
-    font-family: 'Courier New', monospace;
+    font-family: var(--font-ui);
 }
 .demo-ad.show { display: flex; }
 
