@@ -1,12 +1,5 @@
-# Uploads web/ (landing page + game) to Hostinger → https://asaxenadev.com/play/
-# on every push to main that changes web/, or by hand from the Actions tab.
-#
-# One-time setup — GitHub repo → Settings → Secrets and variables → Actions:
-#   Secrets:   FTP_SERVER    (hPanel → Files → FTP Accounts → "FTP IP", e.g. 123.45.67.89)
-#              FTP_USERNAME  (e.g. u123456789 or u123456789.asaxenadev.com)
-#              FTP_PASSWORD
-#   Variable (optional): FTP_SERVER_DIR  — folder to upload into, default "public_html/play/"
-# Until the secrets exist, the job does nothing.
+# Uploads web/ (landing page + game) to Hostinger → https://play.asaxenadev.com/ (or asaxenadev.com/play/)
+# Runs automatically on push to main (changes in web/), or manually from the Actions tab.
 
 name: Deploy web to Hostinger
 
@@ -15,6 +8,11 @@ on:
     branches: [main]
     paths: ['web/**', '.github/workflows/deploy-hostinger.yml']
   workflow_dispatch:
+    inputs:
+      server_dir:
+        description: 'Server target folder (e.g. public_html/play/ or play/ or ./)'
+        required: false
+        default: 'public_html/play/'
 
 concurrency:
   group: deploy-hostinger
@@ -23,23 +21,34 @@ concurrency:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    env:
-      FTP_SERVER: ${{ secrets.FTP_SERVER }}
     steps:
-      - name: Skip until FTP secrets are set
-        if: env.FTP_SERVER == ''
-        run: echo "FTP_SERVER secret not set yet — nothing deployed."
+      - name: Check FTP Secrets
+        run: |
+          if [ -z "${{ secrets.FTP_SERVER }}" ]; then
+            echo "::error::Secret 'FTP_SERVER' is missing or empty! Add it in Repo Settings > Secrets and variables > Actions"
+            exit 1
+          fi
+          if [ -z "${{ secrets.FTP_USERNAME }}" ]; then
+            echo "::error::Secret 'FTP_USERNAME' is missing or empty! Add it in Repo Settings > Secrets and variables > Actions"
+            exit 1
+          fi
+          if [ -z "${{ secrets.FTP_PASSWORD }}" ]; then
+            echo "::error::Secret 'FTP_PASSWORD' is missing or empty! Add it in Repo Settings > Secrets and variables > Actions"
+            exit 1
+          fi
+          echo "All required FTP secrets are present."
 
-      - uses: actions/checkout@v4
-        if: env.FTP_SERVER != ''
+      - name: Checkout Code
+        uses: actions/checkout@v4
 
       - name: Upload web/ over FTP
-        if: env.FTP_SERVER != ''
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
           server: ${{ secrets.FTP_SERVER }}
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
           protocol: ftps
+          security: loose
           local-dir: ./web/
-          server-dir: ${{ vars.FTP_SERVER_DIR || 'public_html/play/' }}
+          server-dir: ${{ inputs.server_dir || vars.FTP_SERVER_DIR || 'public_html/play/' }}
+          log-level: verbose
