@@ -13,6 +13,10 @@ on:
         description: 'Server target folder (defaults to ./ because FTP account is restricted to public_html/play)'
         required: false
         default: './'
+      protocol:
+        description: 'Protocol (ftps or ftp)'
+        required: false
+        default: 'ftps'
 
 concurrency:
   group: deploy-hostinger
@@ -38,7 +42,7 @@ jobs:
           fi
           echo "All required FTP secrets are present."
 
-      - name: Prepare FTP Host
+      - name: Prepare FTP Credentials & Host
         id: ftp_prep
         run: |
           RAW_SERVER="${{ secrets.FTP_SERVER }}"
@@ -49,8 +53,12 @@ jobs:
           # Remove trailing slashes and whitespace
           CLEAN_SERVER=$(echo "$CLEAN_SERVER" | sed -E 's#/+$##' | xargs)
           
+          # Clean username: remove accidental quotes, newlines, carriage returns and whitespace
+          CLEAN_USER=$(echo "${{ secrets.FTP_USERNAME }}" | tr -d '\r\n"' | xargs)
+
           echo "server=$CLEAN_SERVER" >> "$GITHUB_OUTPUT"
-          echo "Prepared server hostname (length: ${#CLEAN_SERVER} chars)"
+          echo "username=$CLEAN_USER" >> "$GITHUB_OUTPUT"
+          echo "Prepared server hostname (length: ${#CLEAN_SERVER} chars) and username (length: ${#CLEAN_USER} chars)"
 
       - name: Checkout Code
         uses: actions/checkout@v4
@@ -59,9 +67,9 @@ jobs:
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
           server: ${{ steps.ftp_prep.outputs.server }}
-          username: ${{ secrets.FTP_USERNAME }}
+          username: ${{ steps.ftp_prep.outputs.username }}
           password: ${{ secrets.FTP_PASSWORD }}
-          protocol: ftps
+          protocol: ${{ inputs.protocol || vars.FTP_PROTOCOL || 'ftps' }}
           security: loose
           local-dir: ./web/
           server-dir: ${{ inputs.server_dir || vars.FTP_SERVER_DIR || './' }}
