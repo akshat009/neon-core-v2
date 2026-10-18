@@ -159,10 +159,10 @@
 
 #shield-btn {
     position: absolute;
-    right: calc(28px + var(--safe-r));
-    bottom: calc(44px + var(--safe-b));
-    width: 58px;
-    height: 58px;
+    top: calc(14px + var(--safe-t));
+    right: calc(290px + var(--safe-r));
+    width: 48px;
+    height: 48px;
     padding: 0;
     border-radius: 50%;
     pointer-events: auto;
@@ -172,11 +172,16 @@
     place-items: center;
     color: #9fd2ff;
     border: 2px solid var(--shield);
-    background: radial-gradient(circle, rgba(74, 168, 255, 0.18) 0%, rgba(6, 18, 36, 0.7) 72%);
+    background: radial-gradient(circle, rgba(74, 168, 255, 0.18) 0%, rgba(6, 18, 36, 0.8) 72%);
     box-shadow: 0 0 16px rgba(74, 168, 255, 0.45), inset 0 0 14px rgba(74, 168, 255, 0.25);
     -webkit-tap-highlight-color: transparent;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
 }
-#shield-btn svg { width: 26px; height: 26px; filter: drop-shadow(0 0 5px rgba(74, 168, 255, 0.8)); }
+#shield-btn:hover {
+    transform: scale(1.06);
+    box-shadow: 0 0 22px rgba(74, 168, 255, 0.7), inset 0 0 18px rgba(74, 168, 255, 0.35);
+}
+#shield-btn svg { width: 24px; height: 24px; filter: drop-shadow(0 0 5px rgba(74, 168, 255, 0.8)); }
 
 .shield-count {
     position: absolute;
@@ -230,12 +235,39 @@
 @keyframes shield-ping { 50% { transform: scale(1.12); } }
 
 /* On touch screens the shield button sits next to the jump button */
-body.touch #shield-btn { right: calc(166px + var(--safe-r)); bottom: calc(108px + var(--safe-b)); }
+body.touch #shield-btn {
+    top: auto;
+    right: calc(166px + var(--safe-r));
+    bottom: calc(108px + var(--safe-b));
+    width: 58px;
+    height: 58px;
+}
 @media (orientation: landscape) and (max-height: 500px) {
-    body.touch #shield-btn { right: calc(150px + var(--safe-r)); bottom: calc(96px + var(--safe-b)); width: 54px; height: 54px; }
+    body.touch #shield-btn {
+        top: auto;
+        right: calc(150px + var(--safe-r));
+        bottom: calc(96px + var(--safe-b));
+        width: 54px;
+        height: 54px;
+    }
 }
 @media (orientation: portrait) {
-    body.touch #shield-btn { right: calc(46px + var(--safe-r)); bottom: calc(166px + var(--safe-b)); width: 54px; height: 54px; }
+    body.touch #shield-btn {
+        top: auto;
+        right: calc(46px + var(--safe-r));
+        bottom: calc(166px + var(--safe-b));
+        width: 54px;
+        height: 54px;
+    }
+}
+
+/* Fallback for narrow desktop screens */
+@media (max-width: 650px) {
+    #shield-btn {
+        top: auto;
+        bottom: calc(34px + var(--safe-b));
+        right: calc(24px + var(--safe-r));
+    }
 }
 
 /* ---------- Popup: no shields left ---------- */

@@ -21,7 +21,7 @@ function updateUI() {
     document.getElementById('score-txt').innerText = `DATA: ${pad2(ringsCollected)}/${pad2(targetRings)}`;
     document.getElementById('data-fill').style.width = `${targetRings ? Math.min(ringsCollected / targetRings, 1) * 100 : 0}%`;
     document.getElementById('level-num').innerText = pad2(level);
-    document.getElementById('diff-ui-txt').innerText = selectedDifficulty.substring(0,3);
+    document.getElementById('diff-ui-txt').innerText = selectedDifficulty;
 }
 
 // --- Fullscreen (without locking orientation) ---

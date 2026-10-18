@@ -5,7 +5,7 @@
 const keys = { w: false, a: false, s: false, d: false, space: false };
 
 window.addEventListener('keydown', (e) => {
-    if(e.code === 'Escape') {
+    if(e.code === 'Escape' || e.code === 'KeyP') {
         if (typeof togglePauseMenu === 'function') togglePauseMenu();
         e.preventDefault();
         return;
