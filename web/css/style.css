@@ -429,6 +429,42 @@ body {
     letter-spacing: 2px;
 }
 
+/* ---------- Joystick sensitivity picker (start menu, touch only) ---------- */
+
+.touch-only { display: none; }
+body.touch .touch-only { display: flex; }
+
+.sens-row {
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin: -4px 0 12px;
+}
+.sens-label {
+    font-size: 11px;
+    font-weight: bold;
+    letter-spacing: 2px;
+    color: rgba(200, 240, 255, 0.75);
+}
+.sens-steps { display: flex; gap: 5px; }
+.sens-step {
+    width: 32px;
+    height: 30px;
+    padding: 0;
+    font: bold 13px 'Courier New', monospace;
+    color: #9adfe6;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid #44575c;
+    border-radius: 5px;
+    cursor: pointer;
+}
+.sens-step.active {
+    color: #00ffff;
+    border-color: #00ffff;
+    background: rgba(0, 255, 255, 0.18);
+    box-shadow: 0 0 10px rgba(0, 255, 255, 0.35);
+}
+
 /* =========================================================
    Touch controls
    ========================================================= */
@@ -602,4 +638,6 @@ body {
     #stars-display { font-size: 26px; margin: 4px 0; }
     #remark-txt { font-size: 16px; margin-bottom: 8px; }
     .btn { font-size: 15px; padding: 10px 20px; margin-bottom: 8px; }
+    .sens-row { margin: -2px 0 8px; }
+    .sens-step { height: 26px; }
 }

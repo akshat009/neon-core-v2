@@ -31,6 +31,18 @@
                 <button class="diff-btn" id="diff-hard" data-diff="HARD">HARD</button>
             </div>
 
+            <!-- Joystick sensitivity (touch screens only, js/input.js) -->
+            <div class="sens-row touch-only">
+                <span class="sens-label">STICK SENSITIVITY</span>
+                <div class="sens-steps" role="radiogroup" aria-label="Joystick sensitivity, 1 gentle to 5 fast">
+                    <button class="sens-step" data-sens="1" role="radio">1</button>
+                    <button class="sens-step" data-sens="2" role="radio">2</button>
+                    <button class="sens-step" data-sens="3" role="radio">3</button>
+                    <button class="sens-step" data-sens="4" role="radio">4</button>
+                    <button class="sens-step" data-sens="5" role="radio">5</button>
+                </div>
+            </div>
+
             <button id="start-btn" class="btn">START RUN</button>
             <div id="continue-info" class="continue-info"></div>
             <button id="new-run-btn" class="btn btn-secondary">NEW RUN</button>
