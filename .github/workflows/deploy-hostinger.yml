@@ -1,4 +1,4 @@
-# Uploads web/ (landing page + game) to Hostinger → https://play.asaxenadev.com/ (or asaxenadev.com/play/)
+# Uploads web/ (landing page + game) to Hostinger → https://play.asaxenadev.com/
 # Runs automatically on push to main (changes in web/), or manually from the Actions tab.
 
 name: Deploy web to Hostinger

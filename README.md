@@ -43,7 +43,7 @@
 One game, two targets:
 
 ```
-web/              Everything the website serves (upload this folder to asaxenadev.com/play/)
+web/              Everything the website serves (deployed to https://play.asaxenadev.com/)
   index.html      Landing page: PLAY button, screenshots, how to play, Android download
   landing/        Landing page styles, script (APK link) and screenshots
   game/           The game itself (HTML/CSS/JS, no build step)

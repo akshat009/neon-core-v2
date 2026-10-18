@@ -1,6 +1,7 @@
-# Keep one address for the game: send play.asaxenadev.com/* to asaxenadev.com/play/*
+# The game lives only at https://play.asaxenadev.com/.
+# This folder is also reachable as asaxenadev.com/play/ — answer 404 there.
 <IfModule mod_rewrite.c>
 RewriteEngine On
-RewriteCond %{HTTP_HOST} ^(www\.)?play\.asaxenadev\.com$ [NC]
-RewriteRule ^(.*)$ https://asaxenadev.com/play/$1 [R=301,L]
+RewriteCond %{HTTP_HOST} ^(www\.)?asaxenadev\.com$ [NC]
+RewriteRule ^ - [R=404,L]
 </IfModule>
