@@ -2,14 +2,21 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="theme-color" content="#03060d">
     <title>Neon Core</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;700;800&family=Rajdhani:wght@600;700&display=swap">
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
 
 <div id="top-controls">
-    <button id="mute-btn" class="small-btn">🔊 MUTE</button>
+    <button id="mute-btn" class="icon-btn" aria-label="Mute sound">
+        <svg class="ico-on" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9h4l5-4v14l-5-4H4z" fill="currentColor"/><path d="M16 8.5a5 5 0 0 1 0 7M18.5 6a8.5 8.5 0 0 1 0 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        <svg class="ico-off" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9h4l5-4v14l-5-4H4z" fill="currentColor"/><path d="M16 9.5l5 5M21 9.5l-5 5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+    </button>
 </div>
 
 <!-- Start menu -->
@@ -67,31 +74,63 @@
 </div>
 
 <!-- In-game HUD -->
-<div id="ui" class="glass-panel">
-    <div id="score-txt">DATA: 0 / 5</div>
-    <div id="level-txt">SECTOR: <span id="level-num">1</span> <span id="diff-ui-txt">[MED]</span></div>
-    <div id="timer-txt">CYCLE: 0.0s</div>
-    <div id="status-txt">CHASSIS: STANDARD</div>
+<div id="ui">
+    <div class="hud-frame" aria-hidden="true">
+        <span class="corner tl"></span><span class="corner tr"></span>
+        <span class="corner bl"></span><span class="corner br"></span>
+        <span class="sys-label left">SYSTEM ACTIVE</span>
+        <span class="sys-label right">SYSTEM ACTIVE</span>
+    </div>
+
+    <div class="hud-left">
+        <div id="score-txt">DATA: 00/05</div>
+        <div class="data-bar"><div id="data-fill"></div></div>
+        <div id="status-txt">CHASSIS: STANDARD</div>
+    </div>
+
+    <div class="hud-right">
+        <div class="hud-panel">
+            <div id="level-txt"><span id="diff-ui-txt" class="diff-chip">MED</span>SECTOR <span id="level-num">01</span></div>
+        </div>
+        <div class="hud-panel">
+            <div id="timer-txt">TIME: 0.0s</div>
+        </div>
+    </div>
 </div>
 
 <!-- Touch controls -->
 <div id="mobile-controls">
-    <div id="dpad">
-        <div class="dpad-btn" id="btn-up">W</div>
-        <div class="dpad-btn" id="btn-left">A</div>
-        <div class="dpad-btn" id="btn-down">S</div>
-        <div class="dpad-btn" id="btn-right">D</div>
+    <div id="joystick" aria-label="Move">
+        <div class="joy-ring">
+            <span class="joy-arrow up"></span><span class="joy-arrow down"></span>
+            <span class="joy-arrow left"></span><span class="joy-arrow right"></span>
+        </div>
+        <div id="joy-knob"></div>
     </div>
-    <div id="btn-jump">JUMP</div>
+
+    <button id="btn-jump" aria-label="Jump">
+        <svg viewBox="0 0 40 40" aria-hidden="true">
+            <polygon points="20,3 36,18 28,18 20,10.5 12,18 4,18"/>
+            <polygon points="20,17 36,32 28,32 20,24.5 12,32 4,32"/>
+        </svg>
+        <span>JUMP</span>
+    </button>
 </div>
 
-<!-- Three.js -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<!-- Three.js r128 + bloom add-ons (the game still runs, without glow, if the add-ons fail to load) -->
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/CopyShader.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/LuminosityHighPassShader.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/EffectComposer.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/RenderPass.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/ShaderPass.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/UnrealBloomPass.js"></script>
 
 <!-- Game scripts (order matters: each file uses globals from the ones above it) -->
 <script src="js/config.js"></script>
 <script src="js/audio.js"></script>
 <script src="js/scene.js"></script>
+<script src="js/effects.js"></script>
 <script src="js/level.js"></script>
 <script src="js/input.js"></script>
 <script src="js/ui.js"></script>

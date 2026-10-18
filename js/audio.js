@@ -14,9 +14,11 @@ function initAudio() {
     }
 }
 
-document.getElementById('mute-btn').addEventListener('click', (e) => {
+const muteBtn = document.getElementById('mute-btn');
+muteBtn.addEventListener('click', () => {
     isMuted = !isMuted;
-    e.target.innerText = isMuted ? "🔇 UNMUTE" : "🔊 MUTE";
+    muteBtn.classList.toggle('muted', isMuted);
+    muteBtn.setAttribute('aria-label', isMuted ? 'Unmute sound' : 'Mute sound');
     if(audioCtx) {
         if(isMuted) audioCtx.suspend();
         else audioCtx.resume();

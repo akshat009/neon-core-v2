@@ -20,13 +20,14 @@
 * **Spacebar**: Jump over gaps and laser barriers
 
 ### Mobile / Touch
-* **On-Screen D-Pad (W, A, S, D)**: Steer & Move
-* **On-Screen JUMP Button**: Jump
+* **Virtual Joystick (left)**: Analog steer & move
+* **JUMP Button (right)**: Jump — works together with the joystick (multi-touch)
 
 ---
 
 ## ⚙️ Features
-* **Full 3D Procedural Neon Grid**: High-performance Three.js WebGL renderer with post-processing neon aesthetic.
+* **Full 3D Procedural Neon Grid**: Three.js WebGL renderer with bloom glow, particle trails and shatter effects.
+* **Auto Quality**: Glow switches itself off on slow devices. Force it with `?quality=high` or `?quality=low` in the URL.
 * **Responsive Orientation**: Auto-adapts FOV and controls for Desktop (16:9), Mobile Portrait (9:16), and Tablets.
 * **Chassis Transformations**:
   * 🟩 **Micro Core (Green)**: Ultra-compact chassis with high speed.
@@ -44,11 +45,12 @@ index.html        Markup only (menus, HUD, touch controls)
 css/style.css     All styles
 js/config.js      Difficulty settings, saved score
 js/audio.js       Synth sound effects, mute
-js/scene.js       Three.js scene, camera, lights, materials, player ball
+js/scene.js       Three.js scene, camera, lights, look of the track, pickups, hurdles and ball
+js/effects.js     Particles, bloom glow, camera shake, per-frame visual effects
 js/level.js       Game state, level generation, ball power-ups
 js/input.js       Keyboard and touch input
 js/ui.js          HUD, menus, buttons, fullscreen
-js/game.js        Main loop: physics, collisions, win / lose
+js/game.js        Main loop: physics (sub-stepped), collisions, win / lose
 ```
 
 The scripts are loaded in the order above and share globals, so keep that order in `index.html`.

@@ -15,10 +15,13 @@ document.querySelectorAll('.diff-btn').forEach(btn => {
 });
 
 // --- HUD ---
+const pad2 = (n) => String(n).padStart(2, '0');
+
 function updateUI() {
-    document.getElementById('score-txt').innerText = `DATA: ${ringsCollected} / ${targetRings}`;
-    document.getElementById('level-num').innerText = level;
-    document.getElementById('diff-ui-txt').innerText = `[${selectedDifficulty.substring(0,3)}]`;
+    document.getElementById('score-txt').innerText = `DATA: ${pad2(ringsCollected)}/${pad2(targetRings)}`;
+    document.getElementById('data-fill').style.width = `${targetRings ? Math.min(ringsCollected / targetRings, 1) * 100 : 0}%`;
+    document.getElementById('level-num').innerText = pad2(level);
+    document.getElementById('diff-ui-txt').innerText = selectedDifficulty.substring(0,3);
 }
 
 // --- Fullscreen (without locking orientation) ---

@@ -19,6 +19,7 @@ let gravity = 0.02, jumpStrength = 0.45, maxSpeed = 0.3;
 let levelStartTime = 0;
 let currentTimeStr = "0.0";
 const clock = new THREE.Clock();
+let gameOverTimer = null;
 
 function generateLevel() {
     [platforms, edges, rings, spikes, movPlatforms, powerups].forEach(arr => arr.forEach(obj => scene.remove(obj)));
@@ -29,10 +30,10 @@ function generateLevel() {
     targetRings = (selectedDifficulty === 'EASY' ? 2 : 3) + level * 2;
     ringsCollected = 0;
 
-    document.getElementById('diff-ui-txt').innerText = `[${selectedDifficulty.substring(0,3)}]`;
-
+    clearTimeout(gameOverTimer);
     pos.set(0, 5, -2); vel.set(0,0,0);
     ball.position.copy(pos);
+    ball.visible = true;
     transformBall('normal');
 
     let currentZ = 0;
@@ -43,18 +44,16 @@ function generateLevel() {
 
         // Moving platform inside a wide gap
         if(gap > 6 && Math.random() < cfg.movPlatChance + (level*0.02)) {
-            let mPlat = new THREE.Mesh(new THREE.BoxGeometry(6, 0.5, 4), floorMat);
+            let mPlat = createMovingPlatform();
             mPlat.position.set(0, 0, currentZ + gap/2);
-            let mEdge = new THREE.LineSegments(new THREE.EdgesGeometry(mPlat.geometry), new THREE.LineBasicMaterial({color: 0xff00ff, opacity: 0.8, transparent: true}));
-            mPlat.add(mEdge);
             mPlat.userData = { startX: -4, endX: 4, speed: 0.05 + (maxSpeed*0.1), dir: 1 };
             scene.add(mPlat); movPlatforms.push(mPlat);
         }
 
-        // Main platform + neon edge outline
-        let plat = new THREE.Mesh(new THREE.BoxGeometry(14, 1, length), floorMat);
+        // Main platform (grid surface + neon rails) + edge outline
+        let plat = createPlatform(length);
         plat.position.set(0, 0, currentZ - length/2);
-        plat.receiveShadow = true; scene.add(plat); platforms.push(plat);
+        scene.add(plat); platforms.push(plat);
 
         let dynEdgeGeo = new THREE.EdgesGeometry(plat.geometry);
         let pEdge = new THREE.LineSegments(dynEdgeGeo, edgeMat);
@@ -63,7 +62,7 @@ function generateLevel() {
 
         if(i > 0 && i <= targetRings) {
             // Data pickup
-            let r = new THREE.Mesh(ringGeo, ringMat);
+            let r = createData(i * 1.3);
             r.position.set(Math.random()*8 - 4, 1.5, currentZ - length/2);
             scene.add(r); rings.push(r);
 
@@ -72,7 +71,7 @@ function generateLevel() {
                 let numSpikes = Math.floor(Math.random() * (level + (selectedDifficulty==='HARD'?2:0)));
                 numSpikes = Math.min(numSpikes, 6);
                 for(let s=0; s<numSpikes; s++) {
-                    let sp = new THREE.Mesh(spikeGeo, spikeMat);
+                    let sp = createMine();
                     sp.position.set(Math.random()*10 - 5, 1.2, currentZ - Math.random()*length);
 
                     if(selectedDifficulty === 'HARD' || level > 5) {
@@ -87,9 +86,9 @@ function generateLevel() {
             // Power-up box
             if(Math.random() > 0.6) {
                 let type = Math.random() > 0.5 ? 'big' : 'small';
-                let p = new THREE.Mesh(new THREE.BoxGeometry(1.2, 1.2, 1.2), type==='big'?bigMat:smallMat);
+                let p = createPowerup(type, i * 0.9);
                 p.position.set(Math.random()*6-3, 1.5, currentZ - length/2 + 2);
-                p.userData = { type: type }; scene.add(p); powerups.push(p);
+                scene.add(p); powerups.push(p);
             }
         }
         currentZ -= length;
@@ -105,21 +104,22 @@ function generateLevel() {
 
 function transformBall(type) {
     ballState = type;
+    setBallLook(type);
     if(type === 'big') {
         ballRadius = 1.4; jumpStrength = 0.55;
-        ball.scale.set(1.4, 1.4, 1.4); ball.material = steelMat; coreLight.color.setHex(0xffaa00);
+        ball.scale.set(1.4, 1.4, 1.4);
         document.getElementById('status-txt').innerText = "CHASSIS: HEAVY (HIGH JUMP)";
         document.getElementById('status-txt').style.color = "#ffaa00";
         playPowerup();
     } else if(type === 'small') {
         ballRadius = 0.6; jumpStrength = 0.4;
-        ball.scale.set(0.6, 0.6, 0.6); ball.material = coreMat; coreLight.color.setHex(0x00ff00);
+        ball.scale.set(0.6, 0.6, 0.6);
         document.getElementById('status-txt').innerText = "CHASSIS: MICRO (FAST SPEED)";
         document.getElementById('status-txt').style.color = "#00ff00";
         playPowerup();
     } else {
         ballRadius = 1; jumpStrength = 0.48;
-        ball.scale.set(1, 1, 1); ball.material = coreMat; coreLight.color.setHex(0x00ffff);
+        ball.scale.set(1, 1, 1);
         document.getElementById('status-txt').innerText = "CHASSIS: STANDARD";
         document.getElementById('status-txt').style.color = "#00ffff";
     }
