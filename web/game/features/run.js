@@ -20,6 +20,9 @@ function showOnly(id) {
     if (pauseBtn) {
         pauseBtn.style.display = (id === null || id === 'pause-modal') ? 'grid' : 'none';
     }
+    if (id !== 'restart-menu' && id !== 'pause-modal') {
+        Ads.hideBanner();
+    }
 }
 
 function savedRun() {
@@ -159,9 +162,11 @@ function togglePauseMenu() {
     if (Pause.reasons.has('esc-pause')) {
         resumeGame('esc-pause');
         modal.style.display = 'none';
+        Ads.hideBanner();
     } else {
         pauseGame('esc-pause');
         modal.style.display = 'flex';
+        Ads.showBanner('pause');
     }
 }
 
@@ -169,12 +174,14 @@ attachButtonAction('pause-btn', togglePauseMenu);
 attachButtonAction('resume-btn', () => {
     const modal = document.getElementById('pause-modal');
     if (modal) modal.style.display = 'none';
+    Ads.hideBanner();
     resumeGame('esc-pause');
 });
 
 attachButtonAction('pause-exit-btn', async () => {
     const modal = document.getElementById('pause-modal');
     if (modal) modal.style.display = 'none';
+    Ads.hideBanner();
     resumeGame('esc-pause');
 
     // Show Demo Ad when exiting to menu
