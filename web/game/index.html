@@ -12,6 +12,12 @@
 <body>
 
 <div id="top-controls">
+    <button id="pause-btn" class="icon-btn" aria-label="Pause game" title="Pause / Menu (P or ESC)" style="display: none;">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+            <rect x="6" y="5" width="4" height="14" rx="1" fill="currentColor"/>
+            <rect x="14" y="5" width="4" height="14" rx="1" fill="currentColor"/>
+        </svg>
+    </button>
     <button id="mute-btn" class="icon-btn" aria-label="Mute sound">
         <svg class="ico-on" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9h4l5-4v14l-5-4H4z" fill="currentColor"/><path d="M16 8.5a5 5 0 0 1 0 7M18.5 6a8.5 8.5 0 0 1 0 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
         <svg class="ico-off" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9h4l5-4v14l-5-4H4z" fill="currentColor"/><path d="M16 9.5l5 5M21 9.5l-5 5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
@@ -158,7 +164,7 @@
 
     <div class="hud-right">
         <div class="hud-panel">
-            <div id="level-txt"><span id="diff-ui-txt" class="diff-chip">MED</span>SECTOR <span id="level-num">01</span></div>
+            <div id="level-txt"><span id="diff-ui-txt" class="diff-chip">MEDIUM</span>SECTOR <span id="level-num">01</span></div>
         </div>
         <div class="hud-panel">
             <div id="timer-txt">TIME: 0.0s</div>

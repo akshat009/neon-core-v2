@@ -16,6 +16,10 @@ function showOnly(id) {
         const el = document.getElementById(m);
         if (el) el.style.display = (m === id) ? 'flex' : 'none';
     });
+    const pauseBtn = document.getElementById('pause-btn');
+    if (pauseBtn) {
+        pauseBtn.style.display = (id === null || id === 'pause-modal') ? 'grid' : 'none';
+    }
 }
 
 function savedRun() {
@@ -161,6 +165,7 @@ function togglePauseMenu() {
     }
 }
 
+attachButtonAction('pause-btn', togglePauseMenu);
 attachButtonAction('resume-btn', () => {
     const modal = document.getElementById('pause-modal');
     if (modal) modal.style.display = 'none';
@@ -177,12 +182,16 @@ attachButtonAction('pause-exit-btn', async () => {
         await Ads.showRewarded('exit');
     } catch (e) {}
 
-    if (document.fullscreenElement && document.exitFullscreen) document.exitFullscreen();
+    if (document.fullscreenElement && document.exitFullscreen) {
+        try { document.exitFullscreen().catch(() => {}); } catch(e) {}
+    }
     document.getElementById('ui').style.display = 'none';
     document.getElementById('mobile-controls').style.display = 'none';
     showOnly('start-menu');
     isPlaying = false;
+    timerRunning = false;
     keys.w = keys.a = keys.s = keys.d = keys.space = false;
+    level = 1;
     refreshStartMenu();
 });
 
