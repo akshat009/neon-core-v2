@@ -1,0 +1,45 @@
+# Uploads web/ (landing page + game) to Hostinger → https://asaxenadev.com/play/
+# on every push to main that changes web/, or by hand from the Actions tab.
+#
+# One-time setup — GitHub repo → Settings → Secrets and variables → Actions:
+#   Secrets:   FTP_SERVER    (hPanel → Files → FTP Accounts → "FTP IP", e.g. 123.45.67.89)
+#              FTP_USERNAME  (e.g. u123456789 or u123456789.asaxenadev.com)
+#              FTP_PASSWORD
+#   Variable (optional): FTP_SERVER_DIR  — folder to upload into, default "public_html/play/"
+# Until the secrets exist, the job does nothing.
+
+name: Deploy web to Hostinger
+
+on:
+  push:
+    branches: [main]
+    paths: ['web/**', '.github/workflows/deploy-hostinger.yml']
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-hostinger
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    env:
+      FTP_SERVER: ${{ secrets.FTP_SERVER }}
+    steps:
+      - name: Skip until FTP secrets are set
+        if: env.FTP_SERVER == ''
+        run: echo "FTP_SERVER secret not set yet — nothing deployed."
+
+      - uses: actions/checkout@v4
+        if: env.FTP_SERVER != ''
+
+      - name: Upload web/ over FTP
+        if: env.FTP_SERVER != ''
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          protocol: ftps
+          local-dir: ./web/
+          server-dir: ${{ vars.FTP_SERVER_DIR || 'public_html/play/' }}
