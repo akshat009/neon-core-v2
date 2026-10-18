@@ -38,13 +38,27 @@ jobs:
           fi
           echo "All required FTP secrets are present."
 
+      - name: Prepare FTP Host
+        id: ftp_prep
+        run: |
+          RAW_SERVER="${{ secrets.FTP_SERVER }}"
+          # Remove protocol prefix if present (ftp://, https://, etc.)
+          CLEAN_SERVER=$(echo "$RAW_SERVER" | sed -E 's#^[a-zA-Z]+://##')
+          # Remove port if present (e.g. :21)
+          CLEAN_SERVER=$(echo "$CLEAN_SERVER" | sed -E 's#:[0-9]+$##')
+          # Remove trailing slashes and whitespace
+          CLEAN_SERVER=$(echo "$CLEAN_SERVER" | sed -E 's#/+$##' | xargs)
+          
+          echo "server=$CLEAN_SERVER" >> "$GITHUB_OUTPUT"
+          echo "Prepared server hostname (length: ${#CLEAN_SERVER} chars)"
+
       - name: Checkout Code
         uses: actions/checkout@v4
 
       - name: Upload web/ over FTP
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
-          server: ${{ secrets.FTP_SERVER }}
+          server: ${{ steps.ftp_prep.outputs.server }}
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
           protocol: ftps
