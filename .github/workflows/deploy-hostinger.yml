@@ -10,9 +10,9 @@ on:
   workflow_dispatch:
     inputs:
       server_dir:
-        description: 'Server target folder (e.g. public_html/play/ or play/ or ./)'
+        description: 'Server target folder (defaults to ./ because FTP account is restricted to public_html/play)'
         required: false
-        default: 'public_html/play/'
+        default: './'
 
 concurrency:
   group: deploy-hostinger
@@ -50,5 +50,5 @@ jobs:
           protocol: ftps
           security: loose
           local-dir: ./web/
-          server-dir: ${{ inputs.server_dir || vars.FTP_SERVER_DIR || 'public_html/play/' }}
+          server-dir: ${{ inputs.server_dir || vars.FTP_SERVER_DIR || './' }}
           log-level: verbose
