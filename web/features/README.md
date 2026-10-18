@@ -10,6 +10,7 @@ Everything for shields, lives, ads and run progress lives in this folder. The co
 | `ads/ads-config.js` | **Ad IDs for both platforms — the only file to edit when going live** |
 | `ads/ads.js` | Ads adapter: picks AdMob (Android app), AdSense (website) or demo ads |
 | `ads/ads-admob.js` | Android app: AdMob via the Capacitor plugin |
+| `ads/ads-applixir.js` | Website: AppLixir rewarded video (no AdSense needed) |
 | `ads/ads-web.js` | Website: AdSense H5 Games Ads (Ad Placement API) |
 | `ads/ads-demo.js` | Demo ads used until real IDs are filled in |
 | `shield.js` | Daily shields, auto-block, "no shields" popup, HUD shield button |
@@ -56,7 +57,7 @@ Everything for shields, lives, ads and run progress lives in this folder. The co
 | `shield` | Rewarded | Crash with 0 shields (popup) | +1 shield, used on that hurdle |
 | `shield` | Rewarded | HUD shield button at 0, or start menu | +1 shield |
 | `continue` | Rewarded | Out of lives | +1 life, continue on the spot |
-| `restart` | Banner | Run Reset screen | — |
+| `restart` | Banner | Run Reset screen (AdMob / AdSense only) | — |
 
 ## Tuning
 
@@ -78,12 +79,22 @@ demoAdSeconds: 5
 | Where the game runs | Ad network | Until IDs are filled in |
 |---|---|---|
 | Android app (`android-app/`, Capacitor) | **AdMob** (`ads/ads-admob.js`) | Google's test ads (test IDs are pre-filled) |
-| Website (`web/`, GitHub Pages) | **AdSense H5 Games Ads** (`ads/ads-web.js`) | Demo ads |
+| Website on `asaxenadev.com/play` | **AppLixir** rewarded video (`ads/ads-applixir.js`) | Demo ads |
+| Website elsewhere with an AdSense ID | **AdSense H5 Games Ads** (`ads/ads-web.js`) | Demo ads |
+| GitHub Pages / localhost | Demo ads | — |
 
-The game picks automatically: inside the Capacitor app → AdMob, in a browser → AdSense (if `adsenseClient` is set) or demo.
+The game picks automatically: inside the Capacitor app → AdMob; in a browser on an AppLixir-registered host → AppLixir; else AdSense if `adsenseClient` is set; otherwise demo.
 
 ### Going live — Android (AdMob)
 See [`android-app/README.md`](../../android-app/README.md). In short: AdMob app ID → `strings.xml`, ad unit IDs → `ads/ads-config.js`, set `testing: false`, `npm run sync`.
+
+### Going live — Website (AppLixir, no AdSense needed)
+1. Sign up at AppLixir as a publisher and add the site under **Sites** (`asaxenadev.com`, game at `https://asaxenadev.com/play/`). Copy its **API key**.
+2. Put the key in `ads/ads-config.js` → `applixir.apiKey`, and keep the host in `applixir.allowedHosts`.
+3. Add the **ads.txt** lines from the AppLixir dashboard to `https://asaxenadev.com/ads.txt` (Hostinger: `public_html/ads.txt` of the main domain).
+4. Upload the contents of `web/` to `public_html/play/` (HTTPS) so the game opens at `https://asaxenadev.com/play/`. AppLixir doesn't serve on localhost or unregistered domains, so test on the real site.
+
+Rewards are given only when AppLixir reports `complete`. AppLixir has no banner format, so the Run Reset screen shows no banner on this network.
 
 ### Going live — Website (AdSense H5 Games Ads)
 1. Apply for H5 Games Ads in AdSense with the site that hosts the game.

@@ -8,7 +8,7 @@
 // Placements: 'shield', 'continue' (rewarded), 'restart' (banner).
 // =========================================================
 
-const AD_NETWORKS = { admob: AdMobAds, web: WebAds, demo: DemoAds };
+const AD_NETWORKS = { admob: AdMobAds, applixir: AppLixirAds, web: WebAds, demo: DemoAds };
 
 function isNativeApp() {
     const cap = window.Capacitor;
@@ -17,6 +17,8 @@ function isNativeApp() {
 
 function pickAdNetwork() {
     if (isNativeApp()) return ADS_CONFIG.admob.rewardedId ? 'admob' : 'demo';
+    const lx = ADS_CONFIG.applixir;
+    if (lx.apiKey && (!lx.allowedHosts.length || lx.allowedHosts.includes(location.hostname))) return 'applixir';
     return ADS_CONFIG.web.adsenseClient ? 'web' : 'demo';
 }
 

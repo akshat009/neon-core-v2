@@ -267,6 +267,19 @@ body.touch #shield-btn { right: calc(166px + var(--safe-r)); bottom: calc(108px 
 .modal-timer { height: 3px; margin-top: 4px; background: rgba(255, 255, 255, 0.08); overflow: hidden; }
 #shield-offer-bar { height: 100%; width: 100%; background: var(--shield); box-shadow: 0 0 8px var(--shield); }
 
+/* ---------- AppLixir player overlay ---------- */
+
+.applixir-ad {
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    background: #000;
+}
+.applixir-ad.show { display: flex; }
+
 /* ---------- Demo rewarded video ---------- */
 
 .demo-ad {

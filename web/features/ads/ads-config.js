@@ -2,9 +2,10 @@
 // Neon Core — ad IDs. This is the only file to edit when you go live.
 //
 // The game picks the ad network by where it runs:
-//   Android app (Capacitor)  → AdMob                   (ads-admob.js)
-//   Website (GitHub Pages)   → AdSense H5 Games Ads    (ads-web.js)
-//   No IDs filled in         → demo ads                (ads-demo.js)
+//   Android app (Capacitor)               → AdMob                  (ads-admob.js)
+//   Website on an AppLixir-registered host → AppLixir rewarded video (ads-applixir.js)
+//   Website with an AdSense ID             → AdSense H5 Games Ads   (ads-web.js)
+//   Nothing filled in / other hosts        → demo ads               (ads-demo.js)
 // =========================================================
 
 const ADS_CONFIG = {
@@ -17,6 +18,15 @@ const ADS_CONFIG = {
         testing: true
         // The AdMob APP ID (ca-app-pub-…~…) goes in
         // android-app/android/app/src/main/res/values/strings.xml → admob_app_id
+    },
+
+    applixir: {
+        // API key from the AppLixir dashboard → Sites (one key per registered site).
+        apiKey: '',
+        // Hosts registered in AppLixir (the game lives at https://asaxenadev.com/play/).
+        // Anywhere else (GitHub Pages, localhost) the game keeps demo ads,
+        // because AppLixir only serves ads on registered domains.
+        allowedHosts: ['asaxenadev.com', 'www.asaxenadev.com']
     },
 
     web: {
