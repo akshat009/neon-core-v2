@@ -18,10 +18,13 @@
 
 .continue-info {
     min-height: 0;
-    margin: -4px 0 8px;
-    font-size: 11px;
+    margin: -2px 0 10px;
+    font-family: var(--font-hud);
+    font-size: clamp(12px, 1.2vw, 14px);
     letter-spacing: 2px;
-    color: rgba(200, 240, 255, 0.7);
+    font-weight: 700;
+    color: #92ecf5;
+    text-shadow: 0 0 8px rgba(41, 243, 255, 0.4);
 }
 .continue-info:empty { display: none; }
 
@@ -29,18 +32,18 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 10px;
-    margin: -4px 0 4px;
-    padding: 9px 10px 9px 12px;
+    gap: 12px;
+    margin: 2px 0 6px;
+    padding: 10px 14px;
     text-align: left;
     border: 1px solid rgba(74, 168, 255, 0.45);
-    background: linear-gradient(90deg, rgba(74, 168, 255, 0.12), rgba(74, 168, 255, 0.03));
-    border-radius: 6px;
+    background: linear-gradient(90deg, rgba(74, 168, 255, 0.15), rgba(74, 168, 255, 0.04));
+    border-radius: 8px;
 }
 .reward-info { display: flex; align-items: center; gap: 10px; color: #cfe8ff; }
-.reward-info svg { width: 26px; height: 26px; color: var(--shield); filter: drop-shadow(0 0 5px rgba(74, 168, 255, 0.7)); flex: none; }
-.reward-info b { display: block; font-size: 14px; letter-spacing: 2px; color: #e4f2ff; }
-.reward-info small { display: block; font-size: 10px; letter-spacing: 1px; color: rgba(200, 225, 255, 0.6); }
+.reward-info svg { width: 28px; height: 28px; color: var(--shield); filter: drop-shadow(0 0 6px rgba(74, 168, 255, 0.8)); flex: none; }
+.reward-info b { display: block; font-family: var(--font-hud); font-size: 15px; letter-spacing: 2px; color: #e4f2ff; }
+.reward-info small { display: block; font-family: var(--font-ui); font-size: 12px; letter-spacing: 1.5px; font-weight: 600; color: rgba(200, 235, 255, 0.7); }
 
 .reward-btn {
     flex: none;
