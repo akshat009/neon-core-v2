@@ -15,7 +15,8 @@ capture_*.py
 CrazyGames/
 Poki/
 Artwork/
-*.png
-*.jpg
-*.mp4
+# (root-level images/videos only — app icons and game assets in subfolders are kept)
+/*.png
+/*.jpg
+/*.mp4
 *_SUBMISSION_GUIDE.md

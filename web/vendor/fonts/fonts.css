@@ -1,0 +1,6 @@
+/* Orbitron + Rajdhani (SIL Open Font License, see LICENSE-*.txt), bundled so the game works offline */
+@font-face { font-family: 'Orbitron'; font-style: normal; font-weight: 600; font-display: swap; src: url('orbitron-latin-600-normal.woff2') format('woff2'); }
+@font-face { font-family: 'Orbitron'; font-style: normal; font-weight: 700; font-display: swap; src: url('orbitron-latin-700-normal.woff2') format('woff2'); }
+@font-face { font-family: 'Orbitron'; font-style: normal; font-weight: 800; font-display: swap; src: url('orbitron-latin-800-normal.woff2') format('woff2'); }
+@font-face { font-family: 'Rajdhani'; font-style: normal; font-weight: 600; font-display: swap; src: url('rajdhani-latin-600-normal.woff2') format('woff2'); }
+@font-face { font-family: 'Rajdhani'; font-style: normal; font-weight: 700; font-display: swap; src: url('rajdhani-latin-700-normal.woff2') format('woff2'); }

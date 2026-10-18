@@ -34,27 +34,29 @@
   * 🟩 **Micro Core (Green)**: Ultra-compact chassis with high speed.
   * 🟧 **Heavy Core (Orange)**: Heavyweight chassis with massive jump strength.
 * **Dynamic Star Rating & Scoring**: Par-time scoring and star rating across 3 difficulty tiers.
-* **Shields, Lives & Saved Runs**: 2 free shields a day, 3 lives per run, continue where you left off. Rewarded and banner ad placements (demo ads for now) — see [`features/README.md`](features/README.md).
+* **Shields, Lives & Saved Runs**: 2 free shields a day, 3 lives per run, continue where you left off. Rewarded and banner ad placements (demo ads for now) — see [`web/features/README.md`](web/features/README.md).
 
 ---
 
 ## 📁 Project Structure
 
-Plain HTML, CSS and JavaScript — no build step. Open `index.html` in a browser, or serve the folder with any static server.
+One game, two targets:
 
 ```
-index.html        Markup only (menus, HUD, touch controls)
-css/style.css     All styles
-js/config.js      Difficulty settings, saved score
-js/audio.js       Synth sound effects, mute
-js/scene.js       Three.js scene, camera, lights, look of the track, pickups, hurdles and ball
-js/effects.js     Particles, bloom glow, camera shake, per-frame visual effects
-js/level.js       Game state, level generation, ball power-ups
-js/input.js       Keyboard and touch input
-js/ui.js          HUD, menus, buttons, fullscreen
-js/game.js        Main loop: physics (sub-stepped), collisions, win / lose
+web/            The game (HTML/CSS/JS, no build step) — this is what the website serves
+  index.html
+  css/ js/      Core game: scene, effects, level, input, HUD, main loop
+  features/     Shields, lives, saved runs, time freeze, ads (own README inside)
+    ads/        AdMob (Android app) · AdSense H5 Games Ads (website) · demo ads
+  vendor/       Three.js r128 + bloom add-ons + fonts, bundled so it works offline
 
-features/         Shields, lives, ads, run progress, time freeze (own README inside)
+android-app/    Capacitor 8 Android app with AdMob — copies web/ in at build time (own README)
+
+index.html      Redirects the old link to web/
 ```
 
-The scripts are loaded in the order above and share globals, so keep that order in `index.html`.
+- **Website:** open `web/index.html`, or serve the repo with any static server.
+- **Android:** see [`android-app/README.md`](android-app/README.md).
+- **Ads:** see [`web/features/README.md`](web/features/README.md).
+
+The scripts in `web/index.html` load in a fixed order and share globals, so keep that order.

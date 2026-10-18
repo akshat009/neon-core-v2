@@ -1,0 +1,10 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Neon Core</string>
+    <string name="title_activity_main">Neon Core</string>
+    <string name="package_name">com.akshat009.neoncore</string>
+    <string name="custom_url_scheme">com.akshat009.neoncore</string>
+    <!-- AdMob APP ID (not an ad unit ID). This is Google's sample app ID for testing.
+         Replace it with your own from the AdMob console before publishing. -->
+    <string name="admob_app_id">ca-app-pub-3940256099942544~3347511713</string>
+</resources>

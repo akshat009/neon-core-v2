@@ -1,0 +1,3 @@
+node_modules/
+# Copied from ../web by `npm run sync-web` — never edit here
+www/
