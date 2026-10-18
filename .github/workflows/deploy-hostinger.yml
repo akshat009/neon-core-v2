@@ -14,9 +14,9 @@ on:
         required: false
         default: './'
       protocol:
-        description: 'Protocol (ftps or ftp)'
+        description: 'Protocol (ftp or ftps)'
         required: false
-        default: 'ftps'
+        default: 'ftp'
 
 concurrency:
   group: deploy-hostinger
@@ -69,8 +69,8 @@ jobs:
           server: ${{ steps.ftp_prep.outputs.server }}
           username: ${{ steps.ftp_prep.outputs.username }}
           password: ${{ secrets.FTP_PASSWORD }}
-          protocol: ${{ inputs.protocol || vars.FTP_PROTOCOL || 'ftps' }}
-          security: loose
+          protocol: ${{ inputs.protocol || vars.FTP_PROTOCOL || 'ftp' }}
+          port: 21
           local-dir: ./web/
           server-dir: ${{ inputs.server_dir || vars.FTP_SERVER_DIR || './' }}
           log-level: verbose
