@@ -1,0 +1,6 @@
+# Keep one address for the game: send play.asaxenadev.com/* to asaxenadev.com/play/*
+<IfModule mod_rewrite.c>
+RewriteEngine On
+RewriteCond %{HTTP_HOST} ^(www\.)?play\.asaxenadev\.com$ [NC]
+RewriteRule ^(.*)$ https://asaxenadev.com/play/$1 [R=301,L]
+</IfModule>
