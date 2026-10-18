@@ -15,7 +15,7 @@ let initialFov = initialAspect < 1 ? 75 : 55; // Wider FOV for portrait mode
 const camera = new THREE.PerspectiveCamera(initialFov, initialAspect, 0.1, 250);
 
 const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: "high-performance" });
-renderer.setPixelRatio(Math.min(window.devicePixelRatio, IS_TOUCH ? 1.5 : 2));
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 renderer.setSize(window.innerWidth, window.innerHeight);
 document.body.appendChild(renderer.domElement);
 
@@ -121,11 +121,11 @@ function additiveMat(color, opacity) {
 
 const floorMat = new THREE.MeshStandardMaterial({
     color: 0x060b16, roughness: 0.55, metalness: 0.45,
-    emissive: 0xffffff, emissiveMap: gridTex, emissiveIntensity: 0.16
+    emissive: 0xffffff, emissiveMap: gridTex, emissiveIntensity: 0.13
 });
-const edgeMat = new THREE.LineBasicMaterial({ color: 0x00ffff, transparent: true, opacity: 0.5 });
-const railMat = new THREE.MeshBasicMaterial({ color: 0x35f4ff });
-const laneMat = new THREE.MeshBasicMaterial({ color: 0x1aa6c8, transparent: true, opacity: 0.55 });
+const edgeMat = new THREE.LineBasicMaterial({ color: 0x00ffff, transparent: true, opacity: 0.45 });
+const railMat = new THREE.MeshBasicMaterial({ color: 0x5ff8ff });
+const laneMat = new THREE.MeshBasicMaterial({ color: 0x1aa6c8, transparent: true, opacity: 0.45 });
 
 // Main platform: 14 wide, 1 tall. Collision code reads geometry.parameters, so it stays a BoxGeometry.
 function createPlatform(length) {
@@ -133,16 +133,16 @@ function createPlatform(length) {
     scaleBoxUVs(geo, 14, 1, length);
     const plat = new THREE.Mesh(geo, floorMat);
 
-    const railGeo = new THREE.BoxGeometry(0.16, 0.1, length);   // bright side rails
-    for (const x of [-6.95, 6.95]) {
+    const railGeo = new THREE.BoxGeometry(0.05, 0.04, length);  // thin bright side rails
+    for (const x of [-6.97, 6.97]) {
         const rail = new THREE.Mesh(railGeo, railMat);
-        rail.position.set(x, 0.55, 0);
+        rail.position.set(x, 0.52, 0);
         plat.add(rail);
     }
-    const laneGeo = new THREE.BoxGeometry(0.06, 0.02, length);  // dim lane lines
+    const laneGeo = new THREE.BoxGeometry(0.022, 0.01, length); // hairline lane markers
     for (const x of [-2.35, 2.35]) {
         const lane = new THREE.Mesh(laneGeo, laneMat);
-        lane.position.set(x, 0.51, 0);
+        lane.position.set(x, 0.506, 0);
         plat.add(lane);
     }
     return plat;
@@ -150,7 +150,7 @@ function createPlatform(length) {
 
 const movPlatGeo = new THREE.BoxGeometry(6, 0.5, 4);
 scaleBoxUVs(movPlatGeo, 6, 0.5, 4);
-const movPlatFrameGeo = tubeEdges(movPlatGeo, 0.05);
+const movPlatFrameGeo = tubeEdges(movPlatGeo, 0.02);
 const movPlatFrameMat = new THREE.MeshBasicMaterial({ color: 0xff3df5 });
 
 function createMovingPlatform() {
@@ -163,79 +163,86 @@ function createMovingPlatform() {
 const gridFloor = new THREE.GridHelper(480, 120, 0x0e4a66, 0x0e4a66);
 gridFloor.position.y = -14;
 gridFloor.material.transparent = true;
-gridFloor.material.opacity = 0.45;
+gridFloor.material.opacity = 0.4;
 scene.add(gridFloor);
 
 // =========================================================
-// Pickups and hurdles
+// Pickups and hurdles — thin, crisp neon outlines
 // =========================================================
 
-// Cyan data: glowing octahedron outline
+// Cyan data: octahedron outline with a small solid core
 const dataShape = new THREE.OctahedronGeometry(0.7);
-const dataFrameGeo = tubeEdges(dataShape, 0.035);
-const dataFrameMat = new THREE.MeshBasicMaterial({ color: 0x5ff7ff });
-const dataFillMat = additiveMat(0x1ec8ff, 0.16);
+const dataFrameGeo = tubeEdges(dataShape, 0.016);
+const dataCoreGeo = new THREE.OctahedronGeometry(0.2);
+const dataFrameMat = new THREE.MeshBasicMaterial({ color: 0x6ff8ff });
+const dataCoreMat = new THREE.MeshBasicMaterial({ color: 0xbffcff });
+const dataFillMat = additiveMat(0x1ec8ff, 0.06);
 
 function createData(phase) {
     const g = new THREE.Group();
     const inner = new THREE.Group();          // inner spins and bobs; outer stays put for collisions
     inner.add(new THREE.Mesh(dataShape, dataFillMat));
     inner.add(new THREE.Mesh(dataFrameGeo, dataFrameMat));
-    inner.add(glowSprite(0x29d8ff, 3.2, 0.35));
+    inner.add(new THREE.Mesh(dataCoreGeo, dataCoreMat));
+    inner.add(glowSprite(0x29d8ff, 1.8, 0.18));
     g.add(inner);
     g.userData = { inner: inner, phase: phase };
     return g;
 }
 
-// Red hurdles: solid faceted octahedron with bright edges
+// Red hurdles: dark faceted octahedron with sharp red edges
 const mineShape = new THREE.OctahedronGeometry(0.95);
-const mineMat = new THREE.MeshStandardMaterial({ color: 0xff1030, emissive: 0xe0001c, emissiveIntensity: 0.6, roughness: 0.3, metalness: 0.2, flatShading: true });
-const mineFrameGeo = tubeEdges(mineShape, 0.03);
-const mineFrameMat = new THREE.MeshBasicMaterial({ color: 0xff4458 });
+const mineMat = new THREE.MeshStandardMaterial({ color: 0x6a0014, emissive: 0xff0022, emissiveIntensity: 0.3, roughness: 0.25, metalness: 0.5, flatShading: true });
+const mineFrameGeo = tubeEdges(mineShape, 0.014);
+const mineFrameMat = new THREE.MeshBasicMaterial({ color: 0xff3a50 });
 
 function createMine() {
     const g = new THREE.Group();
     const body = new THREE.Mesh(mineShape, mineMat);
     const frame = new THREE.Mesh(mineFrameGeo, mineFrameMat);
     body.scale.y = frame.scale.y = 1.15;
-    g.add(body, frame, glowSprite(0xff1030, 3.4, 0.35));
+    g.add(body, frame, glowSprite(0xff1030, 2.2, 0.2));
     return g;
 }
 
-// Power-up boxes: orange = heavy (high jump), green = micro (fast)
+// Power-up boxes: orange = heavy (high jump), green = micro (fast). Cube-in-cube outline.
 const POWERUP_COLORS = { big: 0xffa12e, small: 0x45ff6a };
 const boxShape = new THREE.BoxGeometry(1.3, 1.3, 1.3);
-const boxFrameGeo = tubeEdges(boxShape, 0.045);
+const boxFrameGeo = tubeEdges(boxShape, 0.018);
+const boxInnerFrameGeo = tubeEdges(new THREE.BoxGeometry(0.6, 0.6, 0.6), 0.012);
 const powerupFrameMats = { big: new THREE.MeshBasicMaterial({ color: POWERUP_COLORS.big }), small: new THREE.MeshBasicMaterial({ color: POWERUP_COLORS.small }) };
-const powerupFillMats = { big: additiveMat(POWERUP_COLORS.big, 0.1), small: additiveMat(POWERUP_COLORS.small, 0.1) };
+const powerupFillMats = { big: additiveMat(POWERUP_COLORS.big, 0.045), small: additiveMat(POWERUP_COLORS.small, 0.045) };
 
 function createPowerup(type, phase) {
     const g = new THREE.Group();
     const inner = new THREE.Group();
     inner.add(new THREE.Mesh(boxShape, powerupFillMats[type]));
     inner.add(new THREE.Mesh(boxFrameGeo, powerupFrameMats[type]));
-    inner.add(glowSprite(POWERUP_COLORS[type], 3.6, 0.35));
+    const core = new THREE.Mesh(boxInnerFrameGeo, powerupFrameMats[type]);
+    core.rotation.set(0.6, 0.6, 0);
+    inner.add(core);
+    inner.add(glowSprite(POWERUP_COLORS[type], 2.0, 0.16));
     g.add(inner);
-    g.userData = { type: type, inner: inner, phase: phase };
+    g.userData = { type: type, inner: inner, core: core, phase: phase };
     return g;
 }
 
 // =========================================================
-// Player ball: plasma core with energy veins, rim light and glow
+// Player ball — Tron style: glossy black shell with thin glowing circuit lines
 // =========================================================
 
 const BALL_LOOKS = {
-    normal: { glow: 0x29f3ff, core: 0x063a52, light: 0x00ffff },
-    big:    { glow: 0xffa12e, core: 0x4a2200, light: 0xffaa00 },
-    small:  { glow: 0x45ff6a, core: 0x0a4a1c, light: 0x00ff00 }
+    normal: { glow: 0x29f3ff, light: 0x00ffff },
+    big:    { glow: 0xffa12e, light: 0xffaa00 },
+    small:  { glow: 0x45ff6a, light: 0x00ff00 }
 };
 
 const ballMat = new THREE.ShaderMaterial({
     uniforms: {
         uTime:  { value: 0 },
-        uColor: { value: new THREE.Color(BALL_LOOKS.normal.glow) },
-        uCore:  { value: new THREE.Color(BALL_LOOKS.normal.core) }
+        uColor: { value: new THREE.Color(BALL_LOOKS.normal.glow) }
     },
+    extensions: { derivatives: true },
     vertexShader: `
         varying vec3 vPos; varying vec3 vNormal; varying vec3 vView;
         void main() {
@@ -246,45 +253,65 @@ const ballMat = new THREE.ShaderMaterial({
             gl_Position = projectionMatrix * mv;
         }`,
     fragmentShader: `
-        uniform float uTime; uniform vec3 uColor; uniform vec3 uCore;
+        #define PI 3.14159265
+        uniform float uTime; uniform vec3 uColor;
         varying vec3 vPos; varying vec3 vNormal; varying vec3 vView;
-        float hash(vec3 p) { p = fract(p * 0.3183099 + 0.1); p *= 17.0; return fract(p.x * p.y * p.z * (p.x + p.y + p.z)); }
-        float noise(vec3 x) {
-            vec3 i = floor(x); vec3 f = fract(x); f = f * f * (3.0 - 2.0 * f);
-            return mix(mix(mix(hash(i), hash(i + vec3(1,0,0)), f.x), mix(hash(i + vec3(0,1,0)), hash(i + vec3(1,1,0)), f.x), f.y),
-                       mix(mix(hash(i + vec3(0,0,1)), hash(i + vec3(1,0,1)), f.x), mix(hash(i + vec3(0,1,1)), hash(i + vec3(1,1,1)), f.x), f.y), f.z);
+
+        // Anti-aliased line: stays ~the same pixel width at any distance
+        float aline(float d, float w) {
+            float fw = fwidth(d);
+            return 1.0 - smoothstep(w, w + fw * 1.5, abs(d));
         }
+
         void main() {
-            float n = noise(vPos * 2.6 + uTime * 0.5) * 0.65 + noise(vPos * 5.5 - uTime * 0.8) * 0.35;
-            float veins = 1.0 - smoothstep(0.0, 0.035, abs(n - 0.5));
+            vec3 p = normalize(vPos);
+            float lat = asin(clamp(p.y, -1.0, 1.0));
+            float lon = atan(p.z, p.x);
             float facing = max(dot(vNormal, vView), 0.0);
-            float rim = pow(1.0 - facing, 2.2);
-            vec3 col = uCore + uColor * (0.25 + pow(facing, 1.5) * 0.65) + (uColor * 0.8 + 0.12) * veins * 0.8 + uColor * rim * 1.4;
+
+            // Glossy black shell + one sharp highlight
+            vec3 col = vec3(0.008, 0.016, 0.03) + uColor * 0.035 * facing;
+            vec3 r = reflect(-vView, vNormal);
+            col += vec3(0.55, 0.8, 0.9) * pow(max(dot(r, normalize(vec3(-0.35, 0.75, 0.55))), 0.0), 60.0) * 0.5;
+
+            // Circuit lines
+            float pulse = 0.75 + 0.25 * sin(lon * 3.0 - uTime * 5.0);
+            float lines = 0.0;
+            lines += aline(lat, 0.03) * pulse;                    // main equator band
+            lines += 0.85 * aline(abs(lat) - 0.12, 0.006);        // thin guide lines beside it
+            lines += 0.6 * aline(abs(lat) - 0.66, 0.006);         // upper / lower rings
+            lines += 0.75 * aline(abs(lat) - 1.22, 0.008);        // pole caps
+            float m = (mod(lon + PI * 0.25, PI * 0.5) - PI * 0.25) * cos(lat);
+            float panel = step(0.14, abs(lat)) * step(abs(lat), 1.2);
+            lines += 0.6 * panel * aline(m, 0.006);               // 4 meridian segments
+
+            float rim = pow(1.0 - facing, 3.0);
+            col += uColor * min(lines, 1.3) * 1.7 + uColor * rim * 0.7;
             gl_FragColor = vec4(col, 1.0);
         }`
 });
 
-const ballGeo = new THREE.SphereGeometry(1, 48, 48);
+const ballGeo = new THREE.SphereGeometry(1, 64, 48);
 const ball = new THREE.Mesh(ballGeo, ballMat);
 
-const ballGlow = glowSprite(BALL_LOOKS.normal.glow, 4.2, 0.6);
+const ballGlow = glowSprite(BALL_LOOKS.normal.glow, 2.7, 0.18);
 ball.add(ballGlow);
 
-const coreLight = new THREE.PointLight(0x00ffff, 2.0, 15);
+const coreLight = new THREE.PointLight(0x00ffff, 1.3, 12);
 ball.add(coreLight);
 scene.add(ball);
 
 function setBallLook(type) {
     const look = BALL_LOOKS[type] || BALL_LOOKS.normal;
     ballMat.uniforms.uColor.value.setHex(look.glow);
-    ballMat.uniforms.uCore.value.setHex(look.core);
     ballGlow.material.color.setHex(look.glow);
     coreLight.color.setHex(look.light);
+    if (typeof trailMat !== 'undefined') trailMat.uniforms.uColor.value.setHex(look.glow);
 }
 
-// Glow ring on the track under the ball (shows where you will land)
-const groundRing = new THREE.Mesh(new THREE.RingGeometry(0.85, 1.2, 40), additiveMat(0x29f3ff, 0.5));
+// Thin ring on the track under the ball (shows where you will land)
+const groundRing = new THREE.Mesh(new THREE.RingGeometry(1.0, 1.06, 64), additiveMat(0x29f3ff, 0.7));
 groundRing.rotation.x = -Math.PI / 2;
-const groundGlow = new THREE.Mesh(new THREE.PlaneGeometry(3.4, 3.4), new THREE.MeshBasicMaterial({ map: glowTex, color: 0x29f3ff, transparent: true, opacity: 0.25, blending: THREE.AdditiveBlending, depthWrite: false }));
+const groundGlow = new THREE.Mesh(new THREE.PlaneGeometry(2.6, 2.6), new THREE.MeshBasicMaterial({ map: glowTex, color: 0x29f3ff, transparent: true, opacity: 0.12, blending: THREE.AdditiveBlending, depthWrite: false }));
 groundGlow.rotation.x = -Math.PI / 2;
 scene.add(groundRing, groundGlow);

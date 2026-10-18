@@ -34,6 +34,7 @@ function generateLevel() {
     pos.set(0, 5, -2); vel.set(0,0,0);
     ball.position.copy(pos);
     ball.visible = true;
+    resetTrail();
     transformBall('normal');
 
     let currentZ = 0;

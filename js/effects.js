@@ -111,26 +111,121 @@ function updateParticles(dt, timeScale) {
 // ---------- Effects fired by gameplay ----------
 
 function burstData(p) {
-    burst(p, 0x5ff7ff, 26, 0.2, 0.35, 0.6);
-    burst(p, 0xffffff, 8, 0.1, 0.55, 0.3);
+    burst(p, 0x6ff8ff, 22, 0.2, 0.14, 0.55, { shape: 1 });
+    burst(p, 0xffffff, 6, 0.1, 0.22, 0.25, { shape: 1 });
 }
 
 function burstPowerup(p, type) {
     const c = POWERUP_COLORS[type];
-    burst(p, c, 45, 0.28, 0.4, 0.8, { gravity: 0.004 });
-    burst(p, c, 22, 0.18, 0.24, 0.7, { shape: 1, gravity: 0.006 });
-    burst(p, 0xffffff, 10, 0.12, 0.6, 0.25);
+    burst(p, c, 36, 0.26, 0.16, 0.7, { shape: 1, gravity: 0.004 });
+    burst(p, c, 16, 0.16, 0.1, 0.6, { shape: 1, gravity: 0.006 });
+    burst(p, 0xffffff, 6, 0.12, 0.22, 0.25, { shape: 1 });
 }
 
 function shatterMine(mine) {
     const p = mine.position;
     mine.visible = false;
     ball.visible = false;
-    burst(p, 0xff1a35, 75, 0.36, 0.46, 1.2, { shape: 1, gravity: 0.008, lift: 0.08 });
-    burst(p, 0xff6040, 30, 0.26, 0.34, 0.7);
-    burst(ball.position, BALL_LOOKS[ballState].glow, 40, 0.3, 0.35, 0.8);
-    burst(p, 0xffffff, 12, 0.15, 0.9, 0.25);
+    resetTrail();
+    burst(p, 0xff1a35, 70, 0.36, 0.26, 1.1, { shape: 1, gravity: 0.008, lift: 0.08 });
+    burst(p, 0xff6040, 24, 0.26, 0.16, 0.7, { shape: 1 });
+    burst(ball.position, BALL_LOOKS[ballState].glow, 30, 0.3, 0.16, 0.8, { shape: 1 });
+    burst(p, 0xffffff, 8, 0.15, 0.35, 0.2);
     addShake(0.7);
+}
+
+// ---------- Tron light trail: a thin wall of light left behind the ball ----------
+
+const TRAIL_POINTS = 56;
+const TRAIL_SPACING = 0.16;
+const trailPts = [];
+const trailPos = new Float32Array(TRAIL_POINTS * 2 * 3);
+const trailUV = new Float32Array(TRAIL_POINTS * 2 * 2);
+const trailIndex = [];
+for (let i = 0; i < TRAIL_POINTS - 1; i++) {
+    const a = i * 2, b = a + 1, c = a + 2, d = a + 3;
+    trailIndex.push(a, b, c, b, d, c);
+}
+const trailGeo = new THREE.BufferGeometry();
+trailGeo.setAttribute('position', new THREE.BufferAttribute(trailPos, 3));
+trailGeo.setAttribute('aUV', new THREE.BufferAttribute(trailUV, 2));
+trailGeo.setIndex(trailIndex);
+trailGeo.setDrawRange(0, 0);
+
+const trailMat = new THREE.ShaderMaterial({
+    uniforms: { uColor: { value: new THREE.Color(BALL_LOOKS.normal.glow) } },
+    vertexShader: `
+        attribute vec2 aUV; varying vec2 vUV;
+        void main() { vUV = aUV; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }`,
+    fragmentShader: `
+        uniform vec3 uColor; varying vec2 vUV;
+        void main() {
+            float fade = pow(1.0 - vUV.x, 1.6);                  // 0 = at the ball, 1 = tail end
+            float edge = smoothstep(0.78, 1.0, vUV.y) + 0.6 * smoothstep(0.25, 0.0, vUV.y);
+            float a = (0.28 + edge) * fade;
+            gl_FragColor = vec4(uColor + edge * 0.35, a);
+        }`,
+    transparent: true, depthWrite: false, side: THREE.DoubleSide, blending: THREE.AdditiveBlending
+});
+const trailMesh = new THREE.Mesh(trailGeo, trailMat);
+trailMesh.frustumCulled = false;
+scene.add(trailMesh);
+
+let trailIdle = 0;
+
+function resetTrail() {
+    trailPts.length = 0;
+    trailGeo.setDrawRange(0, 0);
+}
+
+// trailPts[0] is the live point at the ball; the rest are fixed samples TRAIL_SPACING apart,
+// so the trail keeps the same shape at any frame rate. Max length = TRAIL_POINTS * TRAIL_SPACING.
+function updateTrail(dt) {
+    const running = isPlaying && !isGameOver && ball.visible;
+    if (running) {
+        const cur = { x: pos.x, y: pos.y - ballRadius + 0.03, z: pos.z, h: ballRadius * 0.7 };
+        if (trailPts.length === 0) {
+            trailPts.push(cur, { ...cur });
+        } else {
+            const last = trailPts[1] || trailPts[0];
+            let dx = cur.x - last.x, dy = cur.y - last.y, dz = cur.z - last.z;
+            let d = Math.hypot(dx, dy, dz);
+            if (Math.hypot(dx, dz) > 6) {                // teleport / respawn: start fresh
+                trailPts.length = 0; trailPts.push(cur, { ...cur }); d = 0;
+            }
+            let base = last;
+            while (d > TRAIL_SPACING) {                    // drop fixed samples along the path
+                const k = TRAIL_SPACING / d;
+                const sample = { x: base.x + dx * k, y: base.y + dy * k, z: base.z + dz * k, h: cur.h };
+                trailPts.splice(1, 0, sample);
+                base = sample;
+                dx = cur.x - base.x; dy = cur.y - base.y; dz = cur.z - base.z;
+                d = Math.hypot(dx, dy, dz);
+            }
+            trailPts[0] = cur;
+            if (trailPts.length > TRAIL_POINTS) trailPts.length = TRAIL_POINTS;
+        }
+        const moving = Math.hypot(vel.x, vel.z) > 0.03 || Math.abs(vel.y) > 0.03;
+        trailIdle = moving ? 0 : trailIdle + dt;
+    } else {
+        trailIdle += dt;
+    }
+    // When the ball stops (or dies), the tail retracts over ~1.5s
+    if (trailIdle > 0.15) {
+        const remove = Math.ceil(dt * 45);
+        for (let r = 0; r < remove && trailPts.length > 1; r++) trailPts.pop();
+    }
+
+    const n = trailPts.length;
+    for (let i = 0; i < n; i++) {
+        const q = trailPts[i], u = n > 1 ? i / (TRAIL_POINTS - 1) : 0, k = i * 6, t = i * 4;
+        trailPos[k] = q.x; trailPos[k + 1] = q.y; trailPos[k + 2] = q.z;
+        trailPos[k + 3] = q.x; trailPos[k + 4] = q.y + q.h; trailPos[k + 5] = q.z;
+        trailUV[t] = u; trailUV[t + 1] = 0; trailUV[t + 2] = u; trailUV[t + 3] = 1;
+    }
+    trailGeo.attributes.position.needsUpdate = true;
+    trailGeo.attributes.aUV.needsUpdate = true;
+    trailGeo.setDrawRange(0, n > 1 ? (n - 1) * 6 : 0);
 }
 
 // ---------- Camera shake ----------
@@ -147,6 +242,7 @@ function applyCameraShake(dt) {
 // ---------- Bloom (glow) with automatic fallback ----------
 // ?quality=high forces bloom on, ?quality=low forces it off. Otherwise bloom turns itself
 // off if the first seconds of play run below ~32 fps.
+// The scene is rendered into a multisampled target (WebGL2) so edges stay anti-aliased with bloom on.
 
 const qualityParam = new URLSearchParams(window.location.search).get('quality');
 let composer = null, bloomPass = null, useBloom = false;
@@ -155,9 +251,16 @@ let composer = null, bloomPass = null, useBloom = false;
     if (qualityParam === 'low') return;
     if (!THREE.EffectComposer || !THREE.RenderPass || !THREE.UnrealBloomPass) return; // add-ons failed to load
     try {
-        composer = new THREE.EffectComposer(renderer);
+        let target;
+        if (renderer.capabilities.isWebGL2 && THREE.WebGLMultisampleRenderTarget) {
+            target = new THREE.WebGLMultisampleRenderTarget(1, 1, { format: THREE.RGBAFormat });
+            target.samples = 4;
+        }
+        composer = new THREE.EffectComposer(renderer, target);
+        composer.setPixelRatio(renderer.getPixelRatio());
+        composer.setSize(window.innerWidth, window.innerHeight);
         composer.addPass(new THREE.RenderPass(scene, camera));
-        bloomPass = new THREE.UnrealBloomPass(new THREE.Vector2(window.innerWidth, window.innerHeight), 1.05, 0.55, 0.18);
+        bloomPass = new THREE.UnrealBloomPass(new THREE.Vector2(window.innerWidth, window.innerHeight), 0.8, 0.25, 0.28);
         composer.addPass(bloomPass);
         useBloom = true;
     } catch (e) { composer = null; useBloom = false; }
@@ -171,7 +274,7 @@ function trackPerformance(dt) {
     perfChecked = true;
     if (perfTime / perfFrames > 1 / 32) {
         useBloom = false;
-        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1));
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
         renderer.setSize(window.innerWidth, window.innerHeight);
         updateParticleScale();
     }
@@ -183,13 +286,11 @@ function renderFrame() {
 }
 
 function resizeEffects() {
-    if (composer) composer.setSize(window.innerWidth, window.innerHeight);
+    if (composer) { composer.setPixelRatio(renderer.getPixelRatio()); composer.setSize(window.innerWidth, window.innerHeight); }
     updateParticleScale();
 }
 
 // ---------- Per-frame visuals ----------
-
-let trailCarry = 0;
 
 function surfaceUnderBall() {
     for (const p of platforms) {
@@ -206,25 +307,18 @@ function updateEffects(dt, timeScale) {
     const t = performance.now() / 1000;
     const look = BALL_LOOKS[ballState] || BALL_LOOKS.normal;
 
-    // Ball shimmer
+    // Ball circuit pulse + faint halo
     ballMat.uniforms.uTime.value = t;
-    ballGlow.material.opacity = 0.55 + Math.sin(t * 6) * 0.08;
+    ballGlow.material.opacity = 0.18 + Math.sin(t * 6) * 0.04;
 
-    // Trail + sparks while running
+    // Light trail + tiny ground sparks
+    updateTrail(dt);
     if (isPlaying && !isGameOver && ball.visible) {
         const speed = Math.hypot(vel.x, vel.z);
-        trailCarry += timeScale * (0.6 + speed * 6);
-        while (trailCarry >= 1) {
-            trailCarry -= 1;
-            const j = ballRadius * 0.35;
-            emitParticle(pos.x + (Math.random() - 0.5) * j, pos.y + (Math.random() - 0.5) * j, pos.z + (Math.random() - 0.5) * j,
-                -vel.x * 0.25 + (Math.random() - 0.5) * 0.01, (Math.random() - 0.5) * 0.01, -vel.z * 0.25 + (Math.random() - 0.5) * 0.01,
-                look.glow, ballRadius * 0.95, 0.45);
-        }
-        if (onGround && speed > 0.08 && Math.random() < 0.7 * timeScale) {
-            emitParticle(pos.x, pos.y - ballRadius * 0.85, pos.z,
-                -vel.x * 1.4 + (Math.random() - 0.5) * 0.2, 0.05 + Math.random() * 0.09, -vel.z * 1.4 + (Math.random() - 0.5) * 0.2,
-                0xcffcff, 0.16, 0.35, { gravity: 0.01, drag: 0.95 });
+        if (onGround && speed > 0.1 && Math.random() < 0.4 * timeScale) {
+            emitParticle(pos.x, pos.y - ballRadius * 0.9, pos.z,
+                -vel.x * 1.2 + (Math.random() - 0.5) * 0.16, 0.04 + Math.random() * 0.07, -vel.z * 1.2 + (Math.random() - 0.5) * 0.16,
+                0xd8fdff, 0.07, 0.3, { shape: 1, gravity: 0.01, drag: 0.95 });
         }
     }
     updateParticles(dt, timeScale);
@@ -239,8 +333,9 @@ function updateEffects(dt, timeScale) {
         const inner = p.userData.inner;
         inner.position.y = Math.sin(t * 1.8 + p.userData.phase) * 0.18;
         inner.rotation.x += 0.02 * timeScale; inner.rotation.y += 0.05 * timeScale;
+        p.userData.core.rotation.y -= 0.09 * timeScale;    // inner cube spins the other way
     }
-    mineMat.emissiveIntensity = 0.5 + Math.sin(t * 4) * 0.2;
+    mineMat.emissiveIntensity = 0.3 + Math.sin(t * 4) * 0.12;
 
     // Landing ring under the ball
     const surf = ball.visible ? surfaceUnderBall() : null;
@@ -256,8 +351,8 @@ function updateEffects(dt, timeScale) {
         groundGlow.scale.setScalar(ballRadius);
         groundRing.material.color.setHex(look.glow);
         groundGlow.material.color.setHex(look.glow);
-        groundRing.material.opacity = 0.55 * fade;
-        groundGlow.material.opacity = 0.25 * fade;
+        groundRing.material.opacity = 0.75 * fade;
+        groundGlow.material.opacity = 0.12 * fade;
     }
 
     // Keep the endless floor grid under the camera
