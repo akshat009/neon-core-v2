@@ -1,17 +1,17 @@
 # Neon Core — Android app (Capacitor + AdMob)
 
-This folder turns the game in `../web` into an Android app. **Don't edit the game here** — edit `../web`, then sync.
+This folder turns the game in `../web/game` into an Android app (the `/play` landing page isn't included). **Don't edit the game here** — edit `../web/game`, then sync.
 
 ```
 android-app/
   package.json            Capacitor 8 + @capacitor-community/admob 8
   capacitor.config.json   app id, name, webDir = www
-  scripts/sync-web.mjs    copies ../web → www/ and adds Capacitor's script
+  scripts/sync-web.mjs    copies ../web/game → www/ and adds Capacitor's script
   android/                native Android Studio project (generated, committed)
-  www/                    copy of ../web (git-ignored, recreated on every sync)
+  www/                    copy of ../web/game (git-ignored, recreated on every sync)
 ```
 
-Inside the app the game detects it's running natively and uses **AdMob** (`web/features/ads/ads-admob.js`). On the website the same code uses AdSense or demo ads.
+Inside the app the game detects it's running natively and uses **AdMob** (`web/game/features/ads/ads-admob.js`). On the website the same code uses AdSense or demo ads.
 
 ## Requirements
 
@@ -23,11 +23,11 @@ Inside the app the game detects it's running natively and uses **AdMob** (`web/f
 ```bash
 cd android-app
 npm install
-npm run sync        # copy ../web into the app + update native plugins
+npm run sync        # copy ../web/game into the app + update native plugins
 npm run open        # opens Android Studio → Run ▶ on a phone or emulator
 ```
 
-Run `npm run sync` again after every change in `../web`.
+Run `npm run sync` again after every change in `../web/game`.
 
 ## AdMob setup
 
@@ -35,7 +35,7 @@ Right now everything uses **Google's test IDs**, so you'll see test ads and can 
 
 1. Create the app in the AdMob console and two ad units: **Rewarded** and **Banner**.
 2. App ID (`ca-app-pub-…~…`) → `android/app/src/main/res/values/strings.xml` → `admob_app_id`.
-3. Ad unit IDs (`ca-app-pub-…/…`) → `../web/features/ads/ads-config.js` → `admob.rewardedId`, `admob.bannerId`, and set `testing: false`.
+3. Ad unit IDs (`ca-app-pub-…/…`) → `../web/game/features/ads/ads-config.js` → `admob.rewardedId`, `admob.bannerId`, and set `testing: false`.
 4. `npm run sync` and rebuild.
 
 Never tap your own live ads — test on your phone with test ads (or add it as a test device in AdMob).

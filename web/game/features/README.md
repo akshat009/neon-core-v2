@@ -79,20 +79,20 @@ demoAdSeconds: 5
 | Where the game runs | Ad network | Until IDs are filled in |
 |---|---|---|
 | Android app (`android-app/`, Capacitor) | **AdMob** (`ads/ads-admob.js`) | Google's test ads (test IDs are pre-filled) |
-| Website on `asaxenadev.com/play` | **AppLixir** rewarded video (`ads/ads-applixir.js`) | Demo ads |
+| Website on `asaxenadev.com/play` (game at `/play/game/`) | **AppLixir** rewarded video (`ads/ads-applixir.js`) | Demo ads |
 | Website elsewhere with an AdSense ID | **AdSense H5 Games Ads** (`ads/ads-web.js`) | Demo ads |
 | GitHub Pages / localhost | Demo ads | — |
 
 The game picks automatically: inside the Capacitor app → AdMob; in a browser on an AppLixir-registered host → AppLixir; else AdSense if `adsenseClient` is set; otherwise demo.
 
 ### Going live — Android (AdMob)
-See [`android-app/README.md`](../../android-app/README.md). In short: AdMob app ID → `strings.xml`, ad unit IDs → `ads/ads-config.js`, set `testing: false`, `npm run sync`.
+See [`android-app/README.md`](../../../android-app/README.md). In short: AdMob app ID → `strings.xml`, ad unit IDs → `ads/ads-config.js`, set `testing: false`, `npm run sync`.
 
 ### Going live — Website (AppLixir, no AdSense needed)
 1. Sign up at AppLixir as a publisher and add the site under **Sites** (`asaxenadev.com`, game at `https://asaxenadev.com/play/`). Copy its **API key**.
 2. Put the key in `ads/ads-config.js` → `applixir.apiKey`, and keep the host in `applixir.allowedHosts`.
 3. Add the **ads.txt** lines from the AppLixir dashboard to `https://asaxenadev.com/ads.txt` (Hostinger: `public_html/ads.txt` of the main domain).
-4. Upload the contents of `web/` to `public_html/play/` (HTTPS) so the game opens at `https://asaxenadev.com/play/`. AppLixir doesn't serve on localhost or unregistered domains, so test on the real site.
+4. Upload the contents of `web/` to `public_html/play/` (HTTPS): the landing page opens at `https://asaxenadev.com/play/` and the game at `https://asaxenadev.com/play/game/`. AppLixir doesn't serve on localhost or unregistered domains, so test on the real site.
 
 Rewards are given only when AppLixir reports `complete`. AppLixir has no banner format, so the Run Reset screen shows no banner on this network.
 

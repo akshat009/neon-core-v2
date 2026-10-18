@@ -23,7 +23,7 @@ const ADS_CONFIG = {
     applixir: {
         // API key from the AppLixir dashboard → Sites (one key per registered site).
         apiKey: '',
-        // Hosts registered in AppLixir (the game lives at https://asaxenadev.com/play/).
+        // Hosts registered in AppLixir (the game lives at https://asaxenadev.com/play/game/).
         // Anywhere else (GitHub Pages, localhost) the game keeps demo ads,
         // because AppLixir only serves ads on registered domains.
         allowedHosts: ['asaxenadev.com', 'www.asaxenadev.com']

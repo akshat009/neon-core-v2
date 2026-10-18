@@ -34,7 +34,7 @@
   * 🟩 **Micro Core (Green)**: Ultra-compact chassis with high speed.
   * 🟧 **Heavy Core (Orange)**: Heavyweight chassis with massive jump strength.
 * **Dynamic Star Rating & Scoring**: Par-time scoring and star rating across 3 difficulty tiers.
-* **Shields, Lives & Saved Runs**: 2 free shields a day, 3 lives per run, continue where you left off. Rewarded and banner ad placements (demo ads for now) — see [`web/features/README.md`](web/features/README.md).
+* **Shields, Lives & Saved Runs**: 2 free shields a day, 3 lives per run, continue where you left off. Rewarded and banner ad placements (demo ads for now) — see [`web/game/features/README.md`](web/game/features/README.md).
 
 ---
 
@@ -43,20 +43,23 @@
 One game, two targets:
 
 ```
-web/            The game (HTML/CSS/JS, no build step) — this is what the website serves
-  index.html
-  css/ js/      Core game: scene, effects, level, input, HUD, main loop
-  features/     Shields, lives, saved runs, time freeze, ads (own README inside)
-    ads/        AdMob (Android app) · AdSense H5 Games Ads (website) · demo ads
-  vendor/       Three.js r128 + bloom add-ons + fonts, bundled so it works offline
+web/              Everything the website serves (upload this folder to asaxenadev.com/play/)
+  index.html      Landing page: PLAY button, screenshots, how to play, Android download
+  landing/        Landing page styles, script (APK link) and screenshots
+  game/           The game itself (HTML/CSS/JS, no build step)
+    css/ js/      Core game: scene, effects, level, input, HUD, main loop
+    features/     Shields, lives, saved runs, time freeze, ads (own README inside)
+      ads/        AdMob (Android) · AppLixir / AdSense (website) · demo ads
+    vendor/       Three.js r128 + bloom add-ons + fonts, bundled so it works offline
 
-android-app/    Capacitor 8 Android app with AdMob — copies web/ in at build time (own README)
+android-app/      Capacitor 8 Android app with AdMob; copies web/game in at build time (own README)
 
-index.html      Redirects the old link to web/
+index.html        Redirects the GitHub Pages link to web/
 ```
 
-- **Website:** open `web/index.html`, or serve the repo with any static server.
+- **Website:** upload the contents of `web/` to `public_html/play/` → landing at `/play/`, game at `/play/game/`.
+- **Android download:** when the APK is ready, upload it (e.g. `play/downloads/`) and set `ANDROID_APK.url` in `web/landing/landing.js`.
 - **Android:** see [`android-app/README.md`](android-app/README.md).
-- **Ads:** see [`web/features/README.md`](web/features/README.md).
+- **Ads:** see [`web/game/features/README.md`](web/game/features/README.md).
 
-The scripts in `web/index.html` load in a fixed order and share globals, so keep that order.
+The scripts in `web/game/index.html` load in a fixed order and share globals, so keep that order.

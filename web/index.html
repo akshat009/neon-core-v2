@@ -2,245 +2,114 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <meta name="theme-color" content="#03060d">
-    <title>Neon Core</title>
-    <link rel="stylesheet" href="vendor/fonts/fonts.css">
-    <link rel="stylesheet" href="css/style.css">
-    <link rel="stylesheet" href="features/features.css">
+    <title>Neon Core: a neon arcade runner you can play in your browser</title>
+    <meta name="description" content="Roll a light core down a neon track, collect data, dodge red hurdles and clear sectors. Free to play in your browser with a keyboard or a touchscreen. Android version coming soon.">
+    <link rel="canonical" href="https://asaxenadev.com/play/">
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="Neon Core">
+    <meta property="og:description" content="A neon arcade runner. Play free in your browser; Android version coming soon.">
+    <meta property="og:url" content="https://asaxenadev.com/play/">
+    <meta property="og:image" content="https://asaxenadev.com/play/landing/img/gameplay-desktop.jpg">
+    <meta name="twitter:card" content="summary_large_image">
+    <link rel="preload" href="game/vendor/fonts/orbitron-latin-800-normal.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="stylesheet" href="game/vendor/fonts/fonts.css">
+    <link rel="stylesheet" href="landing/landing.css">
 </head>
 <body>
 
-<div id="top-controls">
-    <button id="mute-btn" class="icon-btn" aria-label="Mute sound">
-        <svg class="ico-on" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9h4l5-4v14l-5-4H4z" fill="currentColor"/><path d="M16 8.5a5 5 0 0 1 0 7M18.5 6a8.5 8.5 0 0 1 0 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
-        <svg class="ico-off" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9h4l5-4v14l-5-4H4z" fill="currentColor"/><path d="M16 9.5l5 5M21 9.5l-5 5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
-    </button>
-</div>
+<header class="hero">
+    <div class="floor" aria-hidden="true"><div class="floor-plane"></div></div>
 
-<!-- Start menu -->
-<div id="start-menu" class="fullscreen-menu">
-    <div class="menu-box glass-panel start-box">
-        <div class="start-left">
-            <h1>NEON CORE</h1>
-            <p class="menu-subtitle">[ CYBER RUNNER ]</p>
+    <div class="hero-inner">
+        <h1 class="title">NEON CORE</h1>
+        <p class="pitch">Roll a light core down a neon track. Grab every data crystal, dodge the red hurdles, clear the sector.</p>
 
-            <div class="diff-container">
-                <button class="diff-btn" id="diff-easy" data-diff="EASY">EASY</button>
-                <button class="diff-btn active" id="diff-medium" data-diff="MEDIUM">MEDIUM</button>
-                <button class="diff-btn" id="diff-hard" data-diff="HARD">HARD</button>
-            </div>
+        <a class="play" href="game/">
+            <svg viewBox="0 0 40 40" aria-hidden="true"><polygon points="13,8 32,20 13,32"/></svg>
+            <span>PLAY</span>
+        </a>
+        <p class="play-note">Free in your browser. Works with a keyboard or a touchscreen.</p>
+    </div>
+</header>
 
-            <!-- Joystick sensitivity (touch screens only, js/input.js) -->
-            <div class="sens-row touch-only">
-                <span class="sens-label">STICK SENSITIVITY</span>
-                <div class="sens-steps" role="radiogroup" aria-label="Joystick sensitivity, 1 gentle to 5 fast">
-                    <button class="sens-step" data-sens="1" role="radio">1</button>
-                    <button class="sens-step" data-sens="2" role="radio">2</button>
-                    <button class="sens-step" data-sens="3" role="radio">3</button>
-                    <button class="sens-step" data-sens="4" role="radio">4</button>
-                    <button class="sens-step" data-sens="5" role="radio">5</button>
+<main>
+    <section class="shots" aria-labelledby="shots-title">
+        <h2 id="shots-title">Inside a sector</h2>
+        <div class="shot-grid">
+            <figure class="frame frame-wide">
+                <div class="pic"><img src="landing/img/gameplay-desktop.jpg" width="1280" height="720" loading="lazy"
+                     alt="Neon Core on a computer: the glowing core rolls toward a cyan data crystal and an orange box, with red hurdles further down the track."></div>
+                <figcaption>On a computer, steer with W A S D or the arrow keys and jump with Space.</figcaption>
+            </figure>
+            <figure class="frame frame-phone">
+                <div class="pic"><img src="landing/img/gameplay-phone.jpg" width="1688" height="780" loading="lazy"
+                     alt="Neon Core on a phone held sideways: joystick on the left, shield and jump buttons on the right."></div>
+                <figcaption>On a phone, the joystick moves you and the big green button jumps.</figcaption>
+            </figure>
+        </div>
+    </section>
+
+    <section class="how" aria-labelledby="how-title">
+        <h2 id="how-title">How to play</h2>
+        <div class="how-grid">
+            <div class="controls">
+                <h3>Controls</h3>
+                <div class="control-row">
+                    <span class="keys"><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd></span>
+                    <span>or the arrow keys to move</span>
+                </div>
+                <div class="control-row">
+                    <span class="keys"><kbd class="wide">Space</kbd></span>
+                    <span>to jump over gaps</span>
+                </div>
+                <div class="control-row">
+                    <span class="keys"><span class="pad pad-stick" aria-hidden="true"></span></span>
+                    <span>joystick on touchscreens</span>
+                </div>
+                <div class="control-row">
+                    <span class="keys"><span class="pad pad-jump" aria-hidden="true"></span></span>
+                    <span>jump button on touchscreens</span>
                 </div>
             </div>
 
-            <button id="start-btn" class="btn">START RUN</button>
-            <div id="continue-info" class="continue-info"></div>
-            <button id="new-run-btn" class="btn btn-secondary">NEW RUN</button>
-        </div>
-
-        <div class="start-right">
-            <div class="rules-list">
-                <b>[ POWERUPS &amp; RULES ]</b>
+            <div class="rules">
+                <h3>Rules</h3>
                 <ul>
-                    <li><b class="c-cyan">CYAN DATA:</b> Collect all to win.</li>
-                    <li><b class="c-red">RED MINES:</b> Cost a shield, or a life.</li>
-                    <li><b class="c-blue">SHIELD:</b> Blocks one hit. 2 free every day.</li>
-                    <li><b class="c-cyan">LIVES:</b> 3 per run. Falling costs a life.</li>
-                    <li>🟩 <b class="c-green">GREEN BOX:</b> Micro Ball (Fast Speed)</li>
-                    <li>🟧 <b class="c-orange">ORANGE BOX:</b> Heavy Ball (High Jump)</li>
+                    <li><span class="mark mark-data" aria-hidden="true"></span>Collect every cyan data crystal to clear the sector.</li>
+                    <li><span class="mark mark-hurdle" aria-hidden="true"></span>Red hurdles cost a shield, or a life if you have no shield left.</li>
+                    <li><span class="mark mark-shield" aria-hidden="true"></span>You get 2 free shields every day and 3 lives per run.</li>
+                    <li><span class="mark mark-green" aria-hidden="true"></span>A green box makes your core smaller and faster.</li>
+                    <li><span class="mark mark-orange" aria-hidden="true"></span>An orange box makes it heavier, so it jumps higher.</li>
+                    <li><span class="mark mark-star" aria-hidden="true"></span>Clear a sector quickly to earn three stars.</li>
                 </ul>
             </div>
-
-            <!-- features/shield.js: shields you own + watch an ad for one more -->
-            <div class="reward-strip">
-                <div class="reward-info">
-                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.5 4.5 5.5v6c0 4.6 3.2 8.6 7.5 10 4.3-1.4 7.5-5.4 7.5-10v-6z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M12 6.5 8 8.1v3.6c0 2.6 1.7 4.9 4 5.8 2.3-.9 4-3.2 4-5.8V8.1z" fill="currentColor" opacity=".35"/></svg>
-                    <div><b>SHIELDS <span id="menu-shield-count">2</span></b><small>2 free every day</small></div>
-                </div>
-                <button id="menu-shield-ad" class="reward-btn"><span class="play">▶</span> AD · +1</button>
-            </div>
         </div>
-    </div>
-</div>
+    </section>
 
-<!-- Level complete menu -->
-<div id="level-menu" class="fullscreen-menu">
-    <div class="menu-box glass-panel">
-        <h1 id="lc-title">SECTOR SECURED</h1>
-        <div id="stars-display">⭐⭐⭐</div>
-        <div id="remark-txt">OPTIMAL PERFORMANCE</div>
-
-        <div class="rules-list stats-list">
-            <p>DIFFICULTY: <b id="lc-diff" class="c-magenta">MEDIUM</b></p>
-            <p>CYCLE TIME: <b id="lc-time">0.0s</b></p>
-            <p>DATA REWARD: <b id="lc-score" class="highlight">+0</b></p>
-            <p>TOTAL ARCHIVE: <b id="lc-total">0</b></p>
+    <section class="android" aria-labelledby="android-title">
+        <div class="phone" aria-hidden="true">
+            <img src="landing/img/gameplay-phone.jpg" width="1688" height="780" loading="lazy" alt="">
         </div>
-
-        <button id="next-level-btn" class="btn">NEXT SECTOR</button>
-        <button id="exit-btn" class="btn btn-secondary">DISCONNECT</button>
-    </div>
-</div>
-
-<!-- Out of lives (features/run.js) -->
-<div id="gameover-menu" class="fullscreen-menu">
-    <div class="menu-box glass-panel danger">
-        <h1>SYSTEM FAILURE</h1>
-        <p id="death-reason">Connection lost.</p>
-        <p class="go-stats">NO LIVES LEFT · SECTOR <b id="go-sector">01</b> · DATA <b id="go-data">00/05</b></p>
-        <button id="continue-ad-btn" class="btn btn-reward"><span class="play">▶</span> WATCH AD · +1 LIFE &amp; CONTINUE</button>
-        <button id="skip-continue-btn" class="btn btn-secondary">SKIP</button>
-        <p class="go-total">ARCHIVED DATA: <b id="go-total" class="c-red">0</b></p>
-    </div>
-</div>
-
-<!-- Ad skipped → back to Sector 1, with a banner ad (features/run.js) -->
-<div id="restart-menu" class="fullscreen-menu">
-    <div class="menu-box glass-panel">
-        <h1>RUN RESET</h1>
-        <p class="restart-note">You skipped the ad, so this run starts again from <b class="c-cyan">Sector 1</b>.</p>
-        <div class="rules-list stats-list">
-            <p>REACHED: <b>SECTOR <span id="rs-sector">01</span></b></p>
-            <p>BEST: <b>SECTOR <span id="rs-best">01</span></b></p>
-            <p>TOTAL ARCHIVE: <b id="rs-total" class="highlight">0</b></p>
+        <div class="android-copy">
+            <h2 id="android-title">Neon Core for Android</h2>
+            <p>The Android version is on its way. When it's ready, you'll download it straight from this page.</p>
+            <a id="apk-download" class="apk is-soon" aria-disabled="true" role="link">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v11m0 0-4.5-4.5M12 14l4.5-4.5M4.5 17.5v2h15v-2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                <span>Download for Android</span>
+            </a>
+            <p id="apk-status" class="apk-status">Coming soon</p>
+            <p class="apk-help">The first time you install it, Android will ask you to allow installs from your browser.</p>
         </div>
-        <button id="restart-btn" class="btn">RESTART FROM SECTOR 1</button>
-    </div>
-    <div id="banner-slot" class="ad-banner" aria-label="Advertisement">
-        <span class="ad-tag">AD</span> DEMO BANNER · 320×50 · your AdMob banner shows here
-    </div>
-</div>
+    </section>
+</main>
 
-<!-- In-game HUD -->
-<div id="ui">
-    <div class="hud-frame" aria-hidden="true">
-        <span class="corner tl"></span><span class="corner tr"></span>
-        <span class="corner bl"></span><span class="corner br"></span>
-        <span class="sys-label left">SYSTEM ACTIVE</span>
-        <span class="sys-label right">SYSTEM ACTIVE</span>
-    </div>
+<footer class="footer">
+    <p>Neon Core is made by Akshat Saxena.</p>
+    <p>© 2026</p>
+</footer>
 
-    <div class="hud-left">
-        <div id="score-txt">DATA: 00/05</div>
-        <div class="data-bar"><div id="data-fill"></div></div>
-        <div id="status-txt">CHASSIS: STANDARD</div>
-        <div class="lives-wrap"><span class="lives-label">LIVES</span><div id="lives-row"></div></div>
-    </div>
-
-    <!-- features/shield.js: shield count; shows AD when empty -->
-    <button id="shield-btn" aria-label="Shield">
-        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.5 4.5 5.5v6c0 4.6 3.2 8.6 7.5 10 4.3-1.4 7.5-5.4 7.5-10v-6z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M12 6.5 8 8.1v3.6c0 2.6 1.7 4.9 4 5.8 2.3-.9 4-3.2 4-5.8V8.1z" fill="currentColor" opacity=".35"/></svg>
-        <span id="shield-count" class="shield-count">2</span>
-        <span class="ad-badge">AD</span>
-        <span class="shield-label">SHIELD</span>
-    </button>
-
-    <div class="hud-right">
-        <div class="hud-panel">
-            <div id="level-txt"><span id="diff-ui-txt" class="diff-chip">MED</span>SECTOR <span id="level-num">01</span></div>
-        </div>
-        <div class="hud-panel">
-            <div id="timer-txt">TIME: 0.0s</div>
-        </div>
-    </div>
-</div>
-
-<!-- Touch controls -->
-<div id="mobile-controls">
-    <div id="joystick" aria-label="Move">
-        <div class="joy-ring">
-            <span class="joy-arrow up"></span><span class="joy-arrow down"></span>
-            <span class="joy-arrow left"></span><span class="joy-arrow right"></span>
-        </div>
-        <div id="joy-knob"></div>
-    </div>
-
-    <button id="btn-jump" aria-label="Jump">
-        <svg viewBox="0 0 40 40" aria-hidden="true">
-            <polygon points="20,3 36,18 28,18 20,10.5 12,18 4,18"/>
-            <polygon points="20,17 36,32 28,32 20,24.5 12,32 4,32"/>
-        </svg>
-        <span>JUMP</span>
-    </button>
-</div>
-
-
-<!-- Shield offer when you crash with 0 shields (features/shield.js) -->
-<div id="shield-offer" class="feature-modal">
-    <div class="modal-card">
-        <div class="modal-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.5 4.5 5.5v6c0 4.6 3.2 8.6 7.5 10 4.3-1.4 7.5-5.4 7.5-10v-6z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M12 6.5 8 8.1v3.6c0 2.6 1.7 4.9 4 5.8 2.3-.9 4-3.2 4-5.8V8.1z" fill="currentColor" opacity=".35"/></svg></div>
-        <h2>NO SHIELDS LEFT</h2>
-        <p>Watch a short ad to get a shield and keep your run going.</p>
-        <button id="shield-offer-watch" class="btn btn-reward"><span class="play">▶</span> WATCH AD · +1 SHIELD</button>
-        <button id="shield-offer-skip" class="btn btn-secondary">SKIP · LOSE 1 LIFE</button>
-        <div class="modal-timer"><div id="shield-offer-bar"></div></div>
-    </div>
-</div>
-
-<!-- "Loading ad…" / "Ad not available" message (features/ads/ads.js) -->
-<div id="ad-toast" class="ad-toast" role="status" aria-live="polite"></div>
-
-<!-- AppLixir video player goes in here (features/ads/ads-applixir.js) -->
-<div id="applixir-ad-container" class="applixir-ad"></div>
-
-<!-- Demo rewarded video (features/ads/ads-demo.js) -->
-<div id="demo-ad" class="demo-ad" role="dialog" aria-label="Advertisement">
-    <div class="demo-ad-top">
-        <span class="ad-tag">DEMO AD</span>
-        <span class="demo-ad-count"><span id="demo-ad-count">5</span>s</span>
-        <button id="demo-ad-close" class="demo-ad-close" aria-label="Close ad">✕</button>
-    </div>
-    <div class="demo-ad-body">
-        <div class="demo-ad-art"></div>
-        <h3>Your AdMob rewarded video plays here</h3>
-        <p id="demo-ad-status">Rewarded video</p>
-        <div class="demo-ad-progress"><div id="demo-ad-fill"></div></div>
-    </div>
-</div>
-
-<!-- Three.js r128 + bloom add-ons, bundled locally so the game (and the Android app) works offline -->
-<script src="vendor/three/three.min.js"></script>
-<script src="vendor/three/CopyShader.js"></script>
-<script src="vendor/three/LuminosityHighPassShader.js"></script>
-<script src="vendor/three/EffectComposer.js"></script>
-<script src="vendor/three/RenderPass.js"></script>
-<script src="vendor/three/ShaderPass.js"></script>
-<script src="vendor/three/UnrealBloomPass.js"></script>
-
-<!-- Game scripts (order matters: each file uses globals from the ones above it) -->
-<script src="js/config.js"></script>
-<script src="js/audio.js"></script>
-<script src="js/scene.js"></script>
-<script src="js/effects.js"></script>
-<script src="js/level.js"></script>
-<script src="js/input.js"></script>
-<script src="js/ui.js"></script>
-
-<!-- Features: shield, lives, ads, run flow (see features/README.md) -->
-<script src="features/config.js"></script>
-<script src="features/storage.js"></script>
-<script src="features/pause.js"></script>
-<script src="features/ads/ads-config.js"></script>
-<script src="features/ads/ads-demo.js"></script>
-<script src="features/ads/ads-web.js"></script>
-<script src="features/ads/ads-applixir.js"></script>
-<script src="features/ads/ads-admob.js"></script>
-<script src="features/ads/ads.js"></script>
-<script src="features/shield.js"></script>
-<script src="features/lives.js"></script>
-<script src="features/run.js"></script>
-
-<!-- Main loop (boots the game) -->
-<script src="js/game.js"></script>
+<script src="landing/landing.js"></script>
 </body>
 </html>
