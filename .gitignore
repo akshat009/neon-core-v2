@@ -1,0 +1,21 @@
+# Temporary recording folders
+temp_rec_*
+rec_obj_*
+rec_native_land/
+__pycache__/
+*.pyc
+
+# Scratch & test scripts
+test_*.py
+generate_videos.py
+record_*.py
+capture_*.py
+
+# Portal assets & artwork folders (kept locally, ignored by git)
+CrazyGames/
+Poki/
+Artwork/
+*.png
+*.jpg
+*.mp4
+*_SUBMISSION_GUIDE.md

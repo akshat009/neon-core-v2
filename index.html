@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Neon Core</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<div id="top-controls">
+    <button id="mute-btn" class="small-btn">🔊 MUTE</button>
+</div>
+
+<!-- Start menu -->
+<div id="start-menu" class="fullscreen-menu">
+    <div class="menu-box glass-panel">
+        <h1>NEON CORE</h1>
+        <p class="menu-subtitle">[ CYBER RUNNER ]</p>
+
+        <div class="diff-container">
+            <button class="diff-btn" id="diff-easy" data-diff="EASY">EASY</button>
+            <button class="diff-btn active" id="diff-medium" data-diff="MEDIUM">MEDIUM</button>
+            <button class="diff-btn" id="diff-hard" data-diff="HARD">HARD</button>
+        </div>
+
+        <div class="rules-list">
+            <b>[ POWERUPS &amp; RULES ]</b>
+            <ul>
+                <li><b class="c-cyan">CYAN DATA:</b> Collect all to win.</li>
+                <li><b class="c-red">RED MINES:</b> Touching them = Game Over.</li>
+                <li>🟩 <b class="c-green">GREEN BOX:</b> Micro Ball (Fast Speed)</li>
+                <li>🟧 <b class="c-orange">ORANGE BOX:</b> Heavy Ball (High Jump)</li>
+            </ul>
+        </div>
+        <button id="start-btn" class="btn">START RUN</button>
+    </div>
+</div>
+
+<!-- Level complete menu -->
+<div id="level-menu" class="fullscreen-menu">
+    <div class="menu-box glass-panel">
+        <h1 id="lc-title">SECTOR SECURED</h1>
+        <div id="stars-display">⭐⭐⭐</div>
+        <div id="remark-txt">OPTIMAL PERFORMANCE</div>
+
+        <div class="rules-list stats-list">
+            <p>DIFFICULTY: <b id="lc-diff" class="c-magenta">MEDIUM</b></p>
+            <p>CYCLE TIME: <b id="lc-time">0.0s</b></p>
+            <p>DATA REWARD: <b id="lc-score" class="highlight">+0</b></p>
+            <p>TOTAL ARCHIVE: <b id="lc-total">0</b></p>
+        </div>
+
+        <button id="next-level-btn" class="btn">NEXT SECTOR</button>
+        <button id="exit-btn" class="btn btn-secondary">DISCONNECT</button>
+    </div>
+</div>
+
+<!-- Game over menu -->
+<div id="gameover-menu" class="fullscreen-menu">
+    <div class="menu-box glass-panel danger">
+        <h1>SYSTEM FAILURE</h1>
+        <p id="death-reason">Connection lost.</p>
+        <p>ARCHIVED DATA: <b id="go-total" class="c-red">0</b></p>
+        <button id="restart-btn" class="btn btn-danger">REBOOT</button>
+    </div>
+</div>
+
+<!-- In-game HUD -->
+<div id="ui" class="glass-panel">
+    <div id="score-txt">DATA: 0 / 5</div>
+    <div id="level-txt">SECTOR: <span id="level-num">1</span> <span id="diff-ui-txt">[MED]</span></div>
+    <div id="timer-txt">CYCLE: 0.0s</div>
+    <div id="status-txt">CHASSIS: STANDARD</div>
+</div>
+
+<!-- Touch controls -->
+<div id="mobile-controls">
+    <div id="dpad">
+        <div class="dpad-btn" id="btn-up">W</div>
+        <div class="dpad-btn" id="btn-left">A</div>
+        <div class="dpad-btn" id="btn-down">S</div>
+        <div class="dpad-btn" id="btn-right">D</div>
+    </div>
+    <div id="btn-jump">JUMP</div>
+</div>
+
+<!-- Three.js -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+<!-- Game scripts (order matters: each file uses globals from the ones above it) -->
+<script src="js/config.js"></script>
+<script src="js/audio.js"></script>
+<script src="js/scene.js"></script>
+<script src="js/level.js"></script>
+<script src="js/input.js"></script>
+<script src="js/ui.js"></script>
+<script src="js/game.js"></script>
+</body>
+</html>
