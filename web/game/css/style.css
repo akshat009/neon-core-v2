@@ -670,16 +670,47 @@ body.touch .touch-only { display: flex; }
     .rules-list.stats-list p b { font-size: 16px; }
     .btn { font-size: 16px; padding: 13px 20px; }
 
-    .hud-left { width: 40vw; left: calc(18px + var(--safe-l)); top: calc(18px + var(--safe-t)); }
-    #score-txt { font-size: 14px; letter-spacing: 1px; }
-    .data-bar { height: 10px; margin-top: 7px; }
+    .hud-left { max-width: 38vw; left: calc(14px + var(--safe-l)); top: calc(14px + var(--safe-t)); }
+    #score-txt { font-size: 13px; letter-spacing: 1px; }
+    .data-bar { height: 9px; margin-top: 6px; }
     #status-txt { font-size: 9px; letter-spacing: 1px; }
 
-    .hud-right { right: calc(66px + var(--safe-r)); top: calc(16px + var(--safe-t)); gap: 6px; }
-    .hud-panel { min-width: 0; padding: 7px 10px 9px 10px; font-size: 11px; letter-spacing: 1px; --cut: 7px; }
-    .hud-panel::after { width: 20px; right: 8px; bottom: 3px; }
-    .diff-chip { margin-right: 5px; padding: 2px 3px; font-size: 7px; }
-    #top-controls { right: calc(14px + var(--safe-r)); }
+    #top-controls {
+        right: calc(10px + var(--safe-r));
+        top: calc(14px + var(--safe-t));
+        gap: 6px;
+    }
+    #top-controls .icon-btn {
+        width: 36px;
+        height: 36px;
+    }
+    #top-controls .icon-btn svg {
+        width: 18px;
+        height: 18px;
+    }
+
+    .hud-right {
+        right: calc(94px + var(--safe-r));   /* cleanly avoids the 2 buttons (36px + 6px + 36px + 10px margin = 88px) */
+        top: calc(14px + var(--safe-t));
+        gap: 5px;
+    }
+    .hud-panel {
+        min-width: 0;
+        padding: 6px 10px 7px 10px;
+        font-size: 11px;
+        letter-spacing: 1px;
+        --cut: 6px;
+    }
+    .hud-panel::after {
+        width: 16px;
+        right: 6px;
+        bottom: 2px;
+    }
+    .diff-chip {
+        margin-right: 4px;
+        padding: 2px 4px;
+        font-size: 7.5px;
+    }
 
     .sys-label { display: none; }
 
