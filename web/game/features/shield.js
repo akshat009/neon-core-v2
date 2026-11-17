@@ -66,6 +66,7 @@ function absorbHit(mine) {
 let shieldOffer = null;
 
 function offerShield(mine) {
+    lockInput();                                 // the player's thumbs are still on the controls
     pauseGame('shield-offer');
     Ads.prepareRewarded('shield');
     shieldOffer = { mine: mine, left: FEATURES.shieldOfferSeconds, timer: null };

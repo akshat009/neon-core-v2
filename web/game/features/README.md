@@ -45,7 +45,7 @@ Everything for shields, lives, ads and run progress lives in this folder. The co
 - Skipping the continue ad clears the saved run.
 
 ### Start menu rewards
-- Shows your shields and a **▶ AD · +1** button.
+- Shows your shields and a **+1 (watch an ad)** button.
 
 ### Time freeze
 - While any ad, popup or respawn is on screen — or the app is in the background — physics stop and the sector timer does not count, so star ratings stay fair.

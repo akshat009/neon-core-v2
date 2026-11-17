@@ -36,7 +36,7 @@ const DemoAds = {
                 if (left <= 0 && !earned) {
                     earned = true;
                     clearInterval(timer);
-                    status.textContent = 'Reward earned ✓';
+                    status.textContent = 'Reward earned';
                     el.classList.add('done');
                     setTimeout(finish, 700);
                 }
@@ -73,7 +73,7 @@ const DemoAds = {
                 t += 0.1; left = Math.max(total - t, 0);
                 fill.style.width = `${(t / total) * 100}%`;
                 count.textContent = Math.ceil(left);
-                if (t >= skipAfter) { el.classList.remove('no-skip'); status.textContent = 'Interstitial · tap ✕ to skip'; }
+                if (t >= skipAfter) { el.classList.remove('no-skip'); status.textContent = 'Interstitial · close it to skip'; }
                 if (left <= 0) finish();
             }, 100);
             const finish = () => {
