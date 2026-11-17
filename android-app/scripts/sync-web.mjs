@@ -17,6 +17,20 @@ if (!existsSync(capacitorJs)) {
   process.exit(1);
 }
 
+// A release build must never ship with test ads: stop if the live ad units are still empty
+if (release) {
+  const adsConfig = readFileSync(resolve(src, 'features/ads/ads-config.js'), 'utf8');
+  const live = /live:\s*\{([^}]*)\}/.exec(adsConfig);
+  const missing = ['rewardedId', 'bannerId', 'interstitialId'].filter((k) => {
+    const m = live && new RegExp(k + "\\s*:\\s*'([^']*)'").exec(live[1]);
+    return !m || !/^ca-app-pub-\d+\/\d+$/.test(m[1]);
+  });
+  if (missing.length) {
+    console.error(`Release build stopped: fill ADS_CONFIG.admob.live (${missing.join(', ')}) in web/game/features/ads/ads-config.js with your AdMob ad unit ids.`);
+    process.exit(1);
+  }
+}
+
 rmSync(out, { recursive: true, force: true });
 cpSync(src, out, { recursive: true });
 cpSync(capacitorJs, resolve(out, 'vendor/capacitor.js'));

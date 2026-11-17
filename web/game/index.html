@@ -6,12 +6,12 @@
     <meta name="theme-color" content="#03060d">
     <title>Neon Core</title>
     <link rel="stylesheet" href="vendor/fonts/fonts.css">
-    <link rel="stylesheet" href="css/style.css?v=4.8">
-    <link rel="stylesheet" href="features/features.css?v=4.8">
-    <link rel="stylesheet" href="css/title.css?v=4.8">
-    <link rel="stylesheet" href="css/menus.css?v=4.8">
-    <link rel="stylesheet" href="css/map.css?v=4.8">
-    <link rel="stylesheet" href="css/cores.css?v=4.8">
+    <link rel="stylesheet" href="css/style.css?v=5.0">
+    <link rel="stylesheet" href="features/features.css?v=5.0">
+    <link rel="stylesheet" href="css/title.css?v=5.0">
+    <link rel="stylesheet" href="css/menus.css?v=5.0">
+    <link rel="stylesheet" href="css/map.css?v=5.0">
+    <link rel="stylesheet" href="css/cores.css?v=5.0">
 </head>
 <body>
 
@@ -226,6 +226,16 @@
             </div>
         </div>
 
+        <div class="set-row">
+            <div class="t-label" id="set-gfx-l">GRAPHICS</div>
+            <div class="t-seg t-seg-3" role="radiogroup" aria-labelledby="set-gfx-l">
+                <button class="set-opt" data-setting="graphics" data-val="auto" role="radio" aria-label="Auto: lowers itself on slow phones">AUTO</button>
+                <button class="set-opt" data-setting="graphics" data-val="high" role="radio">HIGH</button>
+                <button class="set-opt" data-setting="graphics" data-val="low" role="radio" aria-label="Low: no glow, smoother on budget phones">LOW</button>
+            </div>
+        </div>
+        <p class="set-note">LOW turns off the glow for smoother play on budget phones.</p>
+
         <!-- Joystick sensitivity (js/input.js) -->
         <div class="touch-only t-label set-label-stick">STICK SENSITIVITY</div>
         <div class="touch-only-block t-seg t-seg-5" role="radiogroup" aria-label="Joystick sensitivity, 1 gentle to 5 fast">
@@ -237,6 +247,10 @@
         </div>
         <div class="touch-only t-scale"><span>Gentle</span><span>Fast</span></div>
         <button id="replay-tutorial" class="t-link set-replay">SHOW THE TUTORIAL TIPS AGAIN</button>
+        <div class="set-links">
+            <!-- Same URL as in Google Play Console / Data safety. In the app Capacitor opens it in the browser. -->
+            <a class="t-link" href="https://play.asaxenadev.com/privacy.html" target="_blank" rel="noopener" data-external>PRIVACY POLICY</a>
+        </div>
         <button class="t-play t-play-sm" data-close>DONE</button>
     </div>
 </div>
@@ -543,37 +557,37 @@
 <script src="vendor/three/UnrealBloomPass.js"></script>
 
 <!-- Game scripts (order matters: each file uses globals from the ones above it) -->
-<script src="js/config.js?v=4.8"></script>
-<script src="js/audio.js?v=4.8"></script>
-<script src="js/scene.js?v=4.8"></script>
-<script src="js/world.js?v=4.8"></script>
-<script src="js/effects.js?v=4.8"></script>
-<script src="js/juice.js?v=4.8"></script>
-<script src="js/level.js?v=4.8"></script>
-<script src="js/input.js?v=4.8"></script>
-<script src="js/ui.js?v=4.8"></script>
+<script src="js/config.js?v=5.0"></script>
+<script src="js/audio.js?v=5.0"></script>
+<script src="js/scene.js?v=5.0"></script>
+<script src="js/world.js?v=5.0"></script>
+<script src="js/effects.js?v=5.0"></script>
+<script src="js/juice.js?v=5.0"></script>
+<script src="js/level.js?v=5.0"></script>
+<script src="js/input.js?v=5.0"></script>
+<script src="js/ui.js?v=5.0"></script>
 
 <!-- Features: shield, lives, ads, run flow (see features/README.md) -->
-<script src="features/config.js?v=4.8"></script>
-<script src="features/storage.js?v=4.8"></script>
-<script src="features/pause.js?v=4.8"></script>
-<script src="features/ads/ads-config.js?v=4.8"></script>
-<script src="features/ads/ads-demo.js?v=4.8"></script>
-<script src="features/ads/ads-web.js?v=4.8"></script>
-<script src="features/ads/ads-applixir.js?v=4.8"></script>
-<script src="features/ads/ads-admob.js?v=4.8"></script>
-<script src="features/ads/ads.js?v=4.8"></script>
-<script src="features/shield.js?v=4.8"></script>
-<script src="features/lives.js?v=4.8"></script>
-<script src="features/cores.js?v=4.8"></script>
-<script src="features/run.js?v=4.8"></script>
-<script src="features/sectors.js?v=4.8"></script>
-<script src="features/shop.js?v=4.8"></script>
-<script src="features/tutorial.js?v=4.8"></script>
-<script src="js/title.js?v=4.8"></script>
-<script src="features/android.js?v=4.8"></script>
+<script src="features/config.js?v=5.0"></script>
+<script src="features/storage.js?v=5.0"></script>
+<script src="features/pause.js?v=5.0"></script>
+<script src="features/ads/ads-config.js?v=5.0"></script>
+<script src="features/ads/ads-demo.js?v=5.0"></script>
+<script src="features/ads/ads-web.js?v=5.0"></script>
+<script src="features/ads/ads-applixir.js?v=5.0"></script>
+<script src="features/ads/ads-admob.js?v=5.0"></script>
+<script src="features/ads/ads.js?v=5.0"></script>
+<script src="features/shield.js?v=5.0"></script>
+<script src="features/lives.js?v=5.0"></script>
+<script src="features/cores.js?v=5.0"></script>
+<script src="features/run.js?v=5.0"></script>
+<script src="features/sectors.js?v=5.0"></script>
+<script src="features/shop.js?v=5.0"></script>
+<script src="features/tutorial.js?v=5.0"></script>
+<script src="js/title.js?v=5.0"></script>
+<script src="features/android.js?v=5.0"></script>
 
 <!-- Main loop (boots the game) -->
-<script src="js/game.js?v=4.8"></script>
+<script src="js/game.js?v=5.0"></script>
 </body>
 </html>
