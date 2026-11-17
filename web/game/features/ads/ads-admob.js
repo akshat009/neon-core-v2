@@ -38,12 +38,13 @@ const AdMobAds = {
         const AdMob = this.getPlugin();
         if (!AdMob) return false;
         try {
-            let consent = await AdMob.requestConsentInfo();
+            let consent = await withTimeout(AdMob.requestConsentInfo(), 8000, { status: 'UNKNOWN' });
             if (consent.isConsentFormAvailable && consent.status === 'REQUIRED') consent = await AdMob.showConsentForm();
             if (consent.canRequestAds === false) return false;
         } catch (e) { /* consent check unavailable: carry on */ }
         try {
-            await AdMob.initialize({ initializeForTesting: ADMOB.testing });
+            const ok = await withTimeout(AdMob.initialize({ initializeForTesting: ADMOB.testing }).then(() => true), 10000, false);
+            if (!ok) { this.initPromise = null; return false; }   // try again next time
             this.ready = true;
             // The adaptive banner's height depends on the screen (about 50-90dp, dp = CSS px here)
             AdMob.addListener('bannerAdSizeChanged', (size) => {
@@ -62,11 +63,12 @@ const AdMobAds = {
         if (!this.ready) return Promise.resolve(false);
         if (this.rewardLoaded) return Promise.resolve(true);
         if (this.rewardLoading) return this.rewardLoading;
-        this.rewardLoading = this.getPlugin()
+        const load = this.getPlugin()
             .prepareRewardVideoAd({ adId: ADMOB.rewardedId, isTesting: ADMOB.testing })
             .then(() => { this.rewardLoaded = true; this.rewardLoadedAt = Date.now(); return true; })
-            .catch(() => false)
-            .finally(() => { this.rewardLoading = null; });
+            .catch(() => false);
+        // A load that hangs (bad network) gives up after 15s, so "Loading ad…" can't stay forever
+        this.rewardLoading = withTimeout(load, 15000, false).finally(() => { this.rewardLoading = null; });
         return this.rewardLoading;
     },
 
@@ -114,7 +116,8 @@ const AdMobAds = {
         if (!(await this.init()) || !ADMOB.interstitialId) return 'unavailable';
         const AdMob = this.getPlugin();
         try {
-            await AdMob.prepareInterstitial({ adId: ADMOB.interstitialId, isTesting: ADMOB.testing });
+            const ready = await withTimeout(AdMob.prepareInterstitial({ adId: ADMOB.interstitialId, isTesting: ADMOB.testing }).then(() => true), 8000, false);
+            if (!ready) return 'unavailable';
         } catch (e) { return 'unavailable'; }
         let finish;
         const closed = new Promise((resolve) => { finish = resolve; });

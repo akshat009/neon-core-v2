@@ -15,8 +15,9 @@ import com.getcapacitor.BridgeActivity;
  * Neon Core runs fullscreen: status and navigation bars are hidden (immersive sticky).
  * A swipe from the edge shows them for a moment, then they hide again.
  *
+ * • The theme is fullscreen too (res/values/styles.xml), so the splash has no status bar.
  * • Ads and dialogs can bring the bars back, so they are hidden again whenever the
- *   game window gets focus back (onWindowFocusChanged).
+ *   game window gets focus back (onWindowFocusChanged) or the app resumes (onResume).
  * • The game may draw into the display cutout (notch / punch-hole). Capacitor's
  *   SystemBars plugin passes the cutout insets to the page, where the CSS keeps the HUD
  *   clear of it with env(safe-area-inset-*) (see --safe-* in web/game/css/style.css).
@@ -42,6 +43,14 @@ public class MainActivity extends BridgeActivity {
             WebSettings settings = getBridge().getWebView().getSettings();
             settings.setTextZoom(Math.min(settings.getTextZoom(), MAX_TEXT_ZOOM));
         }
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        hideSystemBars();
+        // Some phones restore the bars a moment after the app comes back: hide them again
+        getWindow().getDecorView().postDelayed(this::hideSystemBars, 300);
     }
 
     @Override

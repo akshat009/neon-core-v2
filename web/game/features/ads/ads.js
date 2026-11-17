@@ -40,7 +40,8 @@ const Ads = {
         setGameAudio(false);
         let result = 'unavailable';
         try {
-            result = await AD_NETWORKS[this.network].showRewarded(placement);
+            // Safety net: if an ad network never reports back, the game must not stay locked
+            result = await withTimeout(AD_NETWORKS[this.network].showRewarded(placement), 180000, 'unavailable');
         } catch (e) {
             result = 'unavailable';
         } finally {
@@ -68,7 +69,7 @@ const Ads = {
         this.busy = true;
         setGameAudio(false);
         try {
-            const r = await net.showInterstitial(placement);
+            const r = await withTimeout(net.showInterstitial(placement), 120000, 'unavailable');
             if (r === 'viewed') { this.clearsSinceInterstitial = 0; this.lastAdAt = Date.now(); }
         } catch (e) {
         } finally {
@@ -94,6 +95,15 @@ const Ads = {
 // Space the menus keep free at the bottom for the banner (--banner-h, features/features.css)
 function setBannerSpace(px) {
     document.documentElement.style.setProperty('--banner-h', `${Math.max(0, Math.round(px))}px`);
+}
+
+// Resolves with `fallback` if `promise` hasn't settled after `ms`
+function withTimeout(promise, ms, fallback) {
+    let timer;
+    return Promise.race([
+        promise,
+        new Promise((resolve) => { timer = setTimeout(() => resolve(fallback), ms); })
+    ]).finally(() => clearTimeout(timer));
 }
 
 // "Remove Ads" purchase (coming with Google Play billing): forced ads off, rewarded ads stay opt-in

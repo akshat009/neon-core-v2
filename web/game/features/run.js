@@ -205,17 +205,27 @@ attachButtonAction('next-level-btn', async () => {
     beginSector();
 });
 
-attachButtonAction('exit-btn', () => {
-    if (document.fullscreenElement && document.exitFullscreen) document.exitFullscreen();
+// Back to the title screen from anywhere in a run (Main menu buttons, Android Back).
+// The run is saved at the start of every sector, so nothing is lost; a replay just ends.
+function goToTitle() {
+    Ads.hideBanner();
+    ['esc-pause', 'gameover', 'respawn'].forEach(r => resumeGame(r));
+    isGameOver = false;
+    if (document.fullscreenElement && document.exitFullscreen) {
+        try { document.exitFullscreen().catch(() => {}); } catch (e) {}
+    }
     document.getElementById('ui').style.display = 'none';
     document.getElementById('mobile-controls').style.display = 'none';
     practice = null;
     showOnly('start-menu');
     isPlaying = false;
+    timerRunning = false;
     keys.w = keys.a = keys.s = keys.d = keys.space = false;
     level = 1;
     refreshStartMenu();
-});
+}
+
+attachButtonAction('exit-btn', goToTitle);
 
 function togglePauseMenu() {
     if (!isPlaying || isGameOver) return;
@@ -244,26 +254,8 @@ attachButtonAction('resume-btn', () => {
     resumeGame('esc-pause');
 });
 
-attachButtonAction('pause-exit-btn', async () => {
-    const modal = document.getElementById('pause-modal');
-    if (modal) modal.style.display = 'none';
-    Ads.hideBanner();
-    resumeGame('esc-pause');
-
-    // No ad here: a rewarded ad must be something the player chose for a reward
-    if (document.fullscreenElement && document.exitFullscreen) {
-        try { document.exitFullscreen().catch(() => {}); } catch(e) {}
-    }
-    document.getElementById('ui').style.display = 'none';
-    document.getElementById('mobile-controls').style.display = 'none';
-    practice = null;
-    showOnly('start-menu');
-    isPlaying = false;
-    timerRunning = false;
-    keys.w = keys.a = keys.s = keys.d = keys.space = false;
-    level = 1;
-    refreshStartMenu();
-});
+attachButtonAction('pause-exit-btn', goToTitle);   // no ad here: rewarded ads are only ever the player's choice
+attachButtonAction('restart-menu-btn', goToTitle);
 
 attachButtonAction('continue-ad-btn', continueWithAd);
 attachButtonAction('continue-data-btn', continueWithData);
