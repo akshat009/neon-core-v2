@@ -119,13 +119,116 @@ function additiveMat(color, opacity) {
 // Track
 // =========================================================
 
-const floorMat = new THREE.MeshStandardMaterial({
-    color: 0x060b16, roughness: 0.55, metalness: 0.45,
-    emissive: 0xffffff, emissiveMap: gridTex, emissiveIntensity: 0.13
+// Neon highway surface. One shader for every face of a platform box:
+//   top    = glossy dark road, dashed glowing lane lines, neon glow along both edges,
+//            faint grid, pink horizon reflection at grazing angles
+//   sides  = dark panels with a bright top edge and a soft underglow
+// uTime is set in js/world.js. Fog is applied by hand (same falloff as the scene fog).
+function makeRoadMat(halfWidth, edgeHex, lanes) {
+    return new THREE.ShaderMaterial({
+        extensions: { derivatives: true },
+        uniforms: {
+            uTime: { value: 0 },
+            uHalfW: { value: halfWidth },
+            uEdge: { value: new THREE.Color(edgeHex) },
+            uLanes: { value: lanes ? 1 : 0 }
+        },
+        vertexShader: `
+            varying vec3 vLocal; varying vec3 vWorld; varying vec3 vNormalL; varying float vDepth;
+            void main() {
+                vLocal = position;
+                vNormalL = normal;
+                vec4 wp = modelMatrix * vec4(position, 1.0);
+                vWorld = wp.xyz;
+                vec4 mv = viewMatrix * wp;
+                vDepth = -mv.z;
+                gl_Position = projectionMatrix * mv;
+            }`,
+        fragmentShader: `
+            uniform float uTime; uniform float uHalfW; uniform vec3 uEdge; uniform float uLanes;
+            varying vec3 vLocal; varying vec3 vWorld; varying vec3 vNormalL; varying float vDepth;
+
+            float lineAA(float d, float w) { float fw = fwidth(d); return 1.0 - smoothstep(w, w + fw * 1.5, abs(d)); }
+
+            void main() {
+                vec3 col;
+                if (vNormalL.y > 0.5) {
+                    // ---- road top ----
+                    float x = vLocal.x, ax = abs(x), z = vWorld.z;
+                    float edgeDist = uHalfW - ax;
+                    col = mix(vec3(0.010, 0.014, 0.032), vec3(0.030, 0.018, 0.070), smoothstep(uHalfW * 0.2, uHalfW, ax));
+
+                    // faint 2-unit grid
+                    vec2 gp = vec2(x, z) / 2.0;
+                    vec2 gd = abs(fract(gp - 0.5) - 0.5) / fwidth(gp);
+                    col += vec3(0.10, 0.45, 0.65) * (1.0 - min(min(gd.x, gd.y), 1.0)) * 0.07;
+
+                    // neon glow along both edges + a crisp inner line
+                    col += uEdge * exp(-edgeDist * 2.4) * 0.55;
+                    col += uEdge * lineAA(edgeDist - 0.35, 0.025) * 0.9;
+
+                    // dashed lane lines with a soft glow
+                    if (uLanes > 0.5) {
+                        float laneX = uHalfW / 3.0;
+                        float dl = ax - laneX;
+                        float dash = step(0.42, fract(z / 4.0));
+                        col += vec3(0.55, 0.95, 1.0) * lineAA(dl, 0.045) * dash * 0.95;
+                        col += uEdge * exp(-abs(dl) * 5.0) * 0.06;
+                        // centre line: thin, magenta
+                        col += vec3(1.0, 0.25, 0.7) * lineAA(x, 0.02) * step(0.5, fract(z / 2.0 + 0.25)) * 0.45;
+                    }
+
+                    // glossy reflection of the pink horizon at grazing angles
+                    vec3 v = normalize(cameraPosition - vWorld);
+                    float fres = pow(1.0 - max(v.y, 0.0), 4.0);
+                    col += vec3(0.55, 0.10, 0.45) * fres * 0.55;
+
+                    // slow light sweeps rolling towards the camera
+                    float sweep = fract((z - uTime * 18.0) / 36.0);
+                    col += uEdge * smoothstep(0.0, 0.04, sweep) * (1.0 - smoothstep(0.04, 0.16, sweep)) * 0.05;
+                } else if (vNormalL.y < -0.5) {
+                    col = vec3(0.004, 0.004, 0.012);                       // underside
+                } else {
+                    // ---- sides ----
+                    float y = vLocal.y;                                      // -0.5 .. 0.5
+                    col = mix(vec3(0.006, 0.006, 0.02), vec3(0.02, 0.02, 0.05), y + 0.5);
+                    col += uEdge * smoothstep(0.38, 0.5, y) * 0.9;           // bright top edge
+                    col += vec3(1.0, 0.25, 0.7) * smoothstep(-0.38, -0.5, y) * 0.35;   // underglow
+                    float u = abs(vNormalL.x) > 0.5 ? vWorld.z : vWorld.x;
+                    col += uEdge * lineAA(fract(u / 3.0) - 0.5, 0.01) * 0.12;          // panel seams
+                }
+                float fogK = exp(-pow(0.02 * vDepth, 2.0));
+                col = mix(vec3(0.03, 0.015, 0.06), col, fogK);
+                gl_FragColor = vec4(col, 1.0);
+            }`
+    });
+}
+const floorMat = makeRoadMat(7, 0x29f3ff, true);
+const movFloorMat = makeRoadMat(3, 0xff3df5, false);
+const edgeMat = new THREE.LineBasicMaterial({ color: 0x00ffff, transparent: true, opacity: 0.18 });
+// Side rails: light packets race along them towards the camera (uTime set in js/world.js)
+const railMat = new THREE.ShaderMaterial({
+    uniforms: { uTime: { value: 0 }, uColor: { value: new THREE.Color(0x5ff8ff) } },
+    vertexShader: `
+        varying float vZ; varying float vDepth;
+        void main() {
+            vec4 wp = modelMatrix * vec4(position, 1.0);
+            vZ = wp.z;
+            vec4 mv = viewMatrix * wp;
+            vDepth = -mv.z;
+            gl_Position = projectionMatrix * mv;
+        }`,
+    fragmentShader: `
+        uniform float uTime; uniform vec3 uColor;
+        varying float vZ; varying float vDepth;
+        void main() {
+            float p = fract((vZ - uTime * 26.0) / 9.0);
+            float packet = smoothstep(0.0, 0.03, p) * (1.0 - smoothstep(0.03, 0.2, p));
+            vec3 col = uColor * 0.75 + vec3(1.0) * packet * 1.4;
+            float fogK = exp(-pow(0.02 * vDepth, 2.0));            // same falloff as the scene fog
+            gl_FragColor = vec4(col * fogK, 1.0);
+        }`
 });
-const edgeMat = new THREE.LineBasicMaterial({ color: 0x00ffff, transparent: true, opacity: 0.45 });
-const railMat = new THREE.MeshBasicMaterial({ color: 0x5ff8ff });
-const laneMat = new THREE.MeshBasicMaterial({ color: 0x1aa6c8, transparent: true, opacity: 0.45 });
 
 // Main platform: 14 wide, 1 tall. Collision code reads geometry.parameters, so it stays a BoxGeometry.
 function createPlatform(length) {
@@ -139,12 +242,7 @@ function createPlatform(length) {
         rail.position.set(x, 0.52, 0);
         plat.add(rail);
     }
-    const laneGeo = new THREE.BoxGeometry(0.022, 0.01, length); // hairline lane markers
-    for (const x of [-2.35, 2.35]) {
-        const lane = new THREE.Mesh(laneGeo, laneMat);
-        lane.position.set(x, 0.506, 0);
-        plat.add(lane);
-    }
+    decoratePlatform(plat, length);   // neon arch (js/world.js)
     return plat;
 }
 
@@ -154,7 +252,7 @@ const movPlatFrameGeo = tubeEdges(movPlatGeo, 0.02);
 const movPlatFrameMat = new THREE.MeshBasicMaterial({ color: 0xff3df5 });
 
 function createMovingPlatform() {
-    const mPlat = new THREE.Mesh(movPlatGeo, floorMat);
+    const mPlat = new THREE.Mesh(movPlatGeo, movFloorMat);
     mPlat.add(new THREE.Mesh(movPlatFrameGeo, movPlatFrameMat));
     return mPlat;
 }
@@ -170,23 +268,26 @@ scene.add(gridFloor);
 // Pickups and hurdles — thin, crisp neon outlines
 // =========================================================
 
-// Cyan data: octahedron outline with a small solid core
-const dataShape = new THREE.OctahedronGeometry(0.7);
-const dataFrameGeo = tubeEdges(dataShape, 0.016);
-const dataCoreGeo = new THREE.OctahedronGeometry(0.2);
-const dataFrameMat = new THREE.MeshBasicMaterial({ color: 0x6ff8ff });
-const dataCoreMat = new THREE.MeshBasicMaterial({ color: 0xbffcff });
-const dataFillMat = additiveMat(0x1ec8ff, 0.06);
+// Cyan data: a glowing neon ring with a thin inner ring and a small bright core
+const dataRingGeo = new THREE.TorusGeometry(0.8, 0.085, 10, 48);
+const dataInnerGeo = new THREE.TorusGeometry(0.56, 0.024, 6, 40);
+const dataDiscGeo = new THREE.CircleGeometry(0.74, 40);
+const dataCoreGeo = new THREE.OctahedronGeometry(0.16);
+const dataRingMat = new THREE.MeshBasicMaterial({ color: 0x6ff8ff });
+const dataCoreMat = new THREE.MeshBasicMaterial({ color: 0xdffeff });
+const dataFillMat = new THREE.MeshBasicMaterial({ color: 0x1ec8ff, transparent: true, opacity: 0.1, blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide });
 
 function createData(phase) {
     const g = new THREE.Group();
     const inner = new THREE.Group();          // inner spins and bobs; outer stays put for collisions
-    inner.add(new THREE.Mesh(dataShape, dataFillMat));
-    inner.add(new THREE.Mesh(dataFrameGeo, dataFrameMat));
+    inner.add(new THREE.Mesh(dataRingGeo, dataRingMat));
+    inner.add(new THREE.Mesh(dataDiscGeo, dataFillMat));
+    const ring2 = new THREE.Mesh(dataInnerGeo, dataCoreMat);
+    inner.add(ring2);
     inner.add(new THREE.Mesh(dataCoreGeo, dataCoreMat));
-    inner.add(glowSprite(0x29d8ff, 1.8, 0.18));
+    inner.add(glowSprite(0x29d8ff, 2.4, 0.22));
     g.add(inner);
-    g.userData = { inner: inner, phase: phase };
+    g.userData = { inner: inner, ring2: ring2, phase: phase };
     return g;
 }
 
@@ -194,43 +295,63 @@ function createData(phase) {
 const mineFloorMat = new THREE.MeshBasicMaterial({ map: glowTex, color: 0xff1030, transparent: true, opacity: 0.5, depthWrite: false });
 const mineFloorGeo = new THREE.PlaneGeometry(4.2, 2.6);
 
+// Tileable diagonal hazard stripes, hot orange and red (scrolled in js/juice.js)
+function makeHazardTexture() {
+    const c = document.createElement('canvas'); c.width = c.height = 128;
+    const g = c.getContext('2d');
+    g.fillStyle = '#ff2448'; g.fillRect(0, 0, 128, 128);
+    g.fillStyle = '#ffae3a';
+    for (let x = -128; x < 256; x += 64) {        // 45° bands that wrap seamlessly
+        g.beginPath();
+        g.moveTo(x, 128); g.lineTo(x + 30, 128); g.lineTo(x + 30 + 128, 0); g.lineTo(x + 128, 0);
+        g.closePath(); g.fill();
+    }
+    const tex = new THREE.CanvasTexture(c);
+    tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
+    return tex;
+}
+
+// Neon sign frame: a wide soft tube with a bright core, rounded corners, transparent inside
+function makeGateFrameTexture() {
+    const W = 512, H = 384, r = 46, m = 20;
+    const c = document.createElement('canvas'); c.width = W; c.height = H;
+    const g = c.getContext('2d');
+    const rr = (inset) => {
+        const x = m + inset, y = m + inset, w = W - 2 * (m + inset), h = H - 2 * (m + inset), k = Math.max(r - inset, 4);
+        g.beginPath();
+        g.moveTo(x + k, y); g.arcTo(x + w, y, x + w, y + h, k); g.arcTo(x + w, y + h, x, y + h, k);
+        g.arcTo(x, y + h, x, y, k); g.arcTo(x, y, x + w, y, k); g.closePath();
+    };
+    g.lineJoin = 'round';
+    rr(0); g.strokeStyle = 'rgba(255, 70, 60, 0.35)'; g.lineWidth = 34; g.stroke();   // halo
+    rr(0); g.strokeStyle = '#ff6a3a'; g.lineWidth = 16; g.stroke();                   // tube
+    rr(0); g.strokeStyle = '#ffe2b0'; g.lineWidth = 5; g.stroke();                    // hot core
+    rr(30); g.strokeStyle = 'rgba(255, 200, 120, 0.8)'; g.lineWidth = 3; g.stroke();  // inner hairline
+    return new THREE.CanvasTexture(c);
+}
+
 // ---------- Hazard gates (the red hurdles) ----------
-// A neon frame standing across the track with scrolling hazard stripes inside.
+// A glowing hazard sign standing across the track, like a neon road barrier.
 // Hurdles are placed at y 1.2 (js/level.js); the gate stands on the track top (y 0.5).
 // The hit box in js/game.js (hitsGate) uses these sizes.
 const GATE_W = 2.8, GATE_H = 2.1, GATE_D = 0.26;
 const GATE_BASE = 0.5 - 1.2;                    // track top, relative to the hurdle's position
 const GATE_TOP_Y = 0.5 + GATE_H;                // world height of the top bar
 
-function makeHazardTexture() {
-    const c = document.createElement('canvas'); c.width = 256; c.height = 64;
-    const g = c.getContext('2d');
-    g.clearRect(0, 0, 256, 64);
-    for (let x = -64, i = 0; x < 320; x += 32, i++) {   // diagonal bands, tile seamlessly every 64px
-        g.fillStyle = i % 2 ? 'rgba(255, 50, 70, 0.95)' : 'rgba(255, 140, 50, 0.95)';
-        g.beginPath();
-        g.moveTo(x, 64); g.lineTo(x + 18, 64); g.lineTo(x + 18 + 64, 0); g.lineTo(x + 64, 0);
-        g.closePath(); g.fill();
-    }
-    const tex = new THREE.CanvasTexture(c);
-    tex.wrapS = THREE.RepeatWrapping;
-    return tex;
-}
 const hazardTex = makeHazardTexture();
-hazardTex.repeat.set(GATE_W / 1.4, 1);
+hazardTex.repeat.set(2.4, 1.8);
+const gateFrameTex = makeGateFrameTexture();
 
-const gateFrameMat = new THREE.MeshBasicMaterial({ color: 0xff3a50 });
-const gateTrimMat  = new THREE.MeshBasicMaterial({ color: 0xff9a3c });
-const gateStripeMat = new THREE.MeshBasicMaterial({ map: hazardTex, transparent: true, opacity: 0.85, side: THREE.DoubleSide, depthWrite: false, blending: THREE.AdditiveBlending });
-const gateFillMat = new THREE.MeshBasicMaterial({ color: 0xff1030, transparent: true, opacity: 0.08, side: THREE.DoubleSide, depthWrite: false, blending: THREE.AdditiveBlending });
-const gateScanMat = new THREE.MeshBasicMaterial({ color: 0xffc070, transparent: true, opacity: 0.9, blending: THREE.AdditiveBlending, depthWrite: false });
+const gateStripeMat = new THREE.MeshBasicMaterial({ map: hazardTex, transparent: true, opacity: 0.92, side: THREE.DoubleSide, depthWrite: false });
+const gateFrameMat  = new THREE.MeshBasicMaterial({ map: gateFrameTex, transparent: true, side: THREE.DoubleSide, depthWrite: false, blending: THREE.AdditiveBlending });
+const gatePostMat   = new THREE.MeshBasicMaterial({ color: 0xffa050 });
+const gateScanMat   = new THREE.MeshBasicMaterial({ color: 0xfff0c8, transparent: true, opacity: 0.9, blending: THREE.AdditiveBlending, depthWrite: false });
 
-const gateFrameGeo = tubeEdges(new THREE.BoxGeometry(GATE_W, GATE_H, GATE_D), 0.035);
-const gatePostGeo  = new THREE.BoxGeometry(0.16, GATE_H + 0.06, GATE_D + 0.12);
-const gateStripeGeo = new THREE.PlaneGeometry(GATE_W - 0.24, 0.62);
-const gateFillGeo  = new THREE.PlaneGeometry(GATE_W - 0.1, GATE_H - 0.1);
-const gateScanGeo  = new THREE.BoxGeometry(GATE_W - 0.2, 0.04, 0.04);
-const gatePostMat  = new THREE.MeshStandardMaterial({ color: 0x1a0308, emissive: 0xff2040, emissiveIntensity: 0.35, roughness: 0.4, metalness: 0.6 });
+const gateFaceGeo   = new THREE.PlaneGeometry(GATE_W, GATE_H);
+const gateStripeGeo = new THREE.PlaneGeometry(GATE_W * 0.84, GATE_H * 0.78);
+const gatePostGeo   = new THREE.CylinderGeometry(0.06, 0.06, GATE_H * 0.98, 10);
+const gateFootGeo   = new THREE.BoxGeometry(0.34, 0.08, 0.5);
+const gateScanGeo   = new THREE.BoxGeometry(GATE_W * 0.84, 0.035, 0.035);
 
 // children[0] = the gate body (js/juice.js animates its scan line); the group never rotates
 function createMine() {
@@ -238,26 +359,25 @@ function createMine() {
     const gate = new THREE.Group();
     gate.position.y = GATE_BASE + GATE_H / 2;
 
-    gate.add(new THREE.Mesh(gateFrameGeo, gateFrameMat));
-    gate.add(new THREE.Mesh(gateFillGeo, gateFillMat));
-    for (const sx of [-1, 1]) {                                   // solid side posts
+    gate.add(new THREE.Mesh(gateStripeGeo, gateStripeMat));               // hazard stripes fill the sign
+    for (const z of [0.02, -0.02]) {                                     // neon frame, both faces
+        const face = new THREE.Mesh(gateFaceGeo, gateFrameMat);
+        face.position.z = z;
+        gate.add(face);
+    }
+    for (const sx of [-1, 1]) {                                          // glowing legs on little feet
         const post = new THREE.Mesh(gatePostGeo, gatePostMat);
-        post.position.x = sx * (GATE_W / 2 - 0.06);
+        post.position.x = sx * GATE_W * 0.47;
         gate.add(post);
+        const foot = new THREE.Mesh(gateFootGeo, gatePostMat);
+        foot.position.set(sx * GATE_W * 0.47, -GATE_H / 2 + 0.04, 0);
+        gate.add(foot);
     }
-    for (const y of [GATE_H / 2 - 0.46, -GATE_H / 2 + 0.46]) {    // hazard bands top and bottom
-        const band = new THREE.Mesh(gateStripeGeo, gateStripeMat);
-        band.position.y = y;
-        gate.add(band);
-    }
-    const trim = new THREE.Mesh(new THREE.BoxGeometry(GATE_W + 0.1, 0.06, GATE_D + 0.1), gateTrimMat);
-    trim.position.y = GATE_H / 2 + 0.03;
-    gate.add(trim);
-    const scan = new THREE.Mesh(gateScanGeo, gateScanMat);       // light that sweeps up and down
+    const scan = new THREE.Mesh(gateScanGeo, gateScanMat);              // light that sweeps up and down
     gate.add(scan);
     gate.userData.scan = scan;
 
-    const glow = glowSprite(0xff1030, 4.2, 0.22);
+    const glow = glowSprite(0xff4a28, 5.2, 0.32);
     glow.position.y = gate.position.y;
     const floor = new THREE.Mesh(mineFloorGeo, mineFloorMat);
     floor.rotation.x = -Math.PI / 2;

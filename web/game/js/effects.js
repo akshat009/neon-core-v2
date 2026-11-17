@@ -328,12 +328,14 @@ function updateEffects(dt, timeScale) {
     }
     updateParticles(dt, timeScale);
     updateJuice(dt, timeScale);
+    updateWorld(dt);
 
     // Pickups bob and spin (inner part only, so collision positions stay exact)
     for (const r of rings) {
         const inner = r.userData.inner;
         inner.position.y = Math.sin(t * 2.2 + r.userData.phase) * 0.15;
-        inner.rotation.x += 0.02 * timeScale; inner.rotation.y += 0.05 * timeScale;
+        inner.rotation.y += 0.035 * timeScale;                       // turns like a coin
+        if (r.userData.ring2) r.userData.ring2.rotation.x = Math.sin(t * 2 + r.userData.phase) * 0.9;
     }
     for (const p of powerups) {
         const inner = p.userData.inner;

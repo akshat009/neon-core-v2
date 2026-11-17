@@ -108,7 +108,7 @@ function updatePickupsAndMines(dt, t) {
     }
 
     // Hazard gates: stripes scroll, a scan light sweeps up and down, everything pulses
-    hazardTex.offset.x = (hazardTex.offset.x - dt * 0.6) % 1;
+    hazardTex.offset.x = (hazardTex.offset.x - dt * 0.8) % 1;
     for (const sp of spikes) {
         const gate = sp.children[0];
         if (!gate || !gate.userData.scan) continue;
@@ -116,10 +116,9 @@ function updatePickupsAndMines(dt, t) {
         gate.userData.scan.position.y = Math.sin(t * 2.4 + ph) * (GATE_H / 2 - 0.12);
     }
     const pulse = 0.5 + 0.5 * Math.sin(t * 5);
-    gateFrameMat.color.setRGB(1, 0.18 + pulse * 0.12, 0.26 + pulse * 0.1);
-    gateStripeMat.opacity = 0.65 + pulse * 0.3;
-    gatePostMat.emissiveIntensity = 0.3 + pulse * 0.25;
-    mineFloorMat.opacity = 0.42 + pulse * 0.3 - 0.15;
+    gateFrameMat.opacity = 0.8 + pulse * 0.2;
+    gateStripeMat.opacity = 0.62 + pulse * 0.25;
+    mineFloorMat.opacity = 0.3 + pulse * 0.3;
 
     nucleus.rotation.x -= dt * 2.2;
     nucleus.rotation.y += dt * 1.6;
