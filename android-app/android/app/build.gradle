@@ -1,5 +1,13 @@
 apply plugin: 'com.android.application'
 
+// Release signing + live AdMob app id come from android/release.properties (never committed).
+// Copy release.properties.example to release.properties and fill it in. Without it, a release
+// build still compiles (unsigned, test AdMob app id) so CI and debugging keep working.
+def releaseProps = new Properties()
+def releasePropsFile = rootProject.file('release.properties')
+if (releasePropsFile.exists()) releasePropsFile.withInputStream { releaseProps.load(it) }
+def TEST_ADMOB_APP_ID = 'ca-app-pub-3940256099942544~3347511713'   // Google's sample app id
+
 android {
     namespace = "com.akshat009.neoncore"
     compileSdk = rootProject.ext.compileSdkVersion
@@ -7,19 +15,34 @@ android {
         applicationId "com.akshat009.neoncore"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 1
+        versionCode 1          // bump for every upload to Google Play
         versionName "1.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        resValue "string", "admob_app_id", TEST_ADMOB_APP_ID
         aaptOptions {
              // Files and dirs to omit from the packaged assets dir, modified to accommodate modern web apps.
              // Default: https://android.googlesource.com/platform/frameworks/base/+/282e181b58cf72b6ca770dc7ca5f91f135444502/tools/aapt/AaptAssets.cpp#61
             ignoreAssetsPattern = '!.svn:!.git:!.ds_store:!*.scc:.*:!CVS:!thumbs.db:!picasa.ini:!*~'
         }
     }
+    signingConfigs {
+        release {
+            if (releaseProps['storeFile']) {
+                storeFile file(releaseProps['storeFile'])
+                storePassword releaseProps['storePassword']
+                keyAlias releaseProps['keyAlias']
+                keyPassword releaseProps['keyPassword']
+            }
+        }
+    }
     buildTypes {
         release {
+            // The game is plain JS inside a WebView, so R8 would only shrink Capacitor/AdMob glue;
+            // left off to avoid keep-rule surprises with the AdMob SDK.
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            if (releaseProps['storeFile']) signingConfig signingConfigs.release
+            resValue "string", "admob_app_id", (releaseProps['NEON_ADMOB_APP_ID'] ?: TEST_ADMOB_APP_ID)
         }
     }
 }

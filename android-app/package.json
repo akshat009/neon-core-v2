@@ -6,15 +6,19 @@
   "scripts": {
     "sync-web": "node scripts/sync-web.mjs",
     "sync": "npm run sync-web && npx cap sync android",
+    "sync:release": "node scripts/sync-web.mjs --release && npx cap sync android",
     "open": "npx cap open android",
-    "build": "npm run sync && cd android && ./gradlew assembleDebug"
+    "build": "npm run sync && cd android && ./gradlew assembleDebug",
+    "build:release": "npm run sync:release && cd android && ./gradlew bundleRelease"
   },
   "dependencies": {
     "@capacitor-community/admob": "^8.2.1",
     "@capacitor/android": "^8.5.3",
+    "@capacitor/app": "^8.1.2",
     "@capacitor/core": "^8.5.3"
   },
   "devDependencies": {
+    "@capacitor/assets": "^3.0.5",
     "@capacitor/cli": "^8.5.3"
   }
 }

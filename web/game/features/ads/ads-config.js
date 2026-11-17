@@ -1,6 +1,12 @@
 // =========================================================
 // Neon Core — ad IDs. This is the only file to edit when you go live.
 //
+// AdMob has two sets of IDs, chosen by the build:
+//   debug   (npm run sync)          → Google's TEST ids, always. Safe to tap.
+//   release (npm run sync:release)  → your LIVE ids from admob.live below
+//                                     (android-app/scripts/sync-web.mjs marks the build).
+// If a live id is still empty, the release build falls back to test ads instead of breaking.
+//
 // The game picks the ad network by where it runs:
 //   Android app (Capacitor)               → AdMob                  (ads-admob.js)
 //   Website on an AppLixir-registered host → AppLixir rewarded video (ads-applixir.js)
@@ -10,15 +16,20 @@
 
 const ADS_CONFIG = {
     admob: {
-        // Ad unit IDs from your AdMob account. Google's official TEST IDs are filled in for now:
-        // they always serve test ads, so it's safe to tap them while developing.
-        // Before publishing: put your own IDs here and set testing to false.
-        rewardedId:     'ca-app-pub-3940256099942544/5224354917',
-        bannerId:       'ca-app-pub-3940256099942544/6300978111',
-        interstitialId: 'ca-app-pub-3940256099942544/1033173712',
-        testing: true
-        // The AdMob APP ID (ca-app-pub-…~…) goes in
-        // android-app/android/app/src/main/res/values/strings.xml → admob_app_id
+        // Google's official test units: they always serve test ads.
+        test: {
+            rewardedId:     'ca-app-pub-3940256099942544/5224354917',
+            bannerId:       'ca-app-pub-3940256099942544/6300978111',
+            interstitialId: 'ca-app-pub-3940256099942544/1033173712'
+        },
+        // Your units from the AdMob console (ca-app-pub-XXXXXXXXXXXXXXXX/YYYYYYYYYY).
+        live: {
+            rewardedId:     '',
+            bannerId:       '',
+            interstitialId: ''
+        }
+        // The AdMob APP ID (ca-app-pub-…~…) is set per build in
+        // android-app/android/app/build.gradle (release: NEON_ADMOB_APP_ID in release.properties).
     },
 
     applixir: {
@@ -40,3 +51,16 @@ const ADS_CONFIG = {
         testing: true
     }
 };
+
+// The AdMob ids this build uses (see the note at the top)
+const ADMOB = (function () {
+    const live = ADS_CONFIG.admob.live;
+    const useLive = window.NEON_BUILD === 'release' && !!live.rewardedId;
+    const ids = useLive ? live : ADS_CONFIG.admob.test;
+    return {
+        rewardedId: ids.rewardedId,
+        bannerId: ids.bannerId || ADS_CONFIG.admob.test.bannerId,
+        interstitialId: ids.interstitialId || ADS_CONFIG.admob.test.interstitialId,
+        testing: !useLive
+    };
+})();

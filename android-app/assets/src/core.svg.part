@@ -1,0 +1,33 @@
+<defs>
+  <radialGradient id="glow" cx="50%" cy="50%" r="50%">
+    <stop offset="0" stop-color="#29f3ff" stop-opacity=".55"/><stop offset=".55" stop-color="#29f3ff" stop-opacity=".12"/><stop offset="1" stop-color="#29f3ff" stop-opacity="0"/>
+  </radialGradient>
+  <radialGradient id="shell" cx="40%" cy="35%" r="70%">
+    <stop offset="0" stop-color="#0b2236"/><stop offset=".7" stop-color="#040a14"/><stop offset="1" stop-color="#020509"/>
+  </radialGradient>
+  <filter id="neon" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="6" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+  <clipPath id="ball"><circle cx="512" cy="512" r="250"/></clipPath>
+</defs>
+<circle cx="512" cy="512" r="380" fill="url(#glow)"/>
+<!-- orbit ring behind -->
+<ellipse cx="512" cy="530" rx="360" ry="96" fill="none" stroke="#ff3fb4" stroke-width="16" opacity=".55" transform="rotate(-14 512 512)" filter="url(#neon)"/>
+<circle cx="512" cy="512" r="250" fill="url(#shell)"/>
+<g clip-path="url(#ball)" fill="none" stroke="#29f3ff" filter="url(#neon)">
+  <ellipse cx="512" cy="512" rx="250" ry="58" stroke-width="22"/>
+  <ellipse cx="512" cy="436" rx="232" ry="50" stroke-width="5" opacity=".8"/>
+  <ellipse cx="512" cy="588" rx="232" ry="50" stroke-width="5" opacity=".8"/>
+  <ellipse cx="512" cy="330" rx="170" ry="34" stroke-width="5" opacity=".7"/>
+  <ellipse cx="512" cy="694" rx="170" ry="34" stroke-width="5" opacity=".7"/>
+  <path d="M512 262 V454 M512 570 V762" stroke-width="6" opacity=".8"/>
+  <path d="M380 300 Q350 512 380 724" stroke-width="5" opacity=".6"/>
+  <path d="M644 300 Q674 512 644 724" stroke-width="5" opacity=".6"/>
+</g>
+<circle cx="512" cy="512" r="250" fill="none" stroke="#29f3ff" stroke-width="10" filter="url(#neon)"/>
+<!-- nucleus -->
+<g filter="url(#neon)" fill="none" stroke="#bffcff" stroke-width="5" opacity=".9">
+  <polygon points="512,452 564,482 564,542 512,572 460,542 460,482"/>
+  <path d="M460 482 L564 542 M564 482 L460 542 M512 452 V572"/>
+</g>
+<ellipse cx="430" cy="392" rx="34" ry="18" fill="#ffffff" opacity=".18" transform="rotate(-30 430 392)"/>
+<!-- orbit ring in front (lower half) -->
+<path d="M152 530 A360 96 0 0 0 872 530" transform="rotate(-14 512 512)" fill="none" stroke="#ff3fb4" stroke-width="16" filter="url(#neon)"/>

@@ -15,7 +15,7 @@ Inside the app the game detects it's running natively and uses **AdMob** (`web/g
 
 ## Requirements
 
-- Node 20+ and npm
+- Node 22+ and npm (Capacitor CLI 8 needs it)
 - Android Studio (with an Android SDK, API 36) and JDK 21
 
 ## Build & run
@@ -23,29 +23,42 @@ Inside the app the game detects it's running natively and uses **AdMob** (`web/g
 ```bash
 cd android-app
 npm install
-npm run sync        # copy ../web/game into the app + update native plugins
-npm run open        # opens Android Studio → Run ▶ on a phone or emulator
+npm run sync          # copy ../web/game into the app (debug: Google test ads) + update native plugins
+npm run open          # opens Android Studio → Run ▶ on a phone or emulator
 ```
 
-Run `npm run sync` again after every change in `../web/game`.
+Run `npm run sync` again after every change in `../web/game`. CI builds a debug APK on every PR (`.github/workflows/android-build.yml`); download it from the run's artifacts.
 
-## AdMob setup
+## What the app shell does
 
-Right now everything uses **Google's test IDs**, so you'll see test ads and can tap them safely.
+- **Fullscreen:** status and navigation bars are hidden (immersive sticky, `MainActivity.java`); a swipe shows them briefly. They are hidden again when the game gets focus back after an ad. The game may draw under the notch; the HUD keeps clear of it with `env(safe-area-inset-*)`.
+- **Portrait only** (`sensorPortrait` in `AndroidManifest.xml`).
+- **Back button** (`@capacitor/app`, `../web/game/features/android.js`): pauses during play, resumes from the pause menu, closes sheets, goes back from the sector map, exits from the title screen. It does nothing during an ad, the shield offer or the end-of-sector screens.
+- **Icon & splash:** sources in `assets/` (SVG sources in `assets/src/`). Regenerate with
+  `npx capacitor-assets generate --android --iconBackgroundColor '#0a0820' --splashBackgroundColor '#03060d'`.
 
-1. Create the app in the AdMob console and two ad units: **Rewarded** and **Banner**.
-2. App ID (`ca-app-pub-…~…`) → `android/app/src/main/res/values/strings.xml` → `admob_app_id`.
-3. Ad unit IDs (`ca-app-pub-…/…`) → `../web/game/features/ads/ads-config.js` → `admob.rewardedId`, `admob.bannerId`, and set `testing: false`.
-4. `npm run sync` and rebuild.
+## AdMob
 
-Never tap your own live ads — test on your phone with test ads (or add it as a test device in AdMob).
+Debug builds always use Google's **test** IDs, so it's safe to tap.
+
+1. In the AdMob console create the app and three ad units: **Rewarded**, **Interstitial**, **Banner**.
+2. Unit IDs (`ca-app-pub-…/…`) → `../web/game/features/ads/ads-config.js` → `admob.live`.
+3. App ID (`ca-app-pub-…~…`) → `android/release.properties` → `NEON_ADMOB_APP_ID` (see below).
+4. Build the release with `npm run build:release` (or `npm run sync:release`, then build in Android Studio). Only release builds switch to the live IDs; if a live ID is empty, it falls back to test ads.
+
+Never tap your own live ads. Add your phone as a test device in AdMob.
 
 The app asks for ad consent automatically where the law requires it (EEA/UK) using Google's consent form; set up the consent message in AdMob → Privacy & messaging.
 
-## Before publishing on Google Play
+## Release build (Google Play)
 
-- **App ID:** `com.akshat009.neoncore` (in `capacitor.config.json` and `android/app/build.gradle`). It can't change after the first upload, so pick the final one now.
+1. Create an upload keystore once (Android Studio → Build → Generate Signed App Bundle → Create new), and **back it up**. Without it you can't ship updates.
+2. Copy `android/release.properties.example` to `android/release.properties` (git-ignored) and fill in the keystore path, passwords and `NEON_ADMOB_APP_ID`.
+3. Bump `versionCode` in `android/app/build.gradle` for every upload.
+4. `npm run build:release` → `android/app/build/outputs/bundle/release/app-release.aab`.
+
+Before publishing:
+- **App ID:** `com.akshat009.neoncore` can't change after the first upload.
 - **Privacy policy URL** (required because of ads) and the **Data safety** form in Play Console.
 - **Target audience:** don't pick children under 13 unless you follow the Families policy for ads.
-- App icon & splash: replace the defaults in `android/app/src/main/res/` (or use `@capacitor/assets`).
-- Release build: Android Studio → Build → Generate Signed App Bundle (.aab).
+- **Backups:** `android:allowBackup="true"` stays on so shields, progress and Data come back after a reinstall (Android Auto Backup).

@@ -41,7 +41,7 @@ const AdMobAds = {
             if (consent.canRequestAds === false) return false;
         } catch (e) { /* consent check unavailable: carry on */ }
         try {
-            await AdMob.initialize({ initializeForTesting: ADS_CONFIG.admob.testing });
+            await AdMob.initialize({ initializeForTesting: ADMOB.testing });
             this.ready = true;
             this.preload();
             return true;
@@ -56,7 +56,7 @@ const AdMobAds = {
         if (this.rewardLoaded) return Promise.resolve(true);
         if (this.rewardLoading) return this.rewardLoading;
         this.rewardLoading = this.getPlugin()
-            .prepareRewardVideoAd({ adId: ADS_CONFIG.admob.rewardedId, isTesting: ADS_CONFIG.admob.testing })
+            .prepareRewardVideoAd({ adId: ADMOB.rewardedId, isTesting: ADMOB.testing })
             .then(() => { this.rewardLoaded = true; this.rewardLoadedAt = Date.now(); return true; })
             .catch(() => false)
             .finally(() => { this.rewardLoading = null; });
@@ -104,10 +104,10 @@ const AdMobAds = {
 
     // Skippable interstitial between sectors. Resolves when it closes (or can't show).
     async showInterstitial() {
-        if (!(await this.init()) || !ADS_CONFIG.admob.interstitialId) return 'unavailable';
+        if (!(await this.init()) || !ADMOB.interstitialId) return 'unavailable';
         const AdMob = this.getPlugin();
         try {
-            await AdMob.prepareInterstitial({ adId: ADS_CONFIG.admob.interstitialId, isTesting: ADS_CONFIG.admob.testing });
+            await AdMob.prepareInterstitial({ adId: ADMOB.interstitialId, isTesting: ADMOB.testing });
         } catch (e) { return 'unavailable'; }
         let finish;
         const closed = new Promise((resolve) => { finish = resolve; });
@@ -125,11 +125,11 @@ const AdMobAds = {
         this.init().then((ok) => {
             if (!ok) return;
             this.getPlugin().showBanner({
-                adId: ADS_CONFIG.admob.bannerId,
+                adId: ADMOB.bannerId,
                 adSize: 'ADAPTIVE_BANNER',
                 position: 'BOTTOM_CENTER',
                 margin: 0,
-                isTesting: ADS_CONFIG.admob.testing
+                isTesting: ADMOB.testing
             }).catch(() => {});
         });
     },

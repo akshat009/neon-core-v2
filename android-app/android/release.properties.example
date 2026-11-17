@@ -1,0 +1,12 @@
+# Copy to release.properties (git-ignored) and fill in. Used by app/build.gradle for release builds.
+#
+# Upload keystore: create it once with Android Studio (Build > Generate Signed App Bundle > Create new)
+# or: keytool -genkeypair -v -keystore neon-core-upload.jks -keyalg RSA -keysize 2048 -validity 10000 -alias upload
+# Keep the .jks and these passwords backed up somewhere safe: without them you can't ship updates.
+storeFile=../neon-core-upload.jks
+storePassword=
+keyAlias=upload
+keyPassword=
+
+# AdMob APP id (ca-app-pub-XXXXXXXXXXXXXXXX~YYYYYYYYYY) from the AdMob console
+NEON_ADMOB_APP_ID=
