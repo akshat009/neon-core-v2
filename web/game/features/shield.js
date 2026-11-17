@@ -60,7 +60,8 @@ function absorbHit(mine) {
     shatterMine(mine, { keepBall: true });
     shieldPop();
     invulnTime = Math.max(invulnTime, FEATURES.shieldGraceSeconds);
-    playSynth(900, 'triangle', 0.15, 0.08); setTimeout(() => playSynth(450, 'triangle', 0.25, 0.06), 60);
+    playShieldBreak();
+    haptic(30);
 }
 
 // ---------- "No shields left" offer ----------

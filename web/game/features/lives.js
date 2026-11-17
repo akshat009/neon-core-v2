@@ -32,9 +32,17 @@ function onFall() {
 }
 
 function loseLife(reason, opts) {
+    // Still learning to jump (first run, features/tutorial.js): a fall doesn't cost a life
+    if (!opts.mine && tutorialForgivesFall()) {
+        playDie();
+        pauseGame('respawn');
+        setTimeout(() => { respawnBall('safe'); resumeGame('respawn'); }, FEATURES.respawnDelayMs);
+        return;
+    }
     Lives.lastWasFall = !opts.mine;
     if (opts.mine) { opts.mine.userData.dead = true; shatterMine(opts.mine); }
     playDie();
+    haptic([50, 40, 70]);
     setLives(Lives.count - 1);
     flashLives();
     if (Lives.count > 0) announce(`Life lost. ${Lives.count} ${Lives.count === 1 ? 'life' : 'lives'} left.`);

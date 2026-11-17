@@ -64,11 +64,12 @@ function switchCore(id) {
         SaveData.save();
     }
     flashRing(pos, core.glow, 1.3);
-    playPowerup();
+    playSwitch();
     haptic(18);
     hudToast(`${core.name} CORE`, core.perk.toUpperCase(), hexColor(core.glow));
     closeCoreTray();
     renderCoreHud();
+    tutorialEvent('switch');
     return true;
 }
 
@@ -95,12 +96,6 @@ function tickCores(timeScale) {
         if (shown !== coreHudShown) { coreHudShown = shown; renderCoreCooldown(); }
         if (Cores.cooldown === 0) { renderCoreHud(); flashCoreReady(); }
     }
-}
-
-// Short vibration on phones (ignored where not supported, or when the player turned sound off)
-function haptic(ms) {
-    if (isMuted || !navigator.vibrate) return;
-    try { navigator.vibrate(ms); } catch (e) {}
 }
 
 // ---------- HUD: core button + picker ----------

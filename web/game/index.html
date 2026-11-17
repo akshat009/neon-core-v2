@@ -6,12 +6,12 @@
     <meta name="theme-color" content="#03060d">
     <title>Neon Core</title>
     <link rel="stylesheet" href="vendor/fonts/fonts.css">
-    <link rel="stylesheet" href="css/style.css?v=4.5">
-    <link rel="stylesheet" href="features/features.css?v=4.5">
-    <link rel="stylesheet" href="css/title.css?v=4.5">
-    <link rel="stylesheet" href="css/menus.css?v=4.5">
-    <link rel="stylesheet" href="css/map.css?v=4.5">
-    <link rel="stylesheet" href="css/cores.css?v=4.5">
+    <link rel="stylesheet" href="css/style.css?v=4.6">
+    <link rel="stylesheet" href="features/features.css?v=4.6">
+    <link rel="stylesheet" href="css/title.css?v=4.6">
+    <link rel="stylesheet" href="css/menus.css?v=4.6">
+    <link rel="stylesheet" href="css/map.css?v=4.6">
+    <link rel="stylesheet" href="css/cores.css?v=4.6">
 </head>
 <body>
 
@@ -87,9 +87,9 @@
                 <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M9.6 9.4a2.5 2.5 0 1 1 3.4 2.3c-.6.3-1 .8-1 1.5v.6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><circle cx="12" cy="17" r="1.1" fill="currentColor"/></svg>
                 HOW TO PLAY
             </button>
-            <button id="settings-btn" class="t-chip touch-only">
+            <button id="settings-btn" class="t-chip">
                 <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h10M18 7h2M4 17h4M12 17h8" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><circle cx="16" cy="7" r="2.2" fill="none" stroke="currentColor" stroke-width="1.8"/><circle cx="10" cy="17" r="2.2" fill="none" stroke="currentColor" stroke-width="1.8"/></svg>
-                CONTROLS
+                SETTINGS
             </button>
         </div>
     </div>
@@ -195,25 +195,48 @@
     </div>
 </div>
 
-<!-- Controls (touch screens only) -->
+<!-- Settings: sound, music, vibration (js/audio.js) and stick sensitivity (js/input.js) -->
 <div id="settings-sheet" class="t-sheet" role="dialog" aria-modal="true" aria-labelledby="settings-title">
     <div class="t-sheet-card">
         <div class="t-sheet-head">
-            <h2 id="settings-title">CONTROLS</h2>
+            <h2 id="settings-title">SETTINGS</h2>
             <button class="t-close" data-close aria-label="Close">
                 <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
             </button>
         </div>
+        <div class="set-row">
+            <div class="t-label" id="set-music-l">MUSIC</div>
+            <div class="t-seg t-seg-2" role="radiogroup" aria-labelledby="set-music-l">
+                <button class="set-opt" data-setting="music" data-on="1" role="radio">ON</button>
+                <button class="set-opt" data-setting="music" data-on="0" role="radio">OFF</button>
+            </div>
+        </div>
+        <div class="set-row">
+            <div class="t-label" id="set-sfx-l">SOUND EFFECTS</div>
+            <div class="t-seg t-seg-2" role="radiogroup" aria-labelledby="set-sfx-l">
+                <button class="set-opt" data-setting="sfx" data-on="1" role="radio">ON</button>
+                <button class="set-opt" data-setting="sfx" data-on="0" role="radio">OFF</button>
+            </div>
+        </div>
+        <div class="set-row touch-only">
+            <div class="t-label" id="set-vib-l">VIBRATION</div>
+            <div class="t-seg t-seg-2" role="radiogroup" aria-labelledby="set-vib-l">
+                <button class="set-opt" data-setting="vibration" data-on="1" role="radio">ON</button>
+                <button class="set-opt" data-setting="vibration" data-on="0" role="radio">OFF</button>
+            </div>
+        </div>
+
         <!-- Joystick sensitivity (js/input.js) -->
-        <div class="t-label">STICK SENSITIVITY</div>
-        <div class="t-seg t-seg-5" role="radiogroup" aria-label="Joystick sensitivity, 1 gentle to 5 fast">
+        <div class="touch-only t-label set-label-stick">STICK SENSITIVITY</div>
+        <div class="touch-only-block t-seg t-seg-5" role="radiogroup" aria-label="Joystick sensitivity, 1 gentle to 5 fast">
             <button class="sens-step" data-sens="1" role="radio">1</button>
             <button class="sens-step" data-sens="2" role="radio">2</button>
             <button class="sens-step" data-sens="3" role="radio">3</button>
             <button class="sens-step" data-sens="4" role="radio">4</button>
             <button class="sens-step" data-sens="5" role="radio">5</button>
         </div>
-        <div class="t-scale"><span>Gentle</span><span>Fast</span></div>
+        <div class="touch-only t-scale"><span>Gentle</span><span>Fast</span></div>
+        <button id="replay-tutorial" class="t-link set-replay">SHOW THE TUTORIAL TIPS AGAIN</button>
         <button class="t-play t-play-sm" data-close>DONE</button>
     </div>
 </div>
@@ -449,6 +472,9 @@
 
     <!-- Short message in the middle of the screen, e.g. when the core changes form (js/ui.js) -->
     <div id="hud-toast" class="hud-toast" aria-hidden="true"></div>
+
+    <!-- First-run tutorial tip (features/tutorial.js) -->
+    <div id="tut-tip" class="tut-tip" aria-hidden="true"></div>
 </div>
 
 <!-- Read out by screen readers: sector start, form changes, lives lost (js/ui.js announce) -->
@@ -517,36 +543,37 @@
 <script src="vendor/three/UnrealBloomPass.js"></script>
 
 <!-- Game scripts (order matters: each file uses globals from the ones above it) -->
-<script src="js/config.js?v=4.5"></script>
-<script src="js/audio.js?v=4.5"></script>
-<script src="js/scene.js?v=4.5"></script>
-<script src="js/world.js?v=4.5"></script>
-<script src="js/effects.js?v=4.5"></script>
-<script src="js/juice.js?v=4.5"></script>
-<script src="js/level.js?v=4.5"></script>
-<script src="js/input.js?v=4.5"></script>
-<script src="js/ui.js?v=4.5"></script>
+<script src="js/config.js?v=4.6"></script>
+<script src="js/audio.js?v=4.6"></script>
+<script src="js/scene.js?v=4.6"></script>
+<script src="js/world.js?v=4.6"></script>
+<script src="js/effects.js?v=4.6"></script>
+<script src="js/juice.js?v=4.6"></script>
+<script src="js/level.js?v=4.6"></script>
+<script src="js/input.js?v=4.6"></script>
+<script src="js/ui.js?v=4.6"></script>
 
 <!-- Features: shield, lives, ads, run flow (see features/README.md) -->
-<script src="features/config.js?v=4.5"></script>
-<script src="features/storage.js?v=4.5"></script>
-<script src="features/pause.js?v=4.5"></script>
-<script src="features/ads/ads-config.js?v=4.5"></script>
-<script src="features/ads/ads-demo.js?v=4.5"></script>
-<script src="features/ads/ads-web.js?v=4.5"></script>
-<script src="features/ads/ads-applixir.js?v=4.5"></script>
-<script src="features/ads/ads-admob.js?v=4.5"></script>
-<script src="features/ads/ads.js?v=4.5"></script>
-<script src="features/shield.js?v=4.5"></script>
-<script src="features/lives.js?v=4.5"></script>
-<script src="features/cores.js?v=4.5"></script>
-<script src="features/run.js?v=4.5"></script>
-<script src="features/sectors.js?v=4.5"></script>
-<script src="features/shop.js?v=4.5"></script>
-<script src="js/title.js?v=4.5"></script>
-<script src="features/android.js?v=4.5"></script>
+<script src="features/config.js?v=4.6"></script>
+<script src="features/storage.js?v=4.6"></script>
+<script src="features/pause.js?v=4.6"></script>
+<script src="features/ads/ads-config.js?v=4.6"></script>
+<script src="features/ads/ads-demo.js?v=4.6"></script>
+<script src="features/ads/ads-web.js?v=4.6"></script>
+<script src="features/ads/ads-applixir.js?v=4.6"></script>
+<script src="features/ads/ads-admob.js?v=4.6"></script>
+<script src="features/ads/ads.js?v=4.6"></script>
+<script src="features/shield.js?v=4.6"></script>
+<script src="features/lives.js?v=4.6"></script>
+<script src="features/cores.js?v=4.6"></script>
+<script src="features/run.js?v=4.6"></script>
+<script src="features/sectors.js?v=4.6"></script>
+<script src="features/shop.js?v=4.6"></script>
+<script src="features/tutorial.js?v=4.6"></script>
+<script src="js/title.js?v=4.6"></script>
+<script src="features/android.js?v=4.6"></script>
 
 <!-- Main loop (boots the game) -->
-<script src="js/game.js?v=4.5"></script>
+<script src="js/game.js?v=4.6"></script>
 </body>
 </html>

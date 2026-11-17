@@ -3,6 +3,7 @@
 // =========================================================
 
 let attractTime = 0;
+let timeWarp = 1;      // < 1 = slow motion for the physics (first-jump tip, features/tutorial.js)
 
 function animate() {
     requestAnimationFrame(animate);
@@ -25,8 +26,10 @@ function animate() {
 
         // Physics runs in steps of at most one 60fps frame, so a slow frame on a weak phone
         // can't move the ball far enough to pass straight through a platform.
-        const steps = Math.max(1, Math.ceil(timeScale - 0.001));
-        for(let s = 0; s < steps && isPlaying && !isGameOver && !Pause.paused; s++) stepPhysics(timeScale / steps);
+        const physScale = timeScale * timeWarp;
+        const steps = Math.max(1, Math.ceil(physScale - 0.001));
+        for(let s = 0; s < steps && isPlaying && !isGameOver && !Pause.paused; s++) stepPhysics(physScale / steps);
+        updateTutorial();                                  // first-run tips (features/tutorial.js)
     }
 
     // --- Camera: slow cinematic sway on the title screen, follow cam in play ---
@@ -126,7 +129,7 @@ function stepPhysics(timeScale) {
         if(pos.distanceTo(rings[i].position) < ballRadius + 1.2) {
             burstData(rings[i].position);
             flashRing(rings[i].position, 0x6ff8ff);
-            scene.remove(rings[i]); rings.splice(i, 1); ringsCollected++; updateUI(); playCoin();
+            scene.remove(rings[i]); rings.splice(i, 1); ringsCollected++; updateUI(); playCoin(); haptic(8);
             if(ringsCollected >= targetRings) showLevelComplete();
         }
     }
@@ -200,7 +203,7 @@ function hitsGate(sp) {
 }
 
 function showLevelComplete() {
-    isPlaying = false; playWin();
+    isPlaying = false; playWin(); haptic([20, 40, 30]);
     keys.w = keys.a = keys.s = keys.d = keys.space = false;
 
     let timeTaken = parseFloat(currentTimeStr);

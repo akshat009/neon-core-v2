@@ -67,6 +67,8 @@ let squash = 0, squashVel = 0;
 // Called from stepPhysics() in js/game.js the frame the ball touches down
 function onLanding(fallSpeed) {
     const hit = Math.min(fallSpeed, 0.8);
+    playLand(hit);
+    if (hit > 0.45) haptic(12);
     squash = Math.max(squash, Math.min(hit * 0.55, 0.3));
     squashVel = 0;
     const look = BALL_LOOKS[ballState] || BALL_LOOKS.normal;
