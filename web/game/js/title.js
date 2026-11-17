@@ -12,7 +12,7 @@
 let ATTRACT_LOOK_Y = 0, ATTRACT_LOOK_X = 0;
 function updateAttractFraming() {
     const w = window.innerWidth, h = window.innerHeight;
-    ATTRACT_LOOK_Y = w < h ? -2.2 : 0.6;
+    ATTRACT_LOOK_Y = w < h ? -3.6 : 0.6;
     ATTRACT_LOOK_X = (w >= 900 && h >= 560) ? -3.2 : (w > h ? 1.6 : 0);
 }
 updateAttractFraming();
@@ -36,7 +36,7 @@ showOnly = function (id) {
     const wasOnTitle = menuAttract;
     _showOnlyForTitle(id);
     document.body.classList.toggle('menu-open', RESULT_MENUS.includes(id));
-    if (id === 'start-menu' && !wasOnTitle) buildMenuPreview();
+    if ((id === 'start-menu' || id === 'map-menu') && !wasOnTitle) buildMenuPreview();
 };
 
 // ---------- Sheets (How to play, Controls) ----------

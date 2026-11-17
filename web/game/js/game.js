@@ -178,21 +178,6 @@ function hitsGate(sp) {
         && pos.y - ballRadius < GATE_TOP_Y - 0.2;
 }
 
-// Best clear time per difficulty + sector, kept on this device
-function saveBestTime(diff, sector, time) {
-    const KEY = 'neonCoreBestTimes';
-    let all = {};
-    try { all = JSON.parse(localStorage.getItem(KEY)) || {}; } catch (e) {}
-    const id = `${diff}-${sector}`;
-    const prev = all[id];
-    const isNew = prev === undefined || time < prev;
-    if (isNew) {
-        all[id] = time;
-        try { localStorage.setItem(KEY, JSON.stringify(all)); } catch (e) {}
-    }
-    return { isNew, prev, best: isNew ? time : prev };
-}
-
 function showLevelComplete() {
     isPlaying = false; playWin();
     keys.w = keys.a = keys.s = keys.d = keys.space = false;
@@ -234,7 +219,7 @@ function showLevelComplete() {
     countUp('lc-total', totalScore, (v) => Math.round(v).toLocaleString('en-US'), totalScore - levelScore);
 
     // Debrief stats (all real numbers from this sector)
-    const record = saveBestTime(selectedDifficulty, level, timeTaken);
+    const record = SectorProgress.record(selectedDifficulty, level, stars, timeTaken);
     document.getElementById('lc-record').classList.toggle('show', record.isNew);
     document.getElementById('lc-best').innerText = record.isNew ? (record.prev ? `was ${record.prev.toFixed(1)}s` : 'first clear') : `best ${record.best.toFixed(1)}s`;
     document.getElementById('lc-rings').innerText = `${pad2(ringsCollected)}/${pad2(targetRings)}`;
@@ -246,6 +231,7 @@ function showLevelComplete() {
     document.getElementById('lc-lives').innerText = Lives.count;
     document.getElementById('lc-shields').innerText = `${Shield.count} ${Shield.count === 1 ? 'shield' : 'shields'}`;
 
+    document.getElementById('next-level-btn').innerText = practice ? 'SECTOR MAP' : 'NEXT SECTOR';
     showOnly('level-menu');
 }
 

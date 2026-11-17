@@ -6,10 +6,11 @@
     <meta name="theme-color" content="#03060d">
     <title>Neon Core</title>
     <link rel="stylesheet" href="vendor/fonts/fonts.css">
-    <link rel="stylesheet" href="css/style.css?v=3.6">
-    <link rel="stylesheet" href="features/features.css?v=3.6">
-    <link rel="stylesheet" href="css/title.css?v=3.6">
-    <link rel="stylesheet" href="css/menus.css?v=3.6">
+    <link rel="stylesheet" href="css/style.css?v=3.7">
+    <link rel="stylesheet" href="features/features.css?v=3.7">
+    <link rel="stylesheet" href="css/title.css?v=3.7">
+    <link rel="stylesheet" href="css/menus.css?v=3.7">
+    <link rel="stylesheet" href="css/map.css?v=3.7">
 </head>
 <body>
 
@@ -68,6 +69,11 @@
         <div id="continue-info" class="continue-info"></div>
         <button id="new-run-btn" class="t-link">START A NEW RUN</button>
 
+        <button id="map-btn" class="t-ghost">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="6" cy="18" r="2.4" fill="none" stroke="currentColor" stroke-width="1.8"/><circle cx="18" cy="6" r="2.4" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M8 16.5c4-1 2-6 6-8" fill="none" stroke="currentColor" stroke-width="1.8" stroke-dasharray="2.5 2.5"/></svg>
+            SECTOR MAP
+        </button>
+
         <div class="t-actions">
             <button id="howto-btn" class="t-chip">
                 <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M9.6 9.4a2.5 2.5 0 1 1 3.4 2.3c-.6.3-1 .8-1 1.5v.6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><circle cx="12" cy="17" r="1.1" fill="currentColor"/></svg>
@@ -78,6 +84,43 @@
                 CONTROLS
             </button>
         </div>
+    </div>
+</div>
+
+<!-- Sector map: replay any sector you have unlocked (features/sectors.js) -->
+<div id="map-menu" class="fullscreen-menu map-menu" style="display: none;">
+    <div class="title-scrim m-scrim" aria-hidden="true"></div>
+    <div class="m-wrap">
+        <header class="m-head">
+            <button id="map-back" class="t-close" aria-label="Back to the title screen">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5 8 12l7 7" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </button>
+            <div class="m-title">
+                <p class="r-eyebrow">CAMPAIGN</p>
+                <h2>SECTOR MAP</h2>
+            </div>
+            <div class="m-count" aria-label="Stars earned">
+                <span class="m-dia on"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2 21 12 12 22 3 12z" fill="currentColor"/></svg></span>
+                <b id="map-stars">0</b><small id="map-stars-of">/ 0</small>
+            </div>
+        </header>
+
+        <div class="t-seg m-tabs" role="radiogroup" aria-label="Difficulty">
+            <button class="m-tab" data-mdiff="EASY" role="radio">EASY</button>
+            <button class="m-tab" data-mdiff="MEDIUM" role="radio">MEDIUM</button>
+            <button class="m-tab" data-mdiff="HARD" role="radio">HARD</button>
+        </div>
+
+        <ol id="map-list" class="m-list"></ol>
+
+        <footer class="m-foot">
+            <div class="m-dossier">
+                <small id="map-sel-label">SECTOR 01</small>
+                <span id="map-sel-info">Not cleared yet</span>
+            </div>
+            <button id="map-play" class="t-play">PLAY SECTOR 01</button>
+            <p class="m-note">Replays don't change your run. Beat your best time and stars.</p>
+        </footer>
     </div>
 </div>
 
@@ -425,32 +468,33 @@
 <script src="vendor/three/UnrealBloomPass.js"></script>
 
 <!-- Game scripts (order matters: each file uses globals from the ones above it) -->
-<script src="js/config.js?v=3.6"></script>
-<script src="js/audio.js?v=3.6"></script>
-<script src="js/scene.js?v=3.6"></script>
-<script src="js/world.js?v=3.6"></script>
-<script src="js/effects.js?v=3.6"></script>
-<script src="js/juice.js?v=3.6"></script>
-<script src="js/level.js?v=3.6"></script>
-<script src="js/input.js?v=3.6"></script>
-<script src="js/ui.js?v=3.6"></script>
+<script src="js/config.js?v=3.7"></script>
+<script src="js/audio.js?v=3.7"></script>
+<script src="js/scene.js?v=3.7"></script>
+<script src="js/world.js?v=3.7"></script>
+<script src="js/effects.js?v=3.7"></script>
+<script src="js/juice.js?v=3.7"></script>
+<script src="js/level.js?v=3.7"></script>
+<script src="js/input.js?v=3.7"></script>
+<script src="js/ui.js?v=3.7"></script>
 
 <!-- Features: shield, lives, ads, run flow (see features/README.md) -->
-<script src="features/config.js?v=3.6"></script>
-<script src="features/storage.js?v=3.6"></script>
-<script src="features/pause.js?v=3.6"></script>
-<script src="features/ads/ads-config.js?v=3.6"></script>
-<script src="features/ads/ads-demo.js?v=3.6"></script>
-<script src="features/ads/ads-web.js?v=3.6"></script>
-<script src="features/ads/ads-applixir.js?v=3.6"></script>
-<script src="features/ads/ads-admob.js?v=3.6"></script>
-<script src="features/ads/ads.js?v=3.6"></script>
-<script src="features/shield.js?v=3.6"></script>
-<script src="features/lives.js?v=3.6"></script>
-<script src="features/run.js?v=3.6"></script>
-<script src="js/title.js?v=3.6"></script>
+<script src="features/config.js?v=3.7"></script>
+<script src="features/storage.js?v=3.7"></script>
+<script src="features/pause.js?v=3.7"></script>
+<script src="features/ads/ads-config.js?v=3.7"></script>
+<script src="features/ads/ads-demo.js?v=3.7"></script>
+<script src="features/ads/ads-web.js?v=3.7"></script>
+<script src="features/ads/ads-applixir.js?v=3.7"></script>
+<script src="features/ads/ads-admob.js?v=3.7"></script>
+<script src="features/ads/ads.js?v=3.7"></script>
+<script src="features/shield.js?v=3.7"></script>
+<script src="features/lives.js?v=3.7"></script>
+<script src="features/run.js?v=3.7"></script>
+<script src="features/sectors.js?v=3.7"></script>
+<script src="js/title.js?v=3.7"></script>
 
 <!-- Main loop (boots the game) -->
-<script src="js/game.js?v=3.6"></script>
+<script src="js/game.js?v=3.7"></script>
 </body>
 </html>

@@ -21,6 +21,22 @@ let currentTimeStr = "0.0";
 let timerRunning = false;   // the sector timer starts on the first move, not at spawn
 const clock = new THREE.Clock();
 
+// ---------- Seeded layouts: the same difficulty + sector always builds the same track ----------
+// so replays from the sector map are fair and best times can be compared.
+let rand = Math.random;
+function seedSector(diff, sector) {
+    let h = 2166136261;                                   // FNV-1a hash of "DIFF-sector"
+    for (const ch of `${diff}-${sector}`) { h ^= ch.charCodeAt(0); h = Math.imul(h, 16777619); }
+    let a = h >>> 0;
+    rand = function () {                                  // mulberry32
+        a = (a + 0x6D2B79F5) >>> 0;
+        let t = a;
+        t = Math.imul(t ^ (t >>> 15), t | 1);
+        t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+        return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+}
+
 // ---------- Track plan: gaps and platform lengths ----------
 // Every gap must need a jump, and every gap must be clearable with one:
 //   • Rolling off an edge, the ball (centre at y 1.5) still lands if it reaches the next platform
@@ -49,14 +65,14 @@ function trackPlan(cfg, segments) {
     for (let i = 0; i < segments; i++) {
         let length;
         if (i === 0) length = lenMax + 4;                                        // runway to land on
-        else if (Math.random() < cfg.stoneChance) length = 4.5 + Math.random() * 2.5;   // stepping stone
-        else length = lenMin + Math.random() * (lenMax - lenMin);
+        else if (rand() < cfg.stoneChance) length = 4.5 + rand() * 2.5;   // stepping stone
+        else length = lenMin + rand() * (lenMax - lenMin);
 
         let gap = 0;
         if (i > 0) {
             // Lean towards the long end with the bias, with plenty of spread either way,
             // and never repeat almost the same gap twice in a row
-            let t = Math.min(Math.max(bias + (Math.random() - 0.5) * 0.9, 0), 1);
+            let t = Math.min(Math.max(bias + (rand() - 0.5) * 0.9, 0), 1);
             gap = minGap + (maxGap - minGap) * t;
             if (lastGap >= 0 && Math.abs(gap - lastGap) < 1) gap = gap > (minGap + maxGap) / 2 ? gap - 1.6 : gap + 1.6;
             gap = Math.min(Math.max(gap, minGap), maxGap);
@@ -72,6 +88,7 @@ function generateLevel() {
     platforms = []; edges = []; rings = []; spikes = []; movPlatforms = []; powerups = [];
 
     let cfg = diffConfig[selectedDifficulty];
+    seedSector(selectedDifficulty, level);
     maxSpeed = cfg.speed + (level * 0.015);
     targetRings = (selectedDifficulty === 'EASY' ? 2 : 3) + level * 2;
     ringsCollected = 0;
@@ -91,15 +108,15 @@ function generateLevel() {
         currentZ -= gap;
 
         // Some gaps carry a data ring in the air: only a jump through it collects it
-        const airRing = i > 1 && gap > 0 && ringsPlaced < targetRings && Math.random() < cfg.airRingChance;
+        const airRing = i > 1 && gap > 0 && ringsPlaced < targetRings && rand() < cfg.airRingChance;
         if (airRing) {
             const r = createData(i * 0.7);
-            r.position.set(Math.random() * 6 - 3, 3.4, currentZ + gap / 2);
+            r.position.set(rand() * 6 - 3, 3.4, currentZ + gap / 2);
             scene.add(r); rings.push(r); ringsPlaced++;
         }
 
         // Moving platform inside a wide gap
-        if(gap > 6 && Math.random() < cfg.movPlatChance + (level*0.02)) {
+        if(gap > 6 && rand() < cfg.movPlatChance + (level*0.02)) {
             let mPlat = createMovingPlatform();
             mPlat.position.set(0, 0, currentZ + gap/2);
             mPlat.userData = { startX: -4, endX: 4, speed: 0.05 + (maxSpeed*0.1), dir: 1 };
@@ -120,21 +137,21 @@ function generateLevel() {
             // Data pickup on the platform (until the sector has all of its rings)
             if (ringsPlaced < targetRings) {
                 let r = createData(i * 1.3);
-                r.position.set(Math.random()*8 - 4, 1.5, currentZ - length/2);
+                r.position.set(rand()*8 - 4, 1.5, currentZ - length/2);
                 scene.add(r); rings.push(r); ringsPlaced++;
             }
 
             // Hazard gates: only on platforms long enough to land, react and dodge,
             // and never right at either end (where you take off or land)
-            if (length >= 9 && Math.random() < cfg.spikeChance + (level*0.05)) {
-                let numSpikes = Math.floor(Math.random() * (level + (selectedDifficulty==='HARD'?2:0)));
+            if (length >= 9 && rand() < cfg.spikeChance + (level*0.05)) {
+                let numSpikes = Math.floor(rand() * (level + (selectedDifficulty==='HARD'?2:0)));
                 numSpikes = Math.min(numSpikes, 6);
                 for(let s=0; s<numSpikes; s++) {
                     let sp = createMine();
-                    sp.position.set(Math.random()*10 - 5, 1.2, currentZ - 3 - Math.random() * (length - 6));
+                    sp.position.set(rand()*10 - 5, 1.2, currentZ - 3 - rand() * (length - 6));
 
                     if(selectedDifficulty === 'HARD' || level > 5) {
-                        if(Math.random() > 0.5) {
+                        if(rand() > 0.5) {
                             sp.userData = { moving: true, speed: 0.02 + (level*0.005), dir: 1, startX: sp.position.x - 2, endX: sp.position.x + 2 };
                         }
                     }
@@ -143,10 +160,10 @@ function generateLevel() {
             }
 
             // Power-up box
-            if(Math.random() > 0.6) {
-                let type = Math.random() > 0.5 ? 'big' : 'small';
+            if(rand() > 0.6) {
+                let type = rand() > 0.5 ? 'big' : 'small';
                 let p = createPowerup(type, i * 0.9);
-                p.position.set(Math.random()*6-3, 1.5, currentZ - length/2 + 2);
+                p.position.set(rand()*6-3, 1.5, currentZ - length/2 + 2);
                 scene.add(p); powerups.push(p);
             }
         }
@@ -157,7 +174,7 @@ function generateLevel() {
     for (let k = platforms.length - 1; ringsPlaced < targetRings && k > 0; k--) {
         const p = platforms[k];
         const r = createData(k * 1.9);
-        r.position.set(Math.random()*8 - 4, 1.5, p.position.z + 2);
+        r.position.set(rand()*8 - 4, 1.5, p.position.z + 2);
         scene.add(r); rings.push(r); ringsPlaced++;
     }
     targetRings = rings.length;
