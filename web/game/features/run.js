@@ -11,12 +11,16 @@
 
 document.body.classList.toggle('touch', IS_TOUCH);
 
+// A sector replayed from the sector map (features/sectors.js): { sector }.
+// It never touches the saved run, and clearing or ending it goes back to the map.
+let practice = null;
+
 function showOnly(id) {
-    ['start-menu', 'level-menu', 'gameover-menu', 'restart-menu', 'pause-modal'].forEach(m => {
+    ['start-menu', 'map-menu', 'level-menu', 'gameover-menu', 'restart-menu', 'pause-modal'].forEach(m => {
         const el = document.getElementById(m);
         if (el) el.style.display = (m === id) ? 'flex' : 'none';
     });
-    menuAttract = (id === 'start-menu');   // title screen: slow camera sway (js/game.js)
+    menuAttract = (id === 'start-menu' || id === 'map-menu');   // slow camera sway behind menus (js/game.js)
     const pauseBtn = document.getElementById('pause-btn');
     if (pauseBtn) {
         pauseBtn.style.display = (id === null || id === 'pause-modal') ? 'grid' : 'none';
@@ -61,10 +65,11 @@ function beginSector() {
     generateLevel();
     lastSafe.x = 0; lastSafe.z = -2; lastSafe.plat = platforms[0] || null;
     renderLives();
-    SaveData.setRun({ sector: level, difficulty: selectedDifficulty, lives: Lives.count });
+    if (!practice) SaveData.setRun({ sector: level, difficulty: selectedDifficulty, lives: Lives.count });
 }
 
 function startNewRun() {
+    practice = null;
     level = 1;
     Lives.adContinues = 0;
     setLives(FEATURES.livesPerRun);
@@ -74,6 +79,7 @@ function startNewRun() {
 function continueRun() {
     const r = savedRun();
     if (!r) { startNewRun(); return; }
+    practice = null;
     setDifficulty(r.difficulty);   // resets level to 1, so set the sector after it
     level = r.sector;
     Lives.adContinues = 0;
@@ -84,6 +90,7 @@ function continueRun() {
 // Called from showLevelComplete() in js/game.js
 function onSectorComplete() {
     invulnTime = 0;
+    if (practice) return;
     SaveData.setRun({ sector: level + 1, difficulty: selectedDifficulty, lives: Lives.count });
 }
 
@@ -125,7 +132,7 @@ function outOfLives(reason) {
     document.getElementById('go-total').innerText = totalScore.toLocaleString('en-US');
     const canContinue = Lives.adContinues < FEATURES.maxAdContinuesPerRun;
     document.getElementById('go-revive').style.display = canContinue ? 'block' : 'none';
-    document.getElementById('skip-continue-btn').textContent = canContinue ? 'END RUN' : 'CONTINUE';
+    document.getElementById('skip-continue-btn').textContent = practice ? 'SECTOR MAP' : (canContinue ? 'END RUN' : 'CONTINUE');
 
     setTimeout(() => { if (isGameOver) showOnly('gameover-menu'); }, FEATURES.respawnDelayMs);
 }
@@ -140,11 +147,17 @@ async function continueWithAd() {
     isGameOver = false;
     isPlaying = true;
     respawnBall(Lives.lastWasFall ? 'safe' : 'here');
-    SaveData.setRun({ sector: level, difficulty: selectedDifficulty, lives: Lives.count });
+    if (!practice) SaveData.setRun({ sector: level, difficulty: selectedDifficulty, lives: Lives.count });
     resumeGame('gameover');
 }
 
 function skipContinue() {
+    if (practice) {                       // a replay just ends: back to the map, the saved run is untouched
+        resumeGame('gameover');
+        isGameOver = false;
+        openSectorMap(selectedDifficulty, practice.sector);
+        return;
+    }
     SaveData.clearRun();
     document.getElementById('rs-sector').innerText = pad2(level);
     document.getElementById('rs-best').innerText = pad2(SaveData.data.bestSector);
@@ -166,6 +179,7 @@ attachButtonAction('start-btn', () => (savedRun() ? continueRun() : startNewRun(
 attachButtonAction('new-run-btn', startNewRun);
 
 attachButtonAction('next-level-btn', () => {
+    if (practice) { openSectorMap(selectedDifficulty, level + 1); return; }
     level++;
     beginSector();
 });
@@ -174,6 +188,7 @@ attachButtonAction('exit-btn', () => {
     if (document.fullscreenElement && document.exitFullscreen) document.exitFullscreen();
     document.getElementById('ui').style.display = 'none';
     document.getElementById('mobile-controls').style.display = 'none';
+    practice = null;
     showOnly('start-menu');
     isPlaying = false;
     keys.w = keys.a = keys.s = keys.d = keys.space = false;
@@ -220,6 +235,7 @@ attachButtonAction('pause-exit-btn', async () => {
     }
     document.getElementById('ui').style.display = 'none';
     document.getElementById('mobile-controls').style.display = 'none';
+    practice = null;
     showOnly('start-menu');
     isPlaying = false;
     timerRunning = false;
