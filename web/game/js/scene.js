@@ -513,11 +513,9 @@ function createPowerup(type, phase) {
 // Player ball — Tron style: glossy black shell with thin glowing circuit lines
 // =========================================================
 
-const BALL_LOOKS = {
-    normal: { glow: 0x29f3ff, light: 0x00ffff },
-    big:    { glow: 0xffa12e, light: 0xffaa00 },
-    small:  { glow: 0x45ff6a, light: 0x00ff00 }
-};
+// One colour per core (CORES in js/config.js)
+const BALL_LOOKS = {};
+for (const id in CORES) BALL_LOOKS[id] = { glow: CORES[id].glow, light: CORES[id].light };
 
 const ballMat = new THREE.ShaderMaterial({
     uniforms: {

@@ -53,9 +53,9 @@ function stepPhysics(timeScale) {
     if(invulnTime > 0) invulnTime -= timeScale / 60;   // respawn / shield grace time
 
     // --- Movement (keyboard gives -1/0/1, touch joystick gives analog values) ---
-    let currentMaxSpeed = maxSpeed;
-    if(ballState === 'small') currentMaxSpeed *= 1.4;
-    if(ballState === 'big') currentMaxSpeed *= 0.85;
+    const core = CORES[ballState] || CORES.normal;    // the ball's current core (js/config.js)
+    let currentMaxSpeed = maxSpeed * core.speed;
+    tickCores(timeScale);                              // switch cooldown, Phantom phase (features/cores.js)
 
     let axisX = 0, axisZ = 0;
     if(keys.w) axisZ = -1; if(keys.s) axisZ = 1;
@@ -64,8 +64,8 @@ function stepPhysics(timeScale) {
 
     let targetVx = axisX * currentMaxSpeed, targetVz = axisZ * currentMaxSpeed;
 
-    vel.x += (targetVx - vel.x) * 0.15 * timeScale;
-    vel.z += (targetVz - vel.z) * 0.15 * timeScale;
+    vel.x += (targetVx - vel.x) * 0.15 * core.steer * timeScale;
+    vel.z += (targetVz - vel.z) * 0.15 * core.steer * timeScale;
 
     if(isOnMovingPlat) { pos.x += currentPlatVel.x * timeScale; pos.z += currentPlatVel.z * timeScale; }
 
@@ -137,7 +137,7 @@ function stepPhysics(timeScale) {
             burstPowerup(powerups[i].position, powerups[i].userData.type);
             flashRing(powerups[i].position, POWERUP_COLORS[powerups[i].userData.type], 1.4);
             addShake(0.25);
-            transformBall(powerups[i].userData.type);
+            pickupCore(powerups[i].userData.type);          // free try of Titan / Jet (features/cores.js)
             scene.remove(powerups[i]); powerups.splice(i, 1);
         }
     }
@@ -148,7 +148,7 @@ function stepPhysics(timeScale) {
             sp.position.x += sp.userData.speed * sp.userData.dir * timeScale;
             if(sp.position.x > sp.userData.endX || sp.position.x < sp.userData.startX) sp.userData.dir *= -1;
         }
-        if(isPlaying && !sp.userData.dead && invulnTime <= 0 && hitsGate(sp)) {
+        if(isPlaying && !sp.userData.dead && invulnTime <= 0 && Cores.phase <= 0 && hitsGate(sp)) {
             onHurdleHit(sp);                              // shield or life (features/shield.js)
             if(Pause.paused || !isPlaying) return;
         }
@@ -263,8 +263,11 @@ function showLevelComplete() {
     showOnly('level-menu');
 }
 
+// Also runs when the phone is turned: portrait gets the wider field of view again
 window.addEventListener('resize', () => {
     camera.aspect = window.innerWidth / window.innerHeight;
+    initialFov = camera.aspect < 1 ? 75 : 55;           // js/scene.js; js/juice.js adds the jump kick on top
+    camera.fov = initialFov;
     camera.updateProjectionMatrix();
     renderer.setSize(window.innerWidth, window.innerHeight);
     resizeEffects();

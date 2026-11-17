@@ -13,5 +13,8 @@ const FEATURES = {
     demoAdSeconds: 5,                // length of the demo rewarded video
     interstitialEverySectors: 3,     // a skippable interstitial after every 3rd cleared sector (never after a fail)
     interstitialMinGapSeconds: 120,  // and never sooner than this after any other ad
-    reviveDataCost: 500              // game over: spend this much Data instead of watching an ad
+    reviveDataCost: 500,             // game over: spend this much Data instead of watching an ad
+    shopShieldPrice: 1000,           // SHOP: +1 shield (core prices are in CORES, js/config.js)
+    shopLifePrice: 1500,             // SHOP: start the next new run with one extra life (one at a time)
+    coreTrayCloseMs: 3500            // the core picker closes by itself after this long
 };

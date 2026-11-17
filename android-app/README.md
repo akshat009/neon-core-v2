@@ -35,7 +35,7 @@ https://github.com/akshat009/neon-core-v2/releases/download/apk-latest/neon-core
 ## What the app shell does
 
 - **Fullscreen:** status and navigation bars are hidden (immersive sticky, `MainActivity.java`); a swipe shows them briefly. They are hidden again when the game gets focus back after an ad. The game may draw under the notch; the HUD keeps clear of it with `env(safe-area-inset-*)`.
-- **Portrait only** (`sensorPortrait` in `AndroidManifest.xml`).
+- **Portrait and landscape**: follows the phone's auto-rotate setting (`fullUser` in `AndroidManifest.xml`). The activity is not restarted on rotation (`configChanges`), the game just resizes.
 - **Back button** (`@capacitor/app`, `../web/game/features/android.js`): pauses during play, resumes from the pause menu, closes sheets, goes back from the sector map, exits from the title screen. It does nothing during an ad, the shield offer or the end-of-sector screens.
 - **Icon & splash:** sources in `assets/` (SVG sources in `assets/src/`). Regenerate with
   `npx capacitor-assets generate --android --iconBackgroundColor '#0a0820' --splashBackgroundColor '#03060d'`.

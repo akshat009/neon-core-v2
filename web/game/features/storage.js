@@ -5,6 +5,9 @@
 //   shieldDay   the day the free shields were last topped up (YYYY-MM-DD)
 //   run         the run in progress: { sector, difficulty, lives } or null
 //   bestSector  highest sector ever reached
+//   cores       cores bought in the SHOP (Standard is always owned)
+//   equippedCore the core a sector starts with (the one the player last switched to)
+//   bonusLife   1 = an extra life bought for the next new run
 //
 // The lifetime score ("TOTAL ARCHIVE") stays in its own key, see js/config.js.
 // =========================================================
@@ -12,7 +15,8 @@
 const SAVE_KEY = 'neonCoreSave.v1';
 
 const SaveData = {
-    data: { shields: FEATURES.dailyFreeShields, shieldDay: '', run: null, bestSector: 1 },
+    data: { shields: FEATURES.dailyFreeShields, shieldDay: '', run: null, bestSector: 1,
+            cores: ['normal'], equippedCore: 'normal', bonusLife: 0 },
 
     load() {
         try {
