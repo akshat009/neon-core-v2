@@ -534,3 +534,14 @@ body.menu-open #mobile-controls { visibility: hidden; }
     .g-revive-head { margin-bottom: 8px; }
     .result-menu .g-revive .btn-reward, .result-menu .btn.g-end { min-height: 42px; padding: 8px 16px; }
 }
+
+/* Game over: one emblem icon per cause (features/run.js sets data-cause) */
+.g-icon-fall { display: none; }
+#gameover-menu[data-cause="fall"] .g-icon-gate { display: none; }
+#gameover-menu[data-cause="fall"] .g-icon-fall { display: inline; }
+.g-drop { animation: g-drop 1.6s ease-in infinite; }
+@keyframes g-drop { 0% { transform: translateY(-6px); opacity: 1; } 80% { transform: translateY(16px); opacity: 0.2; } 100% { transform: translateY(16px); opacity: 0; } }
+.g-cause > div { display: flex; flex-direction: column; gap: 3px; }
+.g-cause small { font: 600 13px/1.35 var(--font-ui); color: rgba(255, 210, 215, 0.7); }
+@media (prefers-reduced-motion: reduce) { .g-drop { animation: none; } }
+@media (orientation: landscape) and (max-height: 500px) { .g-cause small { display: none; } }

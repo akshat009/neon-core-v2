@@ -89,6 +89,20 @@ function onSectorComplete() {
 
 // ---------- Out of lives ----------
 
+// How the last life was lost decides the game-over title, emblem and tip
+const GAME_OVER_CAUSES = {
+    fall: {
+        title: 'LOST IN THE VOID',
+        reason: 'You fell off the track on your last life.',
+        tip: 'Tip: watch for gaps and jump a little early. The heavy core jumps further.'
+    },
+    gate: {
+        title: 'CORE SHATTERED',
+        reason: 'You crashed into a hazard gate on your last life.',
+        tip: 'Tip: jump over gates, or keep a shield ready. Shields break gates for you.'
+    }
+};
+
 function outOfLives(reason) {
     isGameOver = true;
     isPlaying = false;
@@ -96,7 +110,12 @@ function outOfLives(reason) {
     Ads.prepareRewarded('continue');
     keys.w = keys.a = keys.s = keys.d = keys.space = false;
 
-    document.getElementById('death-reason').innerText = reason;
+    const cause = Lives.lastWasFall ? 'fall' : 'gate';
+    const info = GAME_OVER_CAUSES[cause];
+    document.getElementById('gameover-menu').dataset.cause = cause;
+    document.getElementById('go-title').innerText = info.title;
+    document.getElementById('death-reason').innerText = info.reason || reason;
+    document.getElementById('go-tip').innerText = info.tip;
     document.getElementById('go-sector').innerText = pad2(level);
     document.getElementById('go-sector-top').innerText = pad2(level);
     document.getElementById('go-sector-revive').innerText = pad2(level);
