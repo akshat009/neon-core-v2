@@ -6,8 +6,9 @@
     <meta name="theme-color" content="#03060d">
     <title>Neon Core</title>
     <link rel="stylesheet" href="vendor/fonts/fonts.css">
-    <link rel="stylesheet" href="css/style.css?v=2.4">
-    <link rel="stylesheet" href="features/features.css?v=2.4">
+    <link rel="stylesheet" href="css/style.css?v=2.5">
+    <link rel="stylesheet" href="features/features.css?v=2.5">
+    <link rel="stylesheet" href="css/title.css?v=2.5">
 </head>
 <body>
 
@@ -24,58 +25,122 @@
     </button>
 </div>
 
-<!-- Start menu -->
-<div id="start-menu" class="fullscreen-menu">
-    <div class="menu-box glass-panel start-box">
-        <div class="start-left">
-            <h1>NEON CORE</h1>
-            <p class="menu-subtitle">[ CYBER RUNNER ]</p>
+<!-- Title screen (the live 3D track plays behind it, see js/title.js) -->
+<div id="start-menu" class="fullscreen-menu title-screen">
+    <div class="title-scrim" aria-hidden="true"></div>
 
-            <div class="diff-container">
-                <button class="diff-btn" id="diff-easy" data-diff="EASY">EASY</button>
-                <button class="diff-btn active" id="diff-medium" data-diff="MEDIUM">MEDIUM</button>
-                <button class="diff-btn" id="diff-hard" data-diff="HARD">HARD</button>
+    <header class="title-head">
+        <p class="title-eyebrow">SECTOR RUNNER</p>
+        <h1 class="title-logo">NEON<span>CORE</span></h1>
+        <p class="title-tag">Roll fast. Grab the data. Don't fall.</p>
+    </header>
+
+    <div class="title-panel">
+        <div class="title-stats">
+            <div class="t-stat">
+                <small>BEST<span class="t-wide"> SECTOR</span></small>
+                <b id="title-best">01</b>
             </div>
-
-            <!-- Joystick sensitivity (touch screens only, js/input.js) -->
-            <div class="sens-row touch-only">
-                <span class="sens-label">STICK SENSITIVITY</span>
-                <div class="sens-steps" role="radiogroup" aria-label="Joystick sensitivity, 1 gentle to 5 fast">
-                    <button class="sens-step" data-sens="1" role="radio">1</button>
-                    <button class="sens-step" data-sens="2" role="radio">2</button>
-                    <button class="sens-step" data-sens="3" role="radio">3</button>
-                    <button class="sens-step" data-sens="4" role="radio">4</button>
-                    <button class="sens-step" data-sens="5" role="radio">5</button>
-                </div>
+            <div class="t-stat">
+                <small>DATA</small>
+                <b id="title-total">0</b>
             </div>
-
-            <button id="start-btn" class="btn">START RUN</button>
-            <div id="continue-info" class="continue-info"></div>
-            <button id="new-run-btn" class="btn btn-secondary">NEW RUN</button>
-        </div>
-
-        <div class="start-right">
-            <div class="rules-list">
-                <b>[ POWERUPS &amp; RULES ]</b>
-                <ul>
-                    <li><b class="c-cyan">CYAN DATA:</b> Collect all to win.</li>
-                    <li><b class="c-red">RED MINES:</b> Cost a shield, or a life.</li>
-                    <li><b class="c-blue">SHIELD:</b> Blocks one hit. 2 free every day.</li>
-                    <li><b class="c-cyan">LIVES:</b> 3 per run. Falling costs a life.</li>
-                    <li>🟩 <b class="c-green">GREEN BOX:</b> Micro Ball (Fast Speed)</li>
-                    <li>🟧 <b class="c-orange">ORANGE BOX:</b> Heavy Ball (High Jump)</li>
-                </ul>
-            </div>
-
             <!-- features/shield.js: shields you own + watch an ad for one more -->
-            <div class="reward-strip">
-                <div class="reward-info">
-                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.5 4.5 5.5v6c0 4.6 3.2 8.6 7.5 10 4.3-1.4 7.5-5.4 7.5-10v-6z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M12 6.5 8 8.1v3.6c0 2.6 1.7 4.9 4 5.8 2.3-.9 4-3.2 4-5.8V8.1z" fill="currentColor" opacity=".35"/></svg>
-                    <div><b>SHIELDS <span id="menu-shield-count">2</span></b><small>2 free every day</small></div>
-                </div>
-                <button id="menu-shield-ad" class="reward-btn"><span class="play">▶</span> AD · +1</button>
+            <div class="t-stat t-shield">
+                <small>SHIELDS</small>
+                <b>
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.5 4.5 5.5v6c0 4.6 3.2 8.6 7.5 10 4.3-1.4 7.5-5.4 7.5-10v-6z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>
+                    <span id="menu-shield-count">2</span>
+                </b>
+                <button id="menu-shield-ad" class="t-ad-btn" aria-label="Watch an ad for one more shield"><span class="play">▶</span>+1</button>
             </div>
         </div>
+
+        <div class="t-label">DIFFICULTY</div>
+        <div class="t-seg" role="radiogroup" aria-label="Difficulty">
+            <button class="diff-btn" id="diff-easy" data-diff="EASY">EASY</button>
+            <button class="diff-btn active" id="diff-medium" data-diff="MEDIUM">MEDIUM</button>
+            <button class="diff-btn" id="diff-hard" data-diff="HARD">HARD</button>
+        </div>
+
+        <button id="start-btn" class="t-play">PLAY</button>
+        <div id="continue-info" class="continue-info"></div>
+        <button id="new-run-btn" class="t-link">START A NEW RUN</button>
+
+        <div class="t-actions">
+            <button id="howto-btn" class="t-chip">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M9.6 9.4a2.5 2.5 0 1 1 3.4 2.3c-.6.3-1 .8-1 1.5v.6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><circle cx="12" cy="17" r="1.1" fill="currentColor"/></svg>
+                HOW TO PLAY
+            </button>
+            <button id="settings-btn" class="t-chip touch-only">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h10M18 7h2M4 17h4M12 17h8" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><circle cx="16" cy="7" r="2.2" fill="none" stroke="currentColor" stroke-width="1.8"/><circle cx="10" cy="17" r="2.2" fill="none" stroke="currentColor" stroke-width="1.8"/></svg>
+                CONTROLS
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- How to play (opened from the title screen) -->
+<div id="howto-sheet" class="t-sheet" role="dialog" aria-modal="true" aria-labelledby="howto-title">
+    <div class="t-sheet-card">
+        <div class="t-sheet-head">
+            <h2 id="howto-title">HOW TO PLAY</h2>
+            <button class="t-close" data-close aria-label="Close">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+            </button>
+        </div>
+        <ul class="t-rules">
+            <li>
+                <span class="t-ico i-data"><svg viewBox="0 0 24 24"><path d="M12 3l7 9-7 9-7-9z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg></span>
+                <div><b>Data shards</b><span>Collect every shard in a sector to clear it.</span></div>
+            </li>
+            <li>
+                <span class="t-ico i-mine"><svg viewBox="0 0 24 24"><path d="M12 3l7.8 4.5v9L12 21l-7.8-4.5v-9z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><circle cx="12" cy="12" r="2.6" fill="currentColor"/></svg></span>
+                <div><b>Red mines</b><span>A hit breaks a shield. No shield? You lose a life.</span></div>
+            </li>
+            <li>
+                <span class="t-ico i-shield"><svg viewBox="0 0 24 24"><path d="M12 2.5 4.5 5.5v6c0 4.6 3.2 8.6 7.5 10 4.3-1.4 7.5-5.4 7.5-10v-6z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg></span>
+                <div><b>Shields</b><span>2 free every day. Watch an ad any time for one more.</span></div>
+            </li>
+            <li>
+                <span class="t-ico i-life"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="7.5" fill="none" stroke="currentColor" stroke-width="1.8"/><circle cx="12" cy="12" r="3" fill="currentColor"/></svg></span>
+                <div><b>Lives</b><span>3 per run. Falling off the track costs one.</span></div>
+            </li>
+            <li>
+                <span class="t-ico i-micro"><svg viewBox="0 0 24 24"><rect x="5" y="5" width="14" height="14" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.8"/><rect x="9.5" y="9.5" width="5" height="5" fill="currentColor"/></svg></span>
+                <div><b>Green box</b><span>Micro core: smaller and faster.</span></div>
+            </li>
+            <li>
+                <span class="t-ico i-heavy"><svg viewBox="0 0 24 24"><rect x="5" y="5" width="14" height="14" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.8"/><rect x="8" y="8" width="8" height="8" fill="currentColor"/></svg></span>
+                <div><b>Orange box</b><span>Heavy core: slower, but jumps much higher.</span></div>
+            </li>
+        </ul>
+        <p class="t-controls touch-only">Left stick to roll · <b>JUMP</b> on the right</p>
+        <p class="t-controls no-touch"><b>WASD</b> / arrows to roll · <b>Space</b> to jump · <b>Esc</b> to pause</p>
+        <button class="t-play t-play-sm" data-close>GOT IT</button>
+    </div>
+</div>
+
+<!-- Controls (touch screens only) -->
+<div id="settings-sheet" class="t-sheet" role="dialog" aria-modal="true" aria-labelledby="settings-title">
+    <div class="t-sheet-card">
+        <div class="t-sheet-head">
+            <h2 id="settings-title">CONTROLS</h2>
+            <button class="t-close" data-close aria-label="Close">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+            </button>
+        </div>
+        <!-- Joystick sensitivity (js/input.js) -->
+        <div class="t-label">STICK SENSITIVITY</div>
+        <div class="t-seg t-seg-5" role="radiogroup" aria-label="Joystick sensitivity, 1 gentle to 5 fast">
+            <button class="sens-step" data-sens="1" role="radio">1</button>
+            <button class="sens-step" data-sens="2" role="radio">2</button>
+            <button class="sens-step" data-sens="3" role="radio">3</button>
+            <button class="sens-step" data-sens="4" role="radio">4</button>
+            <button class="sens-step" data-sens="5" role="radio">5</button>
+        </div>
+        <div class="t-scale"><span>Gentle</span><span>Fast</span></div>
+        <button class="t-play t-play-sm" data-close>DONE</button>
     </div>
 </div>
 
@@ -237,29 +302,30 @@
 <script src="vendor/three/UnrealBloomPass.js"></script>
 
 <!-- Game scripts (order matters: each file uses globals from the ones above it) -->
-<script src="js/config.js?v=2.4"></script>
-<script src="js/audio.js?v=2.4"></script>
-<script src="js/scene.js?v=2.4"></script>
-<script src="js/effects.js?v=2.4"></script>
-<script src="js/level.js?v=2.4"></script>
-<script src="js/input.js?v=2.4"></script>
-<script src="js/ui.js?v=2.4"></script>
+<script src="js/config.js?v=2.5"></script>
+<script src="js/audio.js?v=2.5"></script>
+<script src="js/scene.js?v=2.5"></script>
+<script src="js/effects.js?v=2.5"></script>
+<script src="js/level.js?v=2.5"></script>
+<script src="js/input.js?v=2.5"></script>
+<script src="js/ui.js?v=2.5"></script>
 
 <!-- Features: shield, lives, ads, run flow (see features/README.md) -->
-<script src="features/config.js?v=2.4"></script>
-<script src="features/storage.js?v=2.4"></script>
-<script src="features/pause.js?v=2.4"></script>
-<script src="features/ads/ads-config.js?v=2.4"></script>
-<script src="features/ads/ads-demo.js?v=2.4"></script>
-<script src="features/ads/ads-web.js?v=2.4"></script>
-<script src="features/ads/ads-applixir.js?v=2.4"></script>
-<script src="features/ads/ads-admob.js?v=2.4"></script>
-<script src="features/ads/ads.js?v=2.4"></script>
-<script src="features/shield.js?v=2.4"></script>
-<script src="features/lives.js?v=2.4"></script>
-<script src="features/run.js?v=2.4"></script>
+<script src="features/config.js?v=2.5"></script>
+<script src="features/storage.js?v=2.5"></script>
+<script src="features/pause.js?v=2.5"></script>
+<script src="features/ads/ads-config.js?v=2.5"></script>
+<script src="features/ads/ads-demo.js?v=2.5"></script>
+<script src="features/ads/ads-web.js?v=2.5"></script>
+<script src="features/ads/ads-applixir.js?v=2.5"></script>
+<script src="features/ads/ads-admob.js?v=2.5"></script>
+<script src="features/ads/ads.js?v=2.5"></script>
+<script src="features/shield.js?v=2.5"></script>
+<script src="features/lives.js?v=2.5"></script>
+<script src="features/run.js?v=2.5"></script>
+<script src="js/title.js?v=2.5"></script>
 
 <!-- Main loop (boots the game) -->
-<script src="js/game.js?v=2.4"></script>
+<script src="js/game.js?v=2.5"></script>
 </body>
 </html>

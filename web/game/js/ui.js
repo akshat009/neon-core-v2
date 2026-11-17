@@ -2,6 +2,9 @@
 // Neon Core — HUD, menus, buttons, fullscreen
 // =========================================================
 
+// True while the title screen is up: the camera sways slowly around the core (js/game.js)
+let menuAttract = true;
+
 // --- Difficulty picker ---
 function setDifficulty(diff) {
     selectedDifficulty = diff;

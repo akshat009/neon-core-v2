@@ -2,6 +2,8 @@
 // Neon Core — main loop: physics, collisions, win / lose
 // =========================================================
 
+let attractTime = 0;
+
 function animate() {
     requestAnimationFrame(animate);
 
@@ -27,9 +29,18 @@ function animate() {
         for(let s = 0; s < steps && isPlaying && !isGameOver && !Pause.paused; s++) stepPhysics(timeScale / steps);
     }
 
-    // --- Camera follow ---
-    camera.position.lerp(new THREE.Vector3(ball.position.x, ball.position.y + 7, ball.position.z + 10), 0.1 * (dt*60 || 1));
-    camera.lookAt(ball.position.x, ball.position.y, ball.position.z - 5);
+    // --- Camera: slow cinematic sway on the title screen, follow cam in play ---
+    if(menuAttract) {
+        attractTime += dt;
+        const a = Math.sin(attractTime * 0.18) * 0.55;
+        const b = ball.position;
+        camera.position.lerp(new THREE.Vector3(b.x + Math.sin(a) * 9, b.y + 3.2, b.z + Math.cos(a) * 9), 0.04 * (dt*60 || 1));
+        camera.lookAt(b.x + ATTRACT_LOOK_X, b.y + ATTRACT_LOOK_Y, b.z - 6);
+        ball.rotation.x -= dt * 0.9;
+    } else {
+        camera.position.lerp(new THREE.Vector3(ball.position.x, ball.position.y + 7, ball.position.z + 10), 0.1 * (dt*60 || 1));
+        camera.lookAt(ball.position.x, ball.position.y, ball.position.z - 5);
+    }
     applyCameraShake(dt);
 
     updateEffects(dt, timeScale);

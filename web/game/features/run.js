@@ -16,6 +16,7 @@ function showOnly(id) {
         const el = document.getElementById(m);
         if (el) el.style.display = (m === id) ? 'flex' : 'none';
     });
+    menuAttract = (id === 'start-menu');   // title screen: slow camera sway (js/game.js)
     const pauseBtn = document.getElementById('pause-btn');
     if (pauseBtn) {
         pauseBtn.style.display = (id === null || id === 'pause-modal') ? 'grid' : 'none';
@@ -36,11 +37,13 @@ function savedRun() {
 function refreshStartMenu() {
     const r = savedRun();
     const startBtn = document.getElementById('start-btn');
-    startBtn.textContent = r ? `CONTINUE · SECTOR ${pad2(r.sector)}` : 'START RUN';
+    startBtn.textContent = r ? 'CONTINUE' : 'PLAY';
     document.getElementById('new-run-btn').style.display = r ? 'block' : 'none';
-    document.getElementById('continue-info').textContent = r ? `${r.difficulty} · ${r.lives} ${r.lives === 1 ? 'LIFE' : 'LIVES'} LEFT` : '';
+    document.getElementById('continue-info').textContent = r ? `SECTOR ${pad2(r.sector)} · ${r.difficulty} · ${r.lives} ${r.lives === 1 ? 'LIFE' : 'LIVES'} LEFT` : '';
+    document.getElementById('title-best').textContent = pad2(SaveData.data.bestSector);
+    document.getElementById('title-total').textContent = totalScore.toLocaleString('en-US');
     renderShieldUI();
-    Ads.prepareRewarded('shield');          // for the "▶ AD · +1" button
+    Ads.prepareRewarded('shield');          // for the "▶ +1" shield button
 }
 
 // ---------- Starting sectors ----------
