@@ -10,5 +10,8 @@ const FEATURES = {
     respawnDelayMs: 700,             // show the crash for this long before respawning
     shieldOfferSeconds: 6,           // "watch ad for a shield" popup auto-skips after this
     maxAdContinuesPerRun: Infinity,  // "watch ad, +1 life" per run (Infinity = no limit)
-    demoAdSeconds: 5                 // length of the demo rewarded video
+    demoAdSeconds: 5,                // length of the demo rewarded video
+    interstitialEverySectors: 3,     // a skippable interstitial after every 3rd cleared sector (never after a fail)
+    interstitialMinGapSeconds: 120,  // and never sooner than this after any other ad
+    reviveDataCost: 500              // game over: spend this much Data instead of watching an ad
 };

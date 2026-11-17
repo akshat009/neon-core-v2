@@ -132,6 +132,9 @@ function outOfLives(reason) {
     document.getElementById('go-total').innerText = totalScore.toLocaleString('en-US');
     const canContinue = Lives.adContinues < FEATURES.maxAdContinuesPerRun;
     document.getElementById('go-revive').style.display = canContinue ? 'block' : 'none';
+    const dataBtn = document.getElementById('continue-data-btn');
+    dataBtn.style.display = totalScore >= FEATURES.reviveDataCost ? 'block' : 'none';
+    dataBtn.innerHTML = `USE ◈ ${FEATURES.reviveDataCost} DATA`;
     document.getElementById('skip-continue-btn').textContent = practice ? 'SECTOR MAP' : (canContinue ? 'END RUN' : 'CONTINUE');
 
     setTimeout(() => { if (isGameOver) showOnly('gameover-menu'); }, FEATURES.respawnDelayMs);
@@ -141,6 +144,19 @@ async function continueWithAd() {
     if (Ads.busy) return;
     const earned = await Ads.showRewarded('continue');
     if (!earned) return;                         // closed early: stay on this screen
+    revive();
+}
+
+// Game over: pay Data instead of watching an ad
+function continueWithData() {
+    if (Ads.busy || totalScore < FEATURES.reviveDataCost) return;
+    totalScore -= FEATURES.reviveDataCost;
+    saveScore(totalScore);
+    playPowerup();
+    revive();
+}
+
+function revive() {
     Lives.adContinues++;
     setLives(1);
     showOnly(null);
@@ -178,7 +194,9 @@ function restartFromSectorOne() {
 attachButtonAction('start-btn', () => (savedRun() ? continueRun() : startNewRun()));
 attachButtonAction('new-run-btn', startNewRun);
 
-attachButtonAction('next-level-btn', () => {
+attachButtonAction('next-level-btn', async () => {
+    if (Ads.busy) return;
+    await Ads.maybeInterstitial('next-sector');      // every few clears; never after a fail
     if (practice) { openSectorMap(selectedDifficulty, level + 1); return; }
     level++;
     beginSector();
@@ -225,11 +243,7 @@ attachButtonAction('pause-exit-btn', async () => {
     Ads.hideBanner();
     resumeGame('esc-pause');
 
-    // Show Demo Ad when exiting to menu
-    try {
-        await Ads.showRewarded('exit');
-    } catch (e) {}
-
+    // No ad here: a rewarded ad must be something the player chose for a reward
     if (document.fullscreenElement && document.exitFullscreen) {
         try { document.exitFullscreen().catch(() => {}); } catch(e) {}
     }
@@ -245,6 +259,7 @@ attachButtonAction('pause-exit-btn', async () => {
 });
 
 attachButtonAction('continue-ad-btn', continueWithAd);
+attachButtonAction('continue-data-btn', continueWithData);
 attachButtonAction('skip-continue-btn', skipContinue);
 attachButtonAction('restart-btn', restartFromSectorOne);
 

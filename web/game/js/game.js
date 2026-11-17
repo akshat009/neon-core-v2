@@ -155,6 +155,27 @@ function stepPhysics(timeScale) {
     }
 }
 
+// ---------- 2X Data claim on the victory screen ----------
+let lastSectorReward = 0;
+
+async function claimDoubleData() {
+    const btn = document.getElementById('lc-double');
+    if (btn.disabled || Ads.busy || !lastSectorReward) return;
+    const earned = await Ads.showRewarded('double');
+    if (!earned) return;                          // closed early: the offer stays
+    const bonus = lastSectorReward;
+    lastSectorReward = 0;
+    totalScore += bonus;
+    saveScore(totalScore);
+    const fmt = (v) => Math.round(v).toLocaleString('en-US');
+    countUp('lc-score', bonus * 2, (v) => `+${fmt(v)}`, bonus);
+    countUp('lc-total', totalScore, fmt, totalScore - bonus);
+    btn.disabled = true;
+    btn.innerHTML = `✓ 2X CLAIMED · +${fmt(bonus)} DATA`;
+    playPowerup();
+}
+attachButtonAction('lc-double', claimDoubleData);
+
 // Numbers on the level-complete card tick up instead of appearing at once
 function countUp(id, to, format, from = 0, ms = 700) {
     const el = document.getElementById(id);
@@ -217,6 +238,13 @@ function showLevelComplete() {
     countUp('lc-time', timeTaken, (v) => `${v.toFixed(1)}s`);
     countUp('lc-score', levelScore, (v) => `+${Math.round(v).toLocaleString('en-US')}`);
     countUp('lc-total', totalScore, (v) => Math.round(v).toLocaleString('en-US'), totalScore - levelScore);
+
+    // 2X Data: an opt-in rewarded ad that doubles this sector's reward, once
+    lastSectorReward = levelScore;
+    const dbl = document.getElementById('lc-double');
+    dbl.disabled = false;
+    dbl.innerHTML = `<span class="play">▶</span> WATCH AD · 2X DATA <b>+${levelScore.toLocaleString('en-US')}</b>`;
+    Ads.prepareRewarded('double');
 
     // Debrief stats (all real numbers from this sector)
     const record = SectorProgress.record(selectedDifficulty, level, stars, timeTaken);

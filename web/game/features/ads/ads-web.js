@@ -95,4 +95,18 @@ const WebAds = {
     hideBanner() {
         document.getElementById('banner-slot').classList.remove('show');
     }
+
+    ,
+    // Interstitial between levels: H5 Games Ads "next" break. Google decides whether to fill it.
+    showInterstitial(placement) {
+        return new Promise((resolve) => {
+            let done = false;
+            const end = (r) => { if (!done) { done = true; resolve(r); } };
+            try {
+                window.adBreak({ type: 'next', name: placement, adBreakDone: (info) => end(info && info.breakStatus === 'viewed' ? 'viewed' : 'unavailable') });
+            } catch (e) { end('unavailable'); }
+            setTimeout(() => end('unavailable'), 8000);   // never leave the player stuck
+        });
+    }
 };
+
