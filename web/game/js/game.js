@@ -156,17 +156,18 @@ function showLevelComplete() {
     let cfg = diffConfig[selectedDifficulty];
 
     // Star rating from par time
-    let stars = 1, remark = "ACCEPTABLE", color = "#ffaa00";
+    let stars = 1, remark = "ACCEPTABLE";
 
     let parScale = IS_TOUCH ? TOUCH_PAR_SCALE : 1;          // joystick is slower than keys
     let parTime3Stars = targetRings * cfg.timePar * parScale;
     let parTime2Stars = targetRings * (cfg.timePar + 1.5) * parScale;
 
-    if(timeTaken <= parTime3Stars) { stars = 3; remark = "OPTIMAL"; color = "#00ffcc"; }
-    else if(timeTaken <= parTime2Stars) { stars = 2; remark = "EFFICIENT"; color = "#00aaff"; }
+    if(timeTaken <= parTime3Stars) { stars = 3; remark = "OPTIMAL"; }
+    else if(timeTaken <= parTime2Stars) { stars = 2; remark = "EFFICIENT"; }
 
+    const STAR_SVG = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.8l2.7 5.9 6.4.7-4.8 4.3 1.4 6.3L12 16.8 6.3 20l1.4-6.3L2.9 9.4l6.4-.7z" fill="currentColor"/></svg>';
     let starHtml = "";
-    for(let i=0; i<3; i++) starHtml += (i < stars) ? "⭐ " : "🌑 ";
+    for(let i=0; i<3; i++) starHtml += `<span class="r-star ${i < stars ? 'on' : 'off'}">${STAR_SVG}</span>`;
 
     let difficultyMultiplier = selectedDifficulty === 'HARD' ? 3 : (selectedDifficulty === 'MEDIUM' ? 2 : 1);
     let levelScore = ((stars * 100) + (targetRings * 10)) * difficultyMultiplier;
@@ -175,17 +176,18 @@ function showLevelComplete() {
     saveScore(totalScore);
     onSectorComplete();   // saves run progress (features/run.js)
 
-    document.getElementById('lc-title').innerText = `SECTOR ${level} SECURED`;
+    document.getElementById('lc-sector').innerText = `SECTOR ${pad2(level)}`;
     document.getElementById('stars-display').innerHTML = starHtml;
+    document.getElementById('stars-display').setAttribute('aria-label', `${stars} of 3 stars`);
     document.getElementById('remark-txt').innerText = remark;
-    document.getElementById('remark-txt').style.color = color;
+    document.getElementById('remark-txt').dataset.tier = stars;
 
     document.getElementById('lc-diff').innerText = selectedDifficulty;
     document.getElementById('lc-time').innerText = `${timeTaken}s`;
     document.getElementById('lc-score').innerText = `+${levelScore}`;
-    document.getElementById('lc-total').innerText = totalScore;
+    document.getElementById('lc-total').innerText = totalScore.toLocaleString('en-US');
 
-    document.getElementById('level-menu').style.display = 'flex';
+    showOnly('level-menu');
 }
 
 window.addEventListener('resize', () => {

@@ -28,11 +28,14 @@ function buildMenuPreview() {
     ball.position.copy(pos);
 }
 
-// Rebuild the preview whenever the player comes back to the title screen
+// Rebuild the preview whenever the player comes back to the title screen,
+// and hide the HUD and touch controls behind the end-of-sector screens.
+const RESULT_MENUS = ['level-menu', 'gameover-menu', 'restart-menu'];
 const _showOnlyForTitle = showOnly;
 showOnly = function (id) {
     const wasOnTitle = menuAttract;
     _showOnlyForTitle(id);
+    document.body.classList.toggle('menu-open', RESULT_MENUS.includes(id));
     if (id === 'start-menu' && !wasOnTitle) buildMenuPreview();
 };
 

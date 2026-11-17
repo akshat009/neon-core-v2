@@ -1,0 +1,261 @@
+/* =========================================================
+   Neon Core — end-of-sector screens, pause, popups
+   Same look as the title screen (css/title.css): one card,
+   cyan accent, amber only for watch-an-ad rewards, red for failure.
+   ========================================================= */
+
+/* The HUD and touch controls hide behind the result screens (js/title.js) */
+body.menu-open #ui,
+body.menu-open #mobile-controls { visibility: hidden; }
+
+/* ---------- Backdrop: the 3D track stays visible behind the card ---------- */
+
+.fullscreen-menu.result-menu {
+    padding: calc(16px + var(--safe-t)) calc(16px + var(--safe-r)) calc(16px + var(--safe-b)) calc(16px + var(--safe-l));
+    box-sizing: border-box;
+    overflow-y: auto;
+    background: radial-gradient(ellipse at center, rgba(3, 6, 13, 0.55) 0%, rgba(3, 6, 13, 0.9) 75%);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+}
+
+/* ---------- Card ---------- */
+
+.result-menu .menu-box.r-card,
+.feature-modal .modal-card {
+    width: 100%;
+    max-width: 400px;
+    margin: auto;
+    padding: 26px 22px 18px;
+    box-sizing: border-box;
+    text-align: center;
+    color: var(--t-ink);
+    background: linear-gradient(180deg, rgba(12, 22, 36, 0.97), rgba(6, 11, 20, 0.97));
+    border: 1px solid var(--t-line);
+    border-top: 2px solid var(--neon);
+    border-radius: 10px;
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.6);
+    backdrop-filter: none;
+    animation: r-in 0.32s ease-out both;
+}
+.result-menu .r-card.danger {
+    border-top-color: #ff4a5e;
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.6), 0 0 48px rgba(255, 40, 70, 0.12);
+}
+.feature-modal .modal-card { max-width: 360px; border-top-color: var(--shield); }
+
+.r-eyebrow {
+    margin: 0 0 8px;
+    font: 600 11px var(--font-hud);
+    letter-spacing: 0.24em;
+    color: var(--t-muted);
+}
+
+.result-menu .r-card h1 {
+    margin: 0 0 14px;
+    font: 800 24px var(--font-hud);
+    letter-spacing: 0.14em;
+    color: var(--t-ink);
+    text-shadow: 0 0 22px rgba(41, 243, 255, 0.25);
+}
+.result-menu .r-card.danger h1 {
+    color: #ff6b7c;
+    text-shadow: 0 0 22px rgba(255, 60, 90, 0.35);
+}
+
+/* ---------- Stars + rating ---------- */
+
+.r-stars {
+    display: flex;
+    justify-content: center;
+    gap: 14px;
+    margin: 2px 0 12px;
+    font-size: 0;
+    letter-spacing: 0;
+    text-shadow: none;
+}
+.r-star svg { width: 42px; height: 42px; display: block; }
+.r-star.off { color: rgba(200, 226, 236, 0.16); }
+.r-star.on {
+    color: var(--neon);
+    filter: drop-shadow(0 0 10px rgba(41, 243, 255, 0.55));
+    animation: r-star-pop 0.45s cubic-bezier(0.2, 1.6, 0.4, 1) both;
+}
+.r-star:nth-child(2) { animation-delay: 0.14s; }
+.r-star:nth-child(3) { animation-delay: 0.28s; }
+
+.r-remark {
+    display: inline-block;
+    margin: 0 0 18px;
+    padding: 5px 12px;
+    font: 700 11px var(--font-hud);
+    letter-spacing: 0.24em;
+    color: var(--neon);
+    border: 1px solid currentColor;
+    border-radius: 999px;
+    text-shadow: none;
+}
+/* the old #stars-display / #remark-txt rules in style.css use ids, so match them */
+#stars-display.r-stars { margin: 2px 0 12px; font-size: 0; letter-spacing: 0; text-shadow: none; }
+#remark-txt.r-remark {
+    margin: 0 0 18px;
+    font: 700 11px var(--font-hud);
+    letter-spacing: 0.24em;
+    text-shadow: none;
+}
+.r-remark[data-tier="2"] { color: #7cc4ff; }
+.r-remark[data-tier="1"] { color: #ffb347; }
+
+/* ---------- Stats row ---------- */
+
+.r-stats {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    margin: 0 0 20px;
+    border-top: 1px solid var(--t-line);
+    border-bottom: 1px solid var(--t-line);
+}
+.r-stats > div { padding: 12px 6px; }
+.r-stats > div + div { border-left: 1px solid var(--t-line); }
+.r-stats small {
+    display: block;
+    margin-bottom: 5px;
+    font: 600 10px var(--font-hud);
+    letter-spacing: 0.14em;
+    color: var(--t-faint);
+    white-space: nowrap;
+}
+.r-stats b {
+    display: block;
+    font: 700 17px var(--font-hud);
+    letter-spacing: 0.04em;
+    color: var(--t-ink);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.r-stats .r-accent { color: var(--neon); }
+
+/* ---------- Body text ---------- */
+
+.result-menu #death-reason,
+.result-menu .pause-desc,
+.result-menu .restart-note {
+    margin: 0 0 18px;
+    font: 600 16px/1.45 var(--font-ui);
+    letter-spacing: 0.02em;
+    color: var(--t-muted);
+}
+.result-menu .restart-note b { color: var(--t-ink); }
+.result-menu #death-reason { color: var(--t-ink); }
+
+/* ---------- Buttons ---------- */
+
+.result-menu .btn,
+.feature-modal .btn {
+    display: block;
+    width: 100%;
+    min-height: 54px;
+    margin: 0 0 10px;
+    padding: 14px 16px;
+    box-sizing: border-box;
+    font: 800 15px var(--font-hud);
+    letter-spacing: 0.2em;
+    color: #02141a;
+    background: var(--neon);
+    border: none;
+    border-radius: 0;
+    box-shadow: none;
+    text-shadow: none;
+    clip-path: polygon(var(--t-cut) 0, 100% 0, 100% calc(100% - var(--t-cut)), calc(100% - var(--t-cut)) 100%, 0 100%, 0 var(--t-cut));
+    filter: drop-shadow(0 6px 16px rgba(41, 243, 255, 0.22));
+    transition: transform 0.12s ease;
+}
+.result-menu .btn:active,
+.feature-modal .btn:active { transform: scale(0.98); }
+
+.result-menu .r-next::before {
+    content: '';
+    display: inline-block;
+    margin-right: 12px;
+    vertical-align: 1px;
+    border-style: solid;
+    border-width: 6px 0 6px 10px;
+    border-color: transparent transparent transparent currentColor;
+}
+
+.result-menu .btn-reward,
+.feature-modal .btn-reward {
+    color: #1a1000;
+    background: linear-gradient(90deg, var(--reward-a), var(--reward-b));
+    letter-spacing: 0.12em;
+    filter: drop-shadow(0 6px 16px rgba(255, 180, 60, 0.25));
+}
+.result-menu .btn-reward .play,
+.feature-modal .btn-reward .play { margin-right: 6px; }
+
+.result-menu .btn-secondary,
+.feature-modal .btn-secondary {
+    min-height: 48px;
+    padding: 12px 16px;
+    font-size: 13px;
+    letter-spacing: 0.2em;
+    color: var(--t-muted);
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--t-line);
+    border-radius: 6px;
+    clip-path: none;
+    filter: none;
+}
+.result-menu .btn-secondary:hover,
+.feature-modal .btn-secondary:hover { color: var(--t-ink); border-color: rgba(140, 220, 240, 0.4); }
+
+/* ---------- "No shields left" popup ---------- */
+
+.feature-modal .modal-icon svg { width: 36px; height: 36px; filter: drop-shadow(0 0 8px rgba(74, 168, 255, 0.7)); }
+.feature-modal .modal-card h2 {
+    margin: 8px 0 6px;
+    font: 800 17px var(--font-hud);
+    letter-spacing: 0.16em;
+    color: var(--t-ink);
+    text-shadow: none;
+}
+.feature-modal .modal-card p {
+    margin: 0 0 16px;
+    font: 600 15px/1.45 var(--font-ui);
+    color: var(--t-muted);
+}
+
+/* ---------- Motion ---------- */
+
+@keyframes r-in {
+    from { opacity: 0; transform: translateY(12px) scale(0.98); }
+    to { opacity: 1; transform: none; }
+}
+@keyframes r-star-pop {
+    from { opacity: 0; transform: scale(0.4); }
+    to { opacity: 1; transform: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+    .result-menu .menu-box.r-card,
+    .feature-modal .modal-card,
+    .r-star.on { animation: none; }
+}
+
+/* ---------- Phones held sideways ---------- */
+
+@media (orientation: landscape) and (max-height: 500px) {
+    .result-menu .menu-box.r-card { padding: 16px 20px 8px; max-width: 440px; }
+    .result-menu .r-card h1 { font-size: 20px; margin-bottom: 8px; }
+    .r-eyebrow { margin-bottom: 4px; }
+    .r-star svg { width: 30px; height: 30px; }
+    #stars-display.r-stars { margin-bottom: 6px; }
+    #remark-txt.r-remark { margin-bottom: 10px; padding: 3px 10px; }
+    .r-stats { margin-bottom: 12px; }
+    .r-stats > div { padding: 7px 6px; }
+    .result-menu #death-reason,
+    .result-menu .pause-desc,
+    .result-menu .restart-note { margin-bottom: 10px; font-size: 14px; }
+    .result-menu .btn { min-height: 44px; padding: 10px 16px; margin-bottom: 8px; }
+    .result-menu .btn-secondary { min-height: 40px; padding: 9px 16px; }
+}
