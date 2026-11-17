@@ -123,10 +123,9 @@ body.menu-open #mobile-controls { visibility: hidden; }
 .r-stats small {
     display: block;
     margin-bottom: 5px;
-    font: 600 10px var(--font-hud);
-    letter-spacing: 0.14em;
-    color: var(--t-faint);
-    white-space: nowrap;
+    font: 600 11px/1.25 var(--font-hud);
+    letter-spacing: 0.08em;
+    color: var(--t-muted);
 }
 .r-stats b {
     display: block;
@@ -260,7 +259,7 @@ body.menu-open #mobile-controls { visibility: hidden; }
     .result-menu .pause-desc,
     .result-menu .restart-note { margin-bottom: 10px; font-size: 14px; }
     .result-menu .btn { min-height: 44px; padding: 10px 16px; margin-bottom: 8px; }
-    .result-menu .btn-secondary { min-height: 40px; padding: 9px 16px; }
+    .result-menu .btn-secondary { min-height: 44px; padding: 9px 16px; }
 }
 
 /* =========================================================
@@ -560,4 +559,4 @@ body.menu-open #mobile-controls { visibility: hidden; }
 .v-double .play { margin: 0; font-size: 11px; }
 .v-double[disabled] { background: rgba(125, 255, 176, 0.1); color: #7dffb0; box-shadow: none; animation: none; border: 1px solid rgba(125, 255, 176, 0.5); cursor: default; }
 .result-menu .g-revive .btn.g-data-revive { margin-top: 8px; min-height: 44px; font-size: 12px; color: #ffc85a; border-color: rgba(255, 200, 90, 0.45); }
-@media (orientation: landscape) and (max-height: 500px) { .v-double { height: 38px; margin-top: 6px; } }
+@media (orientation: landscape) and (max-height: 500px) { .v-double { height: 44px; margin-top: 6px; } }

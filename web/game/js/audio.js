@@ -18,7 +18,7 @@ const muteBtn = document.getElementById('mute-btn');
 muteBtn.addEventListener('click', () => {
     isMuted = !isMuted;
     muteBtn.classList.toggle('muted', isMuted);
-    muteBtn.setAttribute('aria-label', isMuted ? 'Unmute sound' : 'Mute sound');
+    muteBtn.setAttribute('aria-pressed', String(isMuted));      // label stays "Mute sound
     if(audioCtx) {
         if(isMuted) audioCtx.suspend();
         else audioCtx.resume();

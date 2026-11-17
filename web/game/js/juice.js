@@ -130,7 +130,7 @@ let camTilt = 0, camFovBoost = 0;
 
 // Called from animate() in js/game.js right after camera.lookAt()
 function applyCameraJuice(dt) {
-    const live = isPlaying && !isGameOver && !menuAttract;
+    const live = isPlaying && !isGameOver && !menuAttract && !reducedMotion.matches;
     const steer = live ? THREE.MathUtils.clamp(vel.x / (maxSpeed || 0.3), -1, 1) : 0;
     camTilt += (-steer * 0.038 - camTilt) * (1 - Math.pow(0.004, dt));      // up to ~2.2°
     camera.rotateZ(camTilt);

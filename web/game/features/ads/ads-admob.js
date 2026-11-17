@@ -17,6 +17,8 @@ const AdMobAds = {
     rewardLoaded: false,
     rewardLoadedAt: 0,
     rewardLoading: null,
+    bannerShown: false,
+    bannerHeight: 0,
 
     getPlugin() {
         if (!this.plugin) {
@@ -43,6 +45,11 @@ const AdMobAds = {
         try {
             await AdMob.initialize({ initializeForTesting: ADMOB.testing });
             this.ready = true;
+            // The adaptive banner's height depends on the screen (about 50-90dp, dp = CSS px here)
+            AdMob.addListener('bannerAdSizeChanged', (size) => {
+                this.bannerHeight = size && size.height > 0 ? size.height : 0;
+                if (this.bannerShown) setBannerSpace(this.bannerHeight);
+            }).catch(() => {});
             this.preload();
             return true;
         } catch (e) {
@@ -122,19 +129,22 @@ const AdMobAds = {
     },
 
     showBanner() {
+        this.bannerShown = true;
         this.init().then((ok) => {
-            if (!ok) return;
+            if (!ok || !this.bannerShown) return;
+            setBannerSpace(this.bannerHeight || 60);     // until the banner reports its real size
             this.getPlugin().showBanner({
                 adId: ADMOB.bannerId,
                 adSize: 'ADAPTIVE_BANNER',
                 position: 'BOTTOM_CENTER',
                 margin: 0,
                 isTesting: ADMOB.testing
-            }).catch(() => {});
+            }).catch(() => { if (this.bannerShown) setBannerSpace(0); });   // no banner: no gap
         });
     },
 
     hideBanner() {
+        this.bannerShown = false;
         if (this.ready) this.getPlugin().removeBanner().catch(() => {});
     }
 };

@@ -28,37 +28,6 @@
 }
 .continue-info:empty { display: none; }
 
-.reward-strip {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 12px;
-    margin: 2px 0 6px;
-    padding: 10px 14px;
-    text-align: left;
-    border: 1px solid rgba(74, 168, 255, 0.45);
-    background: linear-gradient(90deg, rgba(74, 168, 255, 0.15), rgba(74, 168, 255, 0.04));
-    border-radius: 8px;
-}
-.reward-info { display: flex; align-items: center; gap: 10px; color: #cfe8ff; }
-.reward-info svg { width: 28px; height: 28px; color: var(--shield); filter: drop-shadow(0 0 6px rgba(74, 168, 255, 0.8)); flex: none; }
-.reward-info b { display: block; font-family: var(--font-hud); font-size: 15px; letter-spacing: 2px; color: #e4f2ff; }
-.reward-info small { display: block; font-family: var(--font-ui); font-size: 12px; letter-spacing: 1.5px; font-weight: 600; color: rgba(200, 235, 255, 0.7); }
-
-.reward-btn {
-    flex: none;
-    padding: 9px 12px;
-    font: 700 13px var(--font-hud);
-    letter-spacing: 1px;
-    color: #1a1000;
-    background: linear-gradient(90deg, var(--reward-a), var(--reward-b));
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    box-shadow: 0 0 14px rgba(255, 190, 60, 0.35);
-}
-.reward-btn:active { transform: scale(0.95); }
-
 /* Rewarded-ad buttons in menus and popups */
 .btn-reward,
 .btn-reward:active {
@@ -85,10 +54,12 @@
 
 .restart-note { font-family: var(--font-ui); font-size: 16px; font-weight: 600; line-height: 1.5; color: #e6f7ff; margin: 6px 0 14px; }
 
+/* Keep the buttons above the banner ad. --banner-h is the banner's real height while it
+   shows (AdMob reports it through bannerAdSizeChanged; the demo banner sets its own). */
 #restart-menu,
 #pause-modal {
     box-sizing: border-box;
-    padding-bottom: 76px;   /* keep the buttons well above the banner */
+    padding-bottom: calc(16px + var(--banner-h) + var(--safe-b));
 }
 
 /* Demo banner ad (320×50), pinned to the bottom, away from the buttons */
@@ -113,16 +84,17 @@
 .ad-banner.show { display: flex; }
 .ad-banner.live { background: none; border: none; }      /* real AdSense banner: no demo styling */
 
-/* "Loading ad…" / "Ad not available" */
+/* "Loading ad…" / "Ad not available": below the HUD top bar, over the track */
 .ad-toast {
     position: fixed;
     left: 50%;
-    top: calc(18px + var(--safe-t));
+    top: max(22%, calc(var(--safe-t) + 120px));
     z-index: 110;
     transform: translate(-50%, -12px);
     padding: 9px 16px;
-    max-width: 86vw;
-    font: 700 12px var(--font-hud);
+    max-width: min(86vw, 360px);
+    text-align: center;
+    font: 700 13px var(--font-hud);
     letter-spacing: 1px;
     color: #1a1000;
     background: linear-gradient(90deg, var(--reward-a), var(--reward-b));
@@ -147,11 +119,11 @@
 /* ---------- HUD: lives ---------- */
 
 .lives-wrap { display: flex; align-items: center; gap: 8px; margin-top: 8px; }
-.lives-label { font: 700 10px var(--font-ui); letter-spacing: 2px; color: rgba(190, 240, 255, 0.75); }
-#lives-row { display: flex; gap: 7px; }
+.lives-label { font: 700 12px var(--font-ui); letter-spacing: 2px; color: rgba(205, 245, 255, 0.9); }
+#lives-row { display: flex; gap: 8px; }
 #lives-row .life {
-    width: 9px;
-    height: 9px;
+    width: 10px;
+    height: 10px;
     transform: rotate(45deg);
     border: 1.5px solid rgba(41, 243, 255, 0.45);
 }
@@ -171,12 +143,14 @@
 
 /* ---------- HUD: shield button ---------- */
 
+/* Desktop (keyboard): bottom-right corner. Touch: next to the jump button, placed from the
+   same --jump-* variables as the jump button (css/style.css), so the two never drift apart. */
 #shield-btn {
     position: absolute;
-    top: calc(128px + var(--safe-t));
-    right: calc(126px + var(--safe-r));
-    width: 48px;
-    height: 48px;
+    right: calc(var(--edge) + 20px + var(--safe-r));
+    bottom: calc(var(--edge) + 28px + var(--safe-b));
+    width: var(--shield-size);
+    height: var(--shield-size);
     padding: 0;
     border-radius: 50%;
     pointer-events: auto;
@@ -191,22 +165,25 @@
     -webkit-tap-highlight-color: transparent;
     transition: transform 0.15s ease, box-shadow 0.15s ease;
 }
-#shield-btn:hover {
-    transform: scale(1.06);
-    box-shadow: 0 0 22px rgba(74, 168, 255, 0.7), inset 0 0 18px rgba(74, 168, 255, 0.35);
+@media (hover: hover) {
+    #shield-btn:hover {
+        transform: scale(1.06);
+        box-shadow: 0 0 22px rgba(74, 168, 255, 0.7), inset 0 0 18px rgba(74, 168, 255, 0.35);
+    }
 }
-#shield-btn svg { width: 24px; height: 24px; filter: drop-shadow(0 0 5px rgba(74, 168, 255, 0.8)); }
+#shield-btn:active { transform: scale(0.94); }
+#shield-btn svg { width: 26px; height: 26px; filter: drop-shadow(0 0 5px rgba(74, 168, 255, 0.8)); }
 
 .shield-count {
     position: absolute;
     top: -4px;
     right: -4px;
-    min-width: 20px;
-    height: 20px;
-    padding: 0 4px;
+    min-width: 22px;
+    height: 22px;
+    padding: 0 5px;
     box-sizing: border-box;
-    border-radius: 10px;
-    font: 800 11px/20px var(--font-hud);
+    border-radius: 11px;
+    font: 800 13px/22px var(--font-hud);
     text-align: center;
     color: #03060d;
     background: var(--shield);
@@ -215,23 +192,23 @@
 
 .shield-label {
     position: absolute;
-    top: -17px;
+    top: -19px;
     left: 50%;
     transform: translateX(-50%);
-    font: 700 9px var(--font-hud);
+    font: 700 11px var(--font-hud);
     letter-spacing: 2px;
-    color: rgba(159, 210, 255, 0.85);
+    color: rgba(185, 222, 255, 0.95);
     text-shadow: 0 0 6px rgba(74, 168, 255, 0.8);
 }
 
 .ad-badge {
     display: none;
     position: absolute;
-    top: -4px;
-    right: -6px;
-    padding: 2px 5px;
+    top: -6px;
+    right: -10px;
+    padding: 3px 6px;
     border-radius: 4px;
-    font: 800 9px/1.2 var(--font-hud);
+    font: 800 11px/1.2 var(--font-hud);
     letter-spacing: 1px;
     color: #1a1000;
     background: linear-gradient(90deg, var(--reward-a), var(--reward-b));
@@ -248,39 +225,16 @@
 #shield-btn.ping { animation: shield-ping 0.4s ease-out; }
 @keyframes shield-ping { 50% { transform: scale(1.12); } }
 
-/* On touch screens the shield button sits next to the jump button */
+/* Touch, portrait: centred above the jump button (clear of its halo ring and the label) */
 body.touch #shield-btn {
-    top: auto;
-    right: calc(166px + var(--safe-r));
-    bottom: calc(108px + var(--safe-b));
-    width: 58px;
-    height: 58px;
+    right: calc(var(--jump-r) + (var(--jump-size) - var(--shield-size)) / 2 + var(--safe-r));
+    bottom: calc(var(--jump-b) + var(--jump-size) + 34px + var(--safe-b));
 }
-@media (orientation: landscape) and (max-height: 500px) {
+/* Touch, landscape: up and to the left of the jump button */
+@media (orientation: landscape) {
     body.touch #shield-btn {
-        top: auto;
-        right: calc(150px + var(--safe-r));
-        bottom: calc(96px + var(--safe-b));
-        width: 54px;
-        height: 54px;
-    }
-}
-@media (orientation: portrait) {
-    body.touch #shield-btn {
-        top: auto;
-        right: calc(46px + var(--safe-r));
-        bottom: calc(166px + var(--safe-b));
-        width: 54px;
-        height: 54px;
-    }
-}
-
-/* Fallback for narrow desktop screens */
-@media (max-width: 650px) {
-    #shield-btn {
-        top: auto;
-        bottom: calc(34px + var(--safe-b));
-        right: calc(24px + var(--safe-r));
+        right: calc(var(--jump-r) + var(--jump-size) + 26px + var(--safe-r));
+        bottom: calc(var(--jump-b) + var(--jump-size) * 0.6 + var(--safe-b));
     }
 }
 

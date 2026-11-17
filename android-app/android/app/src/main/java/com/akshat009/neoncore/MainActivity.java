@@ -3,6 +3,7 @@ package com.akshat009.neoncore;
 import android.os.Build;
 import android.os.Bundle;
 import android.view.WindowManager;
+import android.webkit.WebSettings;
 
 import androidx.core.view.WindowCompat;
 import androidx.core.view.WindowInsetsCompat;
@@ -19,8 +20,12 @@ import com.getcapacitor.BridgeActivity;
  * • The game may draw into the display cutout (notch / punch-hole). Capacitor's
  *   SystemBars plugin passes the cutout insets to the page, where the CSS keeps the HUD
  *   clear of it with env(safe-area-inset-*) (see --safe-* in web/game/css/style.css).
+ * • Android's "Font size" setting also scales the page text. It is capped at 115% so text
+ *   still gets a little bigger for people who need it, without breaking the HUD layout.
  */
 public class MainActivity extends BridgeActivity {
+
+    private static final int MAX_TEXT_ZOOM = 115;   // percent
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -32,6 +37,11 @@ public class MainActivity extends BridgeActivity {
             getWindow().setAttributes(params);
         }
         hideSystemBars();
+
+        if (getBridge() != null && getBridge().getWebView() != null) {
+            WebSettings settings = getBridge().getWebView().getSettings();
+            settings.setTextZoom(Math.min(settings.getTextZoom(), MAX_TEXT_ZOOM));
+        }
     }
 
     @Override

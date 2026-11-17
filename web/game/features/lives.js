@@ -23,7 +23,7 @@ function renderLives() {
     let html = '';
     for (let i = 0; i < slots; i++) html += `<span class="life${i < Lives.count ? ' on' : ''}"></span>`;
     row.innerHTML = html;
-    row.setAttribute('aria-label', `${Lives.count} lives`);
+    row.setAttribute('aria-label', `${Lives.count} ${Lives.count === 1 ? 'life' : 'lives'}`);
 }
 
 // Fall off the track (called from js/game.js)
@@ -37,6 +37,7 @@ function loseLife(reason, opts) {
     playDie();
     setLives(Lives.count - 1);
     flashLives();
+    if (Lives.count > 0) announce(`Life lost. ${Lives.count} ${Lives.count === 1 ? 'life' : 'lives'} left.`);
 
     if (Lives.count <= 0) { outOfLives(reason); return; }
 

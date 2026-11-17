@@ -79,12 +79,22 @@ const Ads = {
 
     showBanner(placement) {
         try { AD_NETWORKS[this.network].showBanner(placement); } catch (e) {}
+        // HTML banners (demo, web) sit in #banner-slot, 12px above the bottom edge.
+        // The AdMob banner is native and reports its own height (features/ads/ads-admob.js).
+        const slot = document.getElementById('banner-slot');
+        if (slot.classList.contains('show')) setBannerSpace(slot.offsetHeight + 12);
     },
 
     hideBanner() {
         try { AD_NETWORKS[this.network].hideBanner(); } catch (e) {}
+        setBannerSpace(0);
     }
 };
+
+// Space the menus keep free at the bottom for the banner (--banner-h, features/features.css)
+function setBannerSpace(px) {
+    document.documentElement.style.setProperty('--banner-h', `${Math.max(0, Math.round(px))}px`);
+}
 
 // "Remove Ads" purchase (coming with Google Play billing): forced ads off, rewarded ads stay opt-in
 function adsRemoved() {
