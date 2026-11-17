@@ -15,7 +15,7 @@ Inside the app the game detects it's running natively and uses **AdMob** (`web/g
 
 ## Requirements
 
-- Node 20+ and npm
+- Node 22+ and npm (Capacitor CLI 8 needs it)
 - Android Studio (with an Android SDK, API 36) and JDK 21
 
 ## Build & run
