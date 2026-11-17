@@ -89,6 +89,20 @@ function onSectorComplete() {
 
 // ---------- Out of lives ----------
 
+// How the last life was lost decides the game-over title, emblem and tip
+const GAME_OVER_CAUSES = {
+    fall: {
+        title: 'LOST IN THE VOID',
+        reason: 'You fell off the track on your last life.',
+        tip: 'Tip: watch for gaps and jump a little early. The heavy core jumps further.'
+    },
+    gate: {
+        title: 'CORE SHATTERED',
+        reason: 'You crashed into a hazard gate on your last life.',
+        tip: 'Tip: jump over gates, or keep a shield ready. Shields break gates for you.'
+    }
+};
+
 function outOfLives(reason) {
     isGameOver = true;
     isPlaying = false;
@@ -96,13 +110,22 @@ function outOfLives(reason) {
     Ads.prepareRewarded('continue');
     keys.w = keys.a = keys.s = keys.d = keys.space = false;
 
-    document.getElementById('death-reason').innerText = reason;
+    const cause = Lives.lastWasFall ? 'fall' : 'gate';
+    const info = GAME_OVER_CAUSES[cause];
+    document.getElementById('gameover-menu').dataset.cause = cause;
+    document.getElementById('go-title').innerText = info.title;
+    document.getElementById('death-reason').innerText = info.reason || reason;
+    document.getElementById('go-tip').innerText = info.tip;
     document.getElementById('go-sector').innerText = pad2(level);
+    document.getElementById('go-sector-top').innerText = pad2(level);
+    document.getElementById('go-sector-revive').innerText = pad2(level);
+    document.getElementById('go-best').innerText = `best ${pad2(Math.max(SaveData.data.bestSector, level))}`;
     document.getElementById('go-data').innerText = `${pad2(ringsCollected)}/${pad2(targetRings)}`;
-    document.getElementById('go-total').innerText = totalScore;
+    document.getElementById('go-bar').style.width = `${targetRings ? Math.round(ringsCollected / targetRings * 100) : 0}%`;
+    document.getElementById('go-total').innerText = totalScore.toLocaleString('en-US');
     const canContinue = Lives.adContinues < FEATURES.maxAdContinuesPerRun;
-    document.getElementById('continue-ad-btn').style.display = canContinue ? 'block' : 'none';
-    document.getElementById('skip-continue-btn').textContent = canContinue ? 'SKIP' : 'CONTINUE';
+    document.getElementById('go-revive').style.display = canContinue ? 'block' : 'none';
+    document.getElementById('skip-continue-btn').textContent = canContinue ? 'END RUN' : 'CONTINUE';
 
     setTimeout(() => { if (isGameOver) showOnly('gameover-menu'); }, FEATURES.respawnDelayMs);
 }
