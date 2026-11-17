@@ -3,7 +3,7 @@
 //
 // • Cores are bought in the SHOP with Data (features/shop.js). Standard is always owned.
 //   Stats, prices and texts: CORES in js/config.js.
-// • During a run the player switches with the core button (touch) or keys 1–5 (keyboard),
+// • During a run the player switches with the core button (touch) or keys 1–5 / Q (keyboard),
 //   e.g. Magnet when data sits somewhere awkward, Jet before a long gap.
 // • After a switch there is a cooldown (5s, Phantom 12s), so the player has to plan ahead
 //   instead of swapping for every single obstacle.
@@ -166,11 +166,19 @@ coreTray.addEventListener('click', (e) => {
     if (opt) switchCore(opt.dataset.core);
 });
 
-// Keyboard: 1–5 picks a core straight away (in the order shown in the picker)
+// Keyboard (the mouse pointer is hidden while playing):
+//   1–5  pick that core straight away (numbers shown on the picker tiles)
+//   Q    the next core in the list
 window.addEventListener('keydown', (e) => {
+    if (!isPlaying || e.repeat) return;
+    const list = Cores.available();
+    if (e.code === 'KeyQ') {
+        if (list.length < 2) return;
+        switchCore(list[(list.indexOf(ballState) + 1) % list.length]);
+        return;
+    }
     const n = /^Digit([1-5])$/.exec(e.code);
-    if (!n || !isPlaying) return;
-    const id = Cores.available()[Number(n[1]) - 1];
+    const id = n && list[Number(n[1]) - 1];
     if (id) switchCore(id);
 });
 

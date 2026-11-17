@@ -725,7 +725,8 @@ body.touch .touch-only { display: flex; }
 
     .sys-label { display: none; }
 
-    #joystick { width: 136px; height: 136px; left: calc(22px + var(--safe-l)); bottom: calc(34px + var(--safe-b)); }
+    :root { --joy-size: 136px; --joy-b: 34px; }    /* the core picker sits right above the stick (css/cores.css) */
+    #joystick { width: var(--joy-size); height: var(--joy-size); left: calc(22px + var(--safe-l)); bottom: calc(var(--joy-b) + var(--safe-b)); }
     #joy-knob { width: 58px; height: 58px; left: calc(50% - 29px); top: calc(50% - 29px); }
     :root { --jump-size: 100px; --jump-r: 26px; --jump-b: 40px; --shield-size: 54px; }
     #btn-jump { font-size: 13px; }
