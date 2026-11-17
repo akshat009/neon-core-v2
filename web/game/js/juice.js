@@ -4,7 +4,7 @@
 // • Landing: the ball squashes and a shockwave ring spreads over the floor
 // • Falling: the ball stretches a little
 // • Pickups: data shards get pulled into the ball, every pickup flashes a ring
-// • Mines: hover and spin, with a pulsing red glow on the floor under them
+// • Hazard gates: scrolling stripes, a sweeping scan light, pulsing red glow on the floor
 // • Camera: slight roll when steering, wider view while airborne / in micro form
 // • Mouse cursor hides while a sector is being played
 // Everything here is visual only: no physics or scoring changes.
@@ -95,7 +95,7 @@ function updateSquash(dt) {
     ballMat.uniforms.uRadius.value = ballRadius;
 }
 
-// ---------- Pickups, mines, nucleus ----------
+// ---------- Pickups, hazard gates, nucleus ----------
 
 const MAGNET_RANGE = 2.6;   // extra distance (beyond touching) at which shards start flying in
 
@@ -107,15 +107,19 @@ function updatePickupsAndMines(dt, t) {
         }
     }
 
+    // Hazard gates: stripes scroll, a scan light sweeps up and down, everything pulses
+    hazardTex.offset.x = (hazardTex.offset.x - dt * 0.6) % 1;
     for (const sp of spikes) {
-        const inner = sp.children[0];
-        if (!inner) continue;
+        const gate = sp.children[0];
+        if (!gate || !gate.userData.scan) continue;
         const ph = sp.userData.phase || 0;
-        inner.position.y = Math.sin(t * 2.1 + ph) * 0.16;
-        inner.rotation.y += dt * 1.4;
-        inner.rotation.x = Math.sin(t * 0.9 + ph) * 0.35;
+        gate.userData.scan.position.y = Math.sin(t * 2.4 + ph) * (GATE_H / 2 - 0.12);
     }
-    mineFloorMat.opacity = 0.42 + Math.sin(t * 5) * 0.16;
+    const pulse = 0.5 + 0.5 * Math.sin(t * 5);
+    gateFrameMat.color.setRGB(1, 0.18 + pulse * 0.12, 0.26 + pulse * 0.1);
+    gateStripeMat.opacity = 0.65 + pulse * 0.3;
+    gatePostMat.emissiveIntensity = 0.3 + pulse * 0.25;
+    mineFloorMat.opacity = 0.42 + pulse * 0.3 - 0.15;
 
     nucleus.rotation.x -= dt * 2.2;
     nucleus.rotation.y += dt * 1.6;

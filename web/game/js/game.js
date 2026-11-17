@@ -148,7 +148,7 @@ function stepPhysics(timeScale) {
             sp.position.x += sp.userData.speed * sp.userData.dir * timeScale;
             if(sp.position.x > sp.userData.endX || sp.position.x < sp.userData.startX) sp.userData.dir *= -1;
         }
-        if(isPlaying && !sp.userData.dead && invulnTime <= 0 && pos.distanceTo(sp.position) < ballRadius + 0.8) {
+        if(isPlaying && !sp.userData.dead && invulnTime <= 0 && hitsGate(sp)) {
             onHurdleHit(sp);                              // shield or life (features/shield.js)
             if(Pause.paused || !isPlaying) return;
         }
@@ -166,6 +166,16 @@ function countUp(id, to, format, from = 0, ms = 700) {
     };
     el.innerText = format(from);
     requestAnimationFrame(step);
+}
+
+// Hazard gate hit box: the frame's width and depth, up to the top bar, a little forgiving
+// at the edges so a graze doesn't count. Jumping over the top bar clears it.
+function hitsGate(sp) {
+    const dx = Math.abs(pos.x - sp.position.x);
+    const dz = Math.abs(pos.z - sp.position.z);
+    return dx < GATE_W / 2 + ballRadius * 0.55
+        && dz < GATE_D / 2 + ballRadius * 0.7
+        && pos.y - ballRadius < GATE_TOP_Y - 0.2;
 }
 
 function showLevelComplete() {
