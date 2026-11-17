@@ -242,7 +242,8 @@ function togglePauseMenu() {
         pauseGame('esc-pause');
         lockInput();
         modal.style.display = 'flex';
-        Ads.showBanner('pause');
+        // No banner here: a pause screen opened mid-run puts it next to RESUME and invites
+        // accidental clicks (AdMob policy). The banner only shows on Run Reset.
         focusDialog(modal);
     }
 }

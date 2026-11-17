@@ -47,7 +47,9 @@ Debug builds always use Google's **test** IDs, so it's safe to tap.
 1. In the AdMob console create the app and three ad units: **Rewarded**, **Interstitial**, **Banner**.
 2. Unit IDs (`ca-app-pub-…/…`) → `../web/game/features/ads/ads-config.js` → `admob.live`.
 3. App ID (`ca-app-pub-…~…`) → `android/release.properties` → `NEON_ADMOB_APP_ID` (see below).
-4. Build the release with `npm run build:release` (or `npm run sync:release`, then build in Android Studio). Only release builds switch to the live IDs; if a live ID is empty, it falls back to test ads.
+4. Build the release with `npm run build:release` (or `npm run sync:release`, then build in Android Studio). Only release builds switch to the live IDs.
+
+**Safety checks:** a release build stops with a clear message if any live ad unit id is empty (`sync:release`), or if `release.properties` has no keystore or no real `NEON_ADMOB_APP_ID` (Gradle `bundleRelease` / `assembleRelease`). Add `-PallowTestRelease` to Gradle only to try a release build locally.
 
 Never tap your own live ads. Add your phone as a test device in AdMob.
 
@@ -59,6 +61,7 @@ The app asks for ad consent automatically where the law requires it (EEA/UK) usi
 2. Copy `android/release.properties.example` to `android/release.properties` (git-ignored) and fill in the keystore path, passwords and `NEON_ADMOB_APP_ID`.
 3. Bump `versionCode` in `android/app/build.gradle` for every upload.
 4. `npm run build:release` → `android/app/build/outputs/bundle/release/app-release.aab`.
+5. Play Console → App content → Privacy policy: `https://play.asaxenadev.com/privacy.html` (also linked in the game's Settings). Fill the Data safety form to match it: no data collected by the developer; advertising ID, device info and approximate location collected by Google AdMob for ads, analytics and fraud prevention; data is encrypted in transit; users can delete data by clearing app storage.
 
 Before publishing:
 - **App ID:** `com.akshat009.neoncore` can't change after the first upload.

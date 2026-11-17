@@ -89,7 +89,9 @@ function generateLevel() {
 
     let cfg = diffConfig[selectedDifficulty];
     seedSector(selectedDifficulty, level);
-    maxSpeed = cfg.speed + (level * 0.015);
+    // Speed climbs each sector but stops growing after Sector 30, so very high sectors stay
+    // playable with touch controls (gaps scale with this speed, js/level.js gapLimits)
+    maxSpeed = cfg.speed + Math.min(level, 30) * 0.015;
     targetRings = (selectedDifficulty === 'EASY' ? 2 : 3) + level * 2;
     ringsCollected = 0;
 

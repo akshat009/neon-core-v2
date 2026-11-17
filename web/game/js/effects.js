@@ -243,16 +243,19 @@ function applyCameraShake(dt) {
     shakeAmount *= Math.pow(0.015, dt);
 }
 
-// ---------- Bloom (glow) with automatic fallback ----------
-// ?quality=high forces bloom on, ?quality=low forces it off. Otherwise bloom turns itself
-// off if the first seconds of play run below ~32 fps.
+// ---------- Bloom (glow) and graphics quality ----------
+// Settings → Graphics (also ?quality=high|low in the address):
+//   AUTO  bloom on; turns itself off (and drops to 1.5× resolution) if the first seconds of
+//         play run below ~32 fps
+//   HIGH  bloom always on, up to 2× resolution
+//   LOW   no bloom, 1× resolution (and no anti-aliasing from the next start), for budget phones
 // The scene is rendered into a multisampled target (WebGL2) so edges stay anti-aliased with bloom on.
 
 const qualityParam = new URLSearchParams(window.location.search).get('quality');
+const graphicsMode = () => qualityParam || Settings.data.graphics;
 let composer = null, bloomPass = null, useBloom = false;
 
 (function setupBloom() {
-    if (qualityParam === 'low') return;
     if (!THREE.EffectComposer || !THREE.RenderPass || !THREE.UnrealBloomPass) return; // add-ons failed to load
     try {
         let target;
@@ -266,11 +269,21 @@ let composer = null, bloomPass = null, useBloom = false;
         composer.addPass(new THREE.RenderPass(scene, camera));
         bloomPass = new THREE.UnrealBloomPass(new THREE.Vector2(window.innerWidth, window.innerHeight), 0.8, 0.25, 0.28);
         composer.addPass(bloomPass);
-        useBloom = true;
+        useBloom = graphicsMode() !== 'low';
     } catch (e) { composer = null; useBloom = false; }
 })();
 
-let perfFrames = 0, perfTime = 0, perfChecked = qualityParam === 'high';
+let perfFrames = 0, perfTime = 0, perfChecked = graphicsMode() !== 'auto';
+
+// Called when the player changes Settings → Graphics
+function applyGraphics() {
+    const mode = graphicsMode();
+    useBloom = !!composer && mode !== 'low';
+    renderer.setPixelRatio(mode === 'low' ? 1 : Math.min(window.devicePixelRatio, 2));
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    resizeEffects();
+    perfFrames = 0; perfTime = 0; perfChecked = mode !== 'auto';          // AUTO measures again
+}
 function trackPerformance(dt) {
     if (perfChecked || !isPlaying || Pause.paused) return;
     perfFrames++; perfTime += dt;

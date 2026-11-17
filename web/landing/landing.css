@@ -379,6 +379,7 @@ kbd.wide { min-width: 128px; }
     color: var(--muted);
 }
 .footer p { margin: 0; }
+.footer a { color: inherit; text-underline-offset: 3px; }
 
 /* =========================================================
    Smaller screens

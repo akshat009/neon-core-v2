@@ -21,7 +21,7 @@ let isMuted = false;
 // ---------- Settings ----------
 
 const Settings = {
-    data: { music: true, sfx: true, vibration: true },
+    data: { music: true, sfx: true, vibration: true, graphics: 'auto' },   // graphics: js/effects.js
     load() {
         try { Object.assign(this.data, JSON.parse(localStorage.getItem('neonCoreSettings') || '{}')); } catch (e) {}
     },
@@ -29,20 +29,24 @@ const Settings = {
         this.data[key] = on;
         try { localStorage.setItem('neonCoreSettings', JSON.stringify(this.data)); } catch (e) {}
         applyVolumes();
+        if (key === 'graphics' && typeof applyGraphics === 'function') applyGraphics();
     }
 };
 Settings.load();
 
 // Vibration. kind: light (data) · medium (landing, core switch) · heavy (shield) ·
 // error (life lost) · success (sector cleared)
+// In the app: the Haptics plugin's vibrate() = a one-shot at full strength. (Its impact()
+// styles are 43-60 ms at 40-100% strength: too short for the cheap vibration motors in many
+// budget phones to spin up, so nothing was felt.) Patterns are played as several one-shots.
 const HAPTICS = {
-    light:   { impact: 'LIGHT',  ms: 30 },
-    medium:  { impact: 'MEDIUM', ms: 45 },
-    heavy:   { impact: 'HEAVY',  ms: 70 },
-    error:   { notification: 'ERROR',   ms: [70, 60, 140] },
-    success: { notification: 'SUCCESS', ms: [40, 60, 60] }
+    light:   [35],
+    medium:  [55],
+    heavy:   [90],
+    error:   [90, 70, 150],          // on, off, on …
+    success: [50, 60, 70]
 };
-let hapticsPlugin = null;
+let hapticsPlugin = null, hapticsError = '';
 function nativeHaptics() {
     if (hapticsPlugin === null) {
         const cap = window.Capacitor;
@@ -52,15 +56,23 @@ function nativeHaptics() {
     return hapticsPlugin;
 }
 function haptic(kind) {
-    const h = HAPTICS[kind] || HAPTICS.light;
     if (!Settings.data.vibration) return;
+    const pattern = HAPTICS[kind] || HAPTICS.light;
     const native = nativeHaptics();
-    if (native) {
-        const done = h.impact ? native.impact({ style: h.impact }) : native.notification({ type: h.notification });
-        done.catch(() => { try { navigator.vibrate && navigator.vibrate(h.ms); } catch (e) {} });
+    if (!native) {
+        try { navigator.vibrate && navigator.vibrate(pattern); } catch (e) {}
         return;
     }
-    try { navigator.vibrate && navigator.vibrate(h.ms); } catch (e) {}
+    let t = 0;
+    pattern.forEach((ms, i) => {
+        if (i % 2 === 0) {
+            setTimeout(() => native.vibrate({ duration: ms }).catch((err) => {
+                hapticsError = (err && err.message) || String(err);
+                try { navigator.vibrate && navigator.vibrate(ms); } catch (e) {}
+            }), t);
+        }
+        t += ms;
+    });
 }
 
 // ---------- Audio graph: sfx + music → compressor → speakers ----------
@@ -382,16 +394,24 @@ const Music = {
 
 // ---------- Settings sheet: on / off buttons ----------
 
+// Buttons carry data-on="1|0" (on/off settings) or data-val="…" (graphics)
+const setOptValue = (b) => (b.dataset.val !== undefined ? b.dataset.val : b.dataset.on === '1');
+
 function renderSettings() {
     document.querySelectorAll('.set-opt').forEach((b) => {
-        const on = Settings.data[b.dataset.setting] === (b.dataset.on === '1');
+        const on = Settings.data[b.dataset.setting] === setOptValue(b);
         b.classList.toggle('active', on);
         b.setAttribute('aria-checked', String(on));
     });
 }
 document.querySelectorAll('.set-opt').forEach((b) => b.addEventListener('click', () => {
-    Settings.set(b.dataset.setting, b.dataset.on === '1');
+    Settings.set(b.dataset.setting, setOptValue(b));
     renderSettings();
-    if (b.dataset.setting === 'vibration' && b.dataset.on === '1') haptic('medium');   // feel it once
+    if (b.dataset.setting === 'vibration' && b.dataset.on === '1') {
+        // Feel it once; if the phone refused, say why (helps when testing on a device)
+        hapticsError = '';
+        haptic('heavy');
+        setTimeout(() => { if (hapticsError) showAdToast('Vibration not available: ' + hapticsError, 3500); }, 400);
+    }
 }));
 renderSettings();

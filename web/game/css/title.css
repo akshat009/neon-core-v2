@@ -496,3 +496,9 @@ body.touch .no-touch { display: none; }
 .t-seg.touch-only-block { display: none; }
 body.touch .t-seg.touch-only-block { display: grid; }
 .set-replay { display: block; margin: 4px auto 12px; }
+.t-seg-3 { grid-template-columns: repeat(3, 1fr); }
+.set-row .t-seg.t-seg-3 { width: 186px; }
+.t-seg-3 .set-opt { letter-spacing: 0.06em; }
+.set-note { margin: -4px 0 14px; font: 600 12px/1.35 var(--font-ui); color: var(--t-muted); }
+.set-links { display: flex; justify-content: center; gap: 18px; margin: 0 0 12px; }
+.set-links .t-link { display: inline-block; margin: 0; }

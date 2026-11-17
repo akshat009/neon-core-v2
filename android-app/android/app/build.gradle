@@ -47,6 +47,19 @@ android {
     }
 }
 
+// A Play Store build (bundleRelease / assembleRelease) must be signed and use your own AdMob
+// app id. Stop early with a clear message instead of producing an upload that Play or AdMob
+// would reject. (-PallowTestRelease skips this, e.g. to try a release build locally.)
+gradle.taskGraph.whenReady { graph ->
+    def releaseTask = graph.allTasks.any { it.project == project && (it.name == 'bundleRelease' || it.name == 'assembleRelease') }
+    if (releaseTask && !project.hasProperty('allowTestRelease')) {
+        def missing = []
+        if (!releaseProps['storeFile']) missing << 'storeFile (keystore)'
+        if (!(releaseProps['NEON_ADMOB_APP_ID'] ?: '').startsWith('ca-app-pub-') || releaseProps['NEON_ADMOB_APP_ID'] == TEST_ADMOB_APP_ID) missing << 'NEON_ADMOB_APP_ID'
+        if (missing) throw new GradleException("Release build stopped: set ${missing.join(' and ')} in android/release.properties (see release.properties.example).")
+    }
+}
+
 repositories {
     flatDir{
         dirs '../capacitor-cordova-android-plugins/src/main/libs', 'libs'

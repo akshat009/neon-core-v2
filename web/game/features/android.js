@@ -4,7 +4,8 @@
 // Only inside the Android app. With a backButton listener registered, Capacitor no
 // longer closes the app on its own, so every case is handled here. Pressing Back
 // again and again always ends up on the title screen, and from there closes the app:
-//   • demo ad on screen → nothing (it has its own close button)
+//   • an ad loading or on screen → nothing (it closes on its own; every ad step has a
+//     time limit in features/ads/*, so this can't lock Back for long)
 //   • How to play / Controls sheet open → close it
 //   • "No shields left" popup → skip it (same as SKIP)
 //   • playing → pause;  pause menu → main menu
@@ -12,9 +13,14 @@
 //   • game over → END RUN (same as the button: shows Run Reset, or the map in a replay)
 //   • title screen → "Press Back again to exit", a second Back within 2s closes the app
 //
-// A real AdMob ad is its own Android screen and takes the Back press itself, so a Back
-// that reaches the page means no ad is showing, even if an ad request is still loading.
+// A real AdMob ad is its own Android screen and takes the Back press itself. While an ad is
+// still loading ("Loading ad…") Back does nothing, so it can't open the pause menu under a
+// pending ad (e.g. the shield offer, which hides itself before the ad starts).
 // =========================================================
+
+// Outside links (Privacy Policy): in the app a plain link is opened in the phone's browser by
+// Capacitor; target="_blank" would try to open a window inside the WebView instead.
+if (isNativeApp()) document.querySelectorAll('a[data-external]').forEach(a => a.removeAttribute('target'));
 
 (function setupAndroidBack() {
     if (!isNativeApp()) return;
@@ -38,7 +44,7 @@
 
     function onBack() {
         if (document.getElementById('demo-ad').classList.contains('show')) return;
-        showAdLoading(false);
+        if (Ads.busy) return;
 
         if (document.querySelector('.t-sheet.open')) { closeSheets(); return; }
         if (document.getElementById('shield-offer').classList.contains('show')) { skipShieldOffer(); return; }

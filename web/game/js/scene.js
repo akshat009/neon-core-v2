@@ -14,8 +14,11 @@ let initialAspect = window.innerWidth / window.innerHeight;
 let initialFov = initialAspect < 1 ? 75 : 55; // Wider FOV for portrait mode
 const camera = new THREE.PerspectiveCamera(initialFov, initialAspect, 0.1, 250);
 
-const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: "high-performance" });
-renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+// Graphics LOW (Settings, js/effects.js applyGraphics): no anti-aliasing (only at start-up),
+// 1× resolution, no bloom
+const startLowGraphics = Settings.data.graphics === 'low' || new URLSearchParams(location.search).get('quality') === 'low';
+const renderer = new THREE.WebGLRenderer({ antialias: !startLowGraphics, powerPreference: "high-performance" });
+renderer.setPixelRatio(startLowGraphics ? 1 : Math.min(window.devicePixelRatio, 2));
 renderer.setSize(window.innerWidth, window.innerHeight);
 document.body.appendChild(renderer.domElement);
 
