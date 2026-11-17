@@ -1,6 +1,10 @@
 # Builds the Android app (debug APK) on every pull request and on pushes to main
 # that touch the game or the Android project, so a broken Gradle / Capacitor setup
-# shows up before it reaches a phone. The APK is attached to the run as an artifact.
+# shows up before it reaches a phone. The APK is attached to the run as an artifact (zip).
+#
+# On main the APK is also put on the "apk-latest" pre-release as a plain .apk file, so it can
+# be downloaded straight to a phone from one fixed link:
+#   https://github.com/akshat009/neon-core-v2/releases/download/apk-latest/neon-core-debug.apk
 
 name: Android build
 
@@ -11,6 +15,9 @@ on:
     branches: [main]
     paths: ['android-app/**', 'web/game/**', '.github/workflows/android-build.yml']
   workflow_dispatch:
+
+permissions:
+  contents: write   # to update the apk-latest release (main only)
 
 concurrency:
   group: android-build-${{ github.ref }}
@@ -52,3 +59,20 @@ jobs:
           name: neon-core-debug-apk
           path: android-app/android/app/build/outputs/apk/debug/app-debug.apk
           if-no-files-found: error
+
+      - name: Publish the APK on the apk-latest release (main only)
+        if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+        working-directory: android-app/android/app/build/outputs/apk/debug
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+        run: |
+          cp app-debug.apk neon-core-debug.apk
+          NOTES="Latest debug build of main (Google test ads). Commit: ${GITHUB_SHA::7}. Install neon-core-debug.apk on the phone."
+          if gh release view apk-latest -R "$REPO" > /dev/null 2>&1; then
+            gh release edit apk-latest -R "$REPO" --notes "$NOTES"
+          else
+            gh release create apk-latest -R "$REPO" --target "$GITHUB_SHA" --prerelease \
+              --title "Neon Core - latest debug APK" --notes "$NOTES"
+          fi
+          gh release upload apk-latest neon-core-debug.apk -R "$REPO" --clobber
