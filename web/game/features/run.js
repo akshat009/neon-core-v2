@@ -98,11 +98,15 @@ function outOfLives(reason) {
 
     document.getElementById('death-reason').innerText = reason;
     document.getElementById('go-sector').innerText = pad2(level);
+    document.getElementById('go-sector-top').innerText = pad2(level);
+    document.getElementById('go-sector-revive').innerText = pad2(level);
+    document.getElementById('go-best').innerText = `best ${pad2(Math.max(SaveData.data.bestSector, level))}`;
     document.getElementById('go-data').innerText = `${pad2(ringsCollected)}/${pad2(targetRings)}`;
-    document.getElementById('go-total').innerText = totalScore;
+    document.getElementById('go-bar').style.width = `${targetRings ? Math.round(ringsCollected / targetRings * 100) : 0}%`;
+    document.getElementById('go-total').innerText = totalScore.toLocaleString('en-US');
     const canContinue = Lives.adContinues < FEATURES.maxAdContinuesPerRun;
-    document.getElementById('continue-ad-btn').style.display = canContinue ? 'block' : 'none';
-    document.getElementById('skip-continue-btn').textContent = canContinue ? 'SKIP' : 'CONTINUE';
+    document.getElementById('go-revive').style.display = canContinue ? 'block' : 'none';
+    document.getElementById('skip-continue-btn').textContent = canContinue ? 'END RUN' : 'CONTINUE';
 
     setTimeout(() => { if (isGameOver) showOnly('gameover-menu'); }, FEATURES.respawnDelayMs);
 }
