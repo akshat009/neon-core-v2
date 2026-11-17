@@ -16,6 +16,7 @@ document.body.classList.toggle('touch', IS_TOUCH);
 let practice = null;
 
 function showOnly(id) {
+    lockInput();
     ['start-menu', 'map-menu', 'level-menu', 'gameover-menu', 'restart-menu', 'pause-modal'].forEach(m => {
         const el = document.getElementById(m);
         if (el) el.style.display = (m === id) ? 'flex' : 'none';
@@ -47,7 +48,7 @@ function refreshStartMenu() {
     document.getElementById('title-best').textContent = pad2(SaveData.data.bestSector);
     document.getElementById('title-total').textContent = totalScore.toLocaleString('en-US');
     renderShieldUI();
-    Ads.prepareRewarded('shield');          // for the "▶ +1" shield button
+    Ads.prepareRewarded('shield');          // for the "+1" shield ad button
 }
 
 // ---------- Starting sectors ----------
@@ -224,6 +225,7 @@ function togglePauseMenu() {
         Ads.hideBanner();
     } else {
         pauseGame('esc-pause');
+        lockInput();
         modal.style.display = 'flex';
         Ads.showBanner('pause');
     }

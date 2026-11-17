@@ -48,7 +48,11 @@ const Ads = {
             setGameAudio(true);
             this.busy = false;
         }
-        if (result === 'unavailable') showAdToast('Ad not available right now — try again in a moment.');
+        if (result === 'unavailable') {
+            showAdToast(navigator.onLine === false
+                ? "You're offline. Ads need an internet connection."
+                : 'Ad not available right now. Try again in a moment.');
+        }
         return result === 'viewed';
     },
 

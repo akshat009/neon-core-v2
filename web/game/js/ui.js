@@ -39,11 +39,19 @@ function enterFullscreen() {
     } catch(e) {}
 }
 
-// --- Menu buttons (click + touch) ---
+// --- Menu buttons ---
+// Buttons act on a real click (finger down AND up on the same button), not on touchstart,
+// so a thumb that is still on the joystick / jump area, a scroll or a stray touch can't start
+// an ad or skip a popup. Right after a screen or popup appears, input is ignored briefly.
+let uiLockUntil = 0;
+function lockInput(ms = 350) { uiLockUntil = Math.max(uiLockUntil, performance.now() + ms); }
+
 function attachButtonAction(id, action) {
     const btn = document.getElementById(id);
-    btn.addEventListener('click', action);
-    btn.addEventListener('touchstart', (e) => { e.stopPropagation(); if (e.cancelable) e.preventDefault(); action(); }, {passive: false});
+    btn.addEventListener('click', (e) => {
+        if (performance.now() < uiLockUntil) return;
+        action(e);
+    });
 }
 
 // Start / Next / Exit / Restart buttons are wired in features/run.js (run flow, lives, ads).

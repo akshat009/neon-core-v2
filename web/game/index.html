@@ -6,11 +6,11 @@
     <meta name="theme-color" content="#03060d">
     <title>Neon Core</title>
     <link rel="stylesheet" href="vendor/fonts/fonts.css">
-    <link rel="stylesheet" href="css/style.css?v=3.9">
-    <link rel="stylesheet" href="features/features.css?v=3.9">
-    <link rel="stylesheet" href="css/title.css?v=3.9">
-    <link rel="stylesheet" href="css/menus.css?v=3.9">
-    <link rel="stylesheet" href="css/map.css?v=3.9">
+    <link rel="stylesheet" href="css/style.css?v=4.0">
+    <link rel="stylesheet" href="features/features.css?v=4.0">
+    <link rel="stylesheet" href="css/title.css?v=4.0">
+    <link rel="stylesheet" href="css/menus.css?v=4.0">
+    <link rel="stylesheet" href="css/map.css?v=4.0">
 </head>
 <body>
 
@@ -54,7 +54,7 @@
                     <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.5 4.5 5.5v6c0 4.6 3.2 8.6 7.5 10 4.3-1.4 7.5-5.4 7.5-10v-6z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>
                     <span id="menu-shield-count">2</span>
                 </b>
-                <button id="menu-shield-ad" class="t-ad-btn" aria-label="Watch an ad for one more shield"><span class="play">▶</span>+1</button>
+                <button id="menu-shield-ad" class="t-ad-btn" aria-label="Watch an ad for one more shield"><span class="play" aria-hidden="true"></span>+1</button>
             </div>
         </div>
 
@@ -243,9 +243,9 @@
                         <small>SECTOR SCORE</small>
                         <b id="lc-score" class="v-score">+0</b>
                     </div>
-                    <span id="lc-record" class="v-record">★ NEW RECORD</span>
+                    <span id="lc-record" class="v-record"><svg class="ico-inline" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.8l2.7 5.9 6.4.7-4.8 4.3 1.4 6.3L12 16.8 6.3 20l1.4-6.3L2.9 9.4l6.4-.7z" fill="currentColor"/></svg> NEW RECORD</span>
                 </div>
-                <button id="lc-double" class="v-double"><span class="play">▶</span> WATCH AD · 2X DATA <b id="lc-double-amt">+0</b></button>
+                <button id="lc-double" class="v-double"><span class="play" aria-hidden="true"></span> WATCH AD · 2X DATA <b id="lc-double-amt">+0</b></button>
                 <div class="v-grid">
                     <div><small>TIME</small><b id="lc-time">0.0s</b><em id="lc-best"></em></div>
                     <div><small>DATA RINGS</small><b id="lc-rings">00/00</b><em id="lc-rings-pct"></em></div>
@@ -344,7 +344,7 @@
                     <span>1 LIFE</span>
                 </div>
                 <p>Watch a short ad to get 1 life and keep going from here, in <b>Sector <span id="go-sector-revive">01</span></b>.</p>
-                <button id="continue-ad-btn" class="btn btn-reward"><span class="play">▶</span> WATCH AD · +1 LIFE</button>
+                <button id="continue-ad-btn" class="btn btn-reward"><span class="play" aria-hidden="true"></span> WATCH AD · +1 LIFE</button>
                 <button id="continue-data-btn" class="btn btn-secondary g-data-revive">USE ◈ 500 DATA</button>
             </div>
 
@@ -433,7 +433,7 @@
         <div class="modal-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.5 4.5 5.5v6c0 4.6 3.2 8.6 7.5 10 4.3-1.4 7.5-5.4 7.5-10v-6z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M12 6.5 8 8.1v3.6c0 2.6 1.7 4.9 4 5.8 2.3-.9 4-3.2 4-5.8V8.1z" fill="currentColor" opacity=".35"/></svg></div>
         <h2>NO SHIELDS LEFT</h2>
         <p>Watch a short ad to get a shield and keep your run going.</p>
-        <button id="shield-offer-watch" class="btn btn-reward"><span class="play">▶</span> WATCH AD · +1 SHIELD</button>
+        <button id="shield-offer-watch" class="btn btn-reward"><span class="play" aria-hidden="true"></span> WATCH AD · +1 SHIELD</button>
         <button id="shield-offer-skip" class="btn btn-secondary">SKIP · LOSE 1 LIFE</button>
         <div class="modal-timer"><div id="shield-offer-bar"></div></div>
     </div>
@@ -450,7 +450,7 @@
     <div class="demo-ad-top">
         <span class="ad-tag">DEMO AD</span>
         <span class="demo-ad-count"><span id="demo-ad-count">5</span>s</span>
-        <button id="demo-ad-close" class="demo-ad-close" aria-label="Close ad">✕</button>
+        <button id="demo-ad-close" class="demo-ad-close" aria-label="Close ad"><svg class="ico-inline" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg></button>
     </div>
     <div class="demo-ad-body">
         <div class="demo-ad-art"></div>
@@ -470,33 +470,33 @@
 <script src="vendor/three/UnrealBloomPass.js"></script>
 
 <!-- Game scripts (order matters: each file uses globals from the ones above it) -->
-<script src="js/config.js?v=3.9"></script>
-<script src="js/audio.js?v=3.9"></script>
-<script src="js/scene.js?v=3.9"></script>
-<script src="js/world.js?v=3.9"></script>
-<script src="js/effects.js?v=3.9"></script>
-<script src="js/juice.js?v=3.9"></script>
-<script src="js/level.js?v=3.9"></script>
-<script src="js/input.js?v=3.9"></script>
-<script src="js/ui.js?v=3.9"></script>
+<script src="js/config.js?v=4.0"></script>
+<script src="js/audio.js?v=4.0"></script>
+<script src="js/scene.js?v=4.0"></script>
+<script src="js/world.js?v=4.0"></script>
+<script src="js/effects.js?v=4.0"></script>
+<script src="js/juice.js?v=4.0"></script>
+<script src="js/level.js?v=4.0"></script>
+<script src="js/input.js?v=4.0"></script>
+<script src="js/ui.js?v=4.0"></script>
 
 <!-- Features: shield, lives, ads, run flow (see features/README.md) -->
-<script src="features/config.js?v=3.9"></script>
-<script src="features/storage.js?v=3.9"></script>
-<script src="features/pause.js?v=3.9"></script>
-<script src="features/ads/ads-config.js?v=3.9"></script>
-<script src="features/ads/ads-demo.js?v=3.9"></script>
-<script src="features/ads/ads-web.js?v=3.9"></script>
-<script src="features/ads/ads-applixir.js?v=3.9"></script>
-<script src="features/ads/ads-admob.js?v=3.9"></script>
-<script src="features/ads/ads.js?v=3.9"></script>
-<script src="features/shield.js?v=3.9"></script>
-<script src="features/lives.js?v=3.9"></script>
-<script src="features/run.js?v=3.9"></script>
-<script src="features/sectors.js?v=3.9"></script>
-<script src="js/title.js?v=3.9"></script>
+<script src="features/config.js?v=4.0"></script>
+<script src="features/storage.js?v=4.0"></script>
+<script src="features/pause.js?v=4.0"></script>
+<script src="features/ads/ads-config.js?v=4.0"></script>
+<script src="features/ads/ads-demo.js?v=4.0"></script>
+<script src="features/ads/ads-web.js?v=4.0"></script>
+<script src="features/ads/ads-applixir.js?v=4.0"></script>
+<script src="features/ads/ads-admob.js?v=4.0"></script>
+<script src="features/ads/ads.js?v=4.0"></script>
+<script src="features/shield.js?v=4.0"></script>
+<script src="features/lives.js?v=4.0"></script>
+<script src="features/run.js?v=4.0"></script>
+<script src="features/sectors.js?v=4.0"></script>
+<script src="js/title.js?v=4.0"></script>
 
 <!-- Main loop (boots the game) -->
-<script src="js/game.js?v=3.9"></script>
+<script src="js/game.js?v=4.0"></script>
 </body>
 </html>

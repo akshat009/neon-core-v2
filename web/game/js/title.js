@@ -42,6 +42,7 @@ showOnly = function (id) {
 // ---------- Sheets (How to play, Controls) ----------
 
 function openSheet(id) {
+    lockInput();
     const sheet = document.getElementById(id);
     sheet.classList.add('open');
     const closeBtn = sheet.querySelector('[data-close]');

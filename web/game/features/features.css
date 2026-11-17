@@ -66,7 +66,16 @@
     background: linear-gradient(90deg, var(--reward-a), var(--reward-b));
     box-shadow: 0 0 20px rgba(255, 190, 60, 0.45);
 }
-.play { display: inline-block; margin-right: 4px; font-size: 0.85em; }
+.play {                                       /* play triangle, drawn in CSS (no emoji glyph) */
+    display: inline-block;
+    width: 0; height: 0;
+    margin-right: 6px;
+    vertical-align: 0.05em;
+    border-style: solid;
+    border-width: 0.34em 0 0.34em 0.56em;
+    border-color: transparent transparent transparent currentColor;
+}
+.ico-inline { display: inline-block; width: 1.05em; height: 1.05em; vertical-align: -0.16em; }
 
 /* ---------- Out of lives / restart screens ---------- */
 

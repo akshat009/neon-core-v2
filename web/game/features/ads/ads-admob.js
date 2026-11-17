@@ -15,6 +15,7 @@ const AdMobAds = {
     ready: false,
     initPromise: null,
     rewardLoaded: false,
+    rewardLoadedAt: 0,
     rewardLoading: null,
 
     getPlugin() {
@@ -56,7 +57,7 @@ const AdMobAds = {
         if (this.rewardLoading) return this.rewardLoading;
         this.rewardLoading = this.getPlugin()
             .prepareRewardVideoAd({ adId: ADS_CONFIG.admob.rewardedId, isTesting: ADS_CONFIG.admob.testing })
-            .then(() => { this.rewardLoaded = true; return true; })
+            .then(() => { this.rewardLoaded = true; this.rewardLoadedAt = Date.now(); return true; })
             .catch(() => false)
             .finally(() => { this.rewardLoading = null; });
         return this.rewardLoading;
@@ -69,6 +70,9 @@ const AdMobAds = {
     async showRewarded() {
         if (!(await this.init())) return 'unavailable';
         const AdMob = this.getPlugin();
+
+        // A preloaded ad can expire (AdMob ads are good for about an hour): load a fresh one
+        if (this.rewardLoaded && Date.now() - this.rewardLoadedAt > 45 * 60 * 1000) this.rewardLoaded = false;
 
         if (!this.rewardLoaded) {
             showAdLoading(true);
@@ -86,7 +90,9 @@ const AdMobAds = {
         ]);
 
         this.rewardLoaded = false;
-        // Resolves when the reward is earned; the ad may still be on screen, so wait for "closed"
+        // The plugin (v8) resolves showRewardVideoAd() only when the user earns the reward, and fires
+        // onRewardedVideoAdReward at the same moment; closing early fires only Dismissed.
+        // The ad may still be on screen after the reward, so wait for "closed" either way.
         AdMob.showRewardVideoAd().then(() => { earned = true; }).catch(() => finish('failed'));
         const how = await closed;
 

@@ -171,7 +171,7 @@ async function claimDoubleData() {
     countUp('lc-score', bonus * 2, (v) => `+${fmt(v)}`, bonus);
     countUp('lc-total', totalScore, fmt, totalScore - bonus);
     btn.disabled = true;
-    btn.innerHTML = `✓ 2X CLAIMED · +${fmt(bonus)} DATA`;
+    btn.innerHTML = `<svg class="ico-inline" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5 10 17l9-10" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg> 2X CLAIMED · +${fmt(bonus)} DATA`;
     playPowerup();
 }
 attachButtonAction('lc-double', claimDoubleData);
@@ -243,7 +243,7 @@ function showLevelComplete() {
     lastSectorReward = levelScore;
     const dbl = document.getElementById('lc-double');
     dbl.disabled = false;
-    dbl.innerHTML = `<span class="play">▶</span> WATCH AD · 2X DATA <b>+${levelScore.toLocaleString('en-US')}</b>`;
+    dbl.innerHTML = `<span class="play" aria-hidden="true"></span> WATCH AD · 2X DATA <b>+${levelScore.toLocaleString('en-US')}</b>`;
     Ads.prepareRewarded('double');
 
     // Debrief stats (all real numbers from this sector)
