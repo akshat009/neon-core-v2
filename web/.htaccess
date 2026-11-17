@@ -5,3 +5,19 @@ RewriteEngine On
 RewriteCond %{HTTP_HOST} ^(www\.)?asaxenadev\.com$ [NC]
 RewriteRule ^(.*)$ https://play.asaxenadev.com/$1 [R=301,L]
 </IfModule>
+
+# Always check for a fresh index.html. The game's JS/CSS links carry ?v= version numbers,
+# so a stale cached page would keep loading the old game after a deploy.
+<IfModule mod_headers.c>
+    <FilesMatch "\.html?$">
+        Header set Cache-Control "no-cache, must-revalidate"
+        Header unset Expires
+    </FilesMatch>
+</IfModule>
+
+# Hostinger runs LiteSpeed: keep its server-side page cache off the HTML pages too
+<IfModule LiteSpeed>
+    RewriteEngine On
+    RewriteCond %{REQUEST_URI} (/|\.html?)$
+    RewriteRule .* - [E=Cache-Control:no-cache]
+</IfModule>
