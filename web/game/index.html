@@ -6,10 +6,10 @@
     <meta name="theme-color" content="#03060d">
     <title>Neon Core</title>
     <link rel="stylesheet" href="vendor/fonts/fonts.css">
-    <link rel="stylesheet" href="css/style.css?v=3.2">
-    <link rel="stylesheet" href="features/features.css?v=3.2">
-    <link rel="stylesheet" href="css/title.css?v=3.2">
-    <link rel="stylesheet" href="css/menus.css?v=3.2">
+    <link rel="stylesheet" href="css/style.css?v=3.3">
+    <link rel="stylesheet" href="features/features.css?v=3.3">
+    <link rel="stylesheet" href="css/title.css?v=3.3">
+    <link rel="stylesheet" href="css/menus.css?v=3.3">
 </head>
 <body>
 
@@ -146,21 +146,79 @@
 </div>
 
 <!-- Level complete menu -->
-<div id="level-menu" class="fullscreen-menu result-menu">
-    <div class="menu-box r-card">
-        <p class="r-eyebrow"><span id="lc-sector">SECTOR 01</span> · <span id="lc-diff">MEDIUM</span></p>
-        <h1 id="lc-title">SECTOR CLEARED</h1>
-        <div id="stars-display" class="r-stars" aria-label="Stars"></div>
-        <div id="remark-txt" class="r-remark">OPTIMAL</div>
-
-        <div class="r-stats">
-            <div><small>TIME</small><b id="lc-time">0.0s</b></div>
-            <div><small>REWARD</small><b id="lc-score" class="r-accent">+0</b></div>
-            <div><small>TOTAL DATA</small><b id="lc-total">0</b></div>
+<!-- Victory: sector cleared (js/game.js → showLevelComplete) -->
+<div id="level-menu" class="fullscreen-menu result-menu victory-menu">
+    <div class="v-wrap">
+        <div class="v-hero">
+            <div class="v-halo" aria-hidden="true"></div>
+            <svg class="v-emblem" viewBox="0 0 200 200" aria-hidden="true">
+                <defs>
+                    <linearGradient id="v-cup" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0" stop-color="#eafcff"/><stop offset="1" stop-color="#29f3ff"/>
+                    </linearGradient>
+                    <linearGradient id="v-ribbon" x1="0" y1="0" x2="1" y2="0">
+                        <stop offset="0" stop-color="#29f3ff"/><stop offset=".5" stop-color="#9b5cff"/><stop offset="1" stop-color="#ff3fb4"/>
+                    </linearGradient>
+                </defs>
+                <g class="v-spin"><circle cx="100" cy="100" r="94" fill="none" stroke="#29f3ff" stroke-width="1.5" stroke-dasharray="3 9" opacity=".7"/></g>
+                <g class="v-spin-rev"><circle cx="100" cy="100" r="86" fill="none" stroke="#ff3fb4" stroke-width="2" stroke-dasharray="40 14 6 14" opacity=".8"/></g>
+                <polygon points="100,22 167.5,61 167.5,139 100,178 32.5,139 32.5,61" fill="rgba(41,243,255,.06)" stroke="#ff3fb4" stroke-width="3"/>
+                <polygon points="100,36 155,68 155,132 100,164 45,132 45,68" fill="none" stroke="#29f3ff" stroke-width="1.6" opacity=".9"/>
+                <!-- wings -->
+                <g fill="none" stroke="#29f3ff" stroke-width="3.2" stroke-linecap="round">
+                    <path d="M74 66 L42 58"/><path d="M74 76 L38 74"/><path d="M74 86 L42 90"/><path d="M76 96 L50 104"/>
+                    <path d="M126 66 L158 58"/><path d="M126 76 L162 74"/><path d="M126 86 L158 90"/><path d="M124 96 L150 104"/>
+                </g>
+                <!-- trophy -->
+                <path d="M78 56 H122 V70 C122 88 112 98 100 100 C88 98 78 88 78 70 Z" fill="url(#v-cup)"/>
+                <path d="M78 62 H68 C68 76 74 82 82 84 M122 62 H132 C132 76 126 82 118 84" fill="none" stroke="#eafcff" stroke-width="3" stroke-linecap="round"/>
+                <rect x="96" y="100" width="8" height="10" fill="#bffcff"/>
+                <rect x="86" y="110" width="28" height="6" rx="1.5" fill="#29f3ff"/>
+                <!-- ribbon -->
+                <path d="M30 122 H170 L162 133 L170 144 H30 L38 133 Z" fill="#0a0f22" stroke="url(#v-ribbon)" stroke-width="2.5"/>
+                <text x="100" y="139.5" text-anchor="middle" class="v-word">VICTORY</text>
+                <circle cx="100" cy="160" r="6" fill="none" stroke="#29f3ff" stroke-width="2"/>
+                <circle cx="100" cy="160" r="2" fill="#ff3fb4"/>
+                <g class="v-sparks" fill="#ffd27a">
+                    <circle cx="44" cy="40" r="1.6"/><circle cx="160" cy="34" r="1.3"/><circle cx="172" cy="104" r="1.5"/>
+                    <circle cx="26" cy="104" r="1.2"/><circle cx="150" cy="172" r="1.4"/><circle cx="52" cy="170" r="1.1"/>
+                </g>
+            </svg>
         </div>
 
-        <button id="next-level-btn" class="btn r-next">NEXT SECTOR</button>
-        <button id="exit-btn" class="btn btn-secondary">MAIN MENU</button>
+        <div class="v-body">
+            <p class="r-eyebrow"><span id="lc-sector">SECTOR 01</span> · <span id="lc-diff">MEDIUM</span> · DEBRIEF</p>
+            <h1 id="lc-title" class="v-title">SECTOR CLEARED</h1>
+            <div class="v-rating">
+                <div id="stars-display" class="r-stars" aria-label="Stars"></div>
+                <span id="remark-txt" class="r-remark">OPTIMAL</span>
+            </div>
+
+            <div class="v-card">
+                <div class="v-score-row">
+                    <div>
+                        <small>SECTOR SCORE</small>
+                        <b id="lc-score" class="v-score">+0</b>
+                    </div>
+                    <span id="lc-record" class="v-record">★ NEW RECORD</span>
+                </div>
+                <div class="v-grid">
+                    <div><small>TIME</small><b id="lc-time">0.0s</b><em id="lc-best"></em></div>
+                    <div><small>DATA RINGS</small><b id="lc-rings">00/00</b><em id="lc-rings-pct"></em></div>
+                    <div><small>GATES DODGED</small><b id="lc-gates">0</b><em id="lc-gates-of"></em></div>
+                    <div><small>LIVES LEFT</small><b id="lc-lives">3</b><em id="lc-shields"></em></div>
+                </div>
+                <div class="v-total"><span>TOTAL DATA</span><b id="lc-total">0</b></div>
+            </div>
+
+            <div class="v-actions">
+                <button id="exit-btn" class="btn btn-secondary v-menu" aria-label="Main menu">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5 8 12l7 7" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    MENU
+                </button>
+                <button id="next-level-btn" class="btn v-next">NEXT SECTOR</button>
+            </div>
+        </div>
     </div>
 </div>
 
@@ -308,32 +366,32 @@
 <script src="vendor/three/UnrealBloomPass.js"></script>
 
 <!-- Game scripts (order matters: each file uses globals from the ones above it) -->
-<script src="js/config.js?v=3.2"></script>
-<script src="js/audio.js?v=3.2"></script>
-<script src="js/scene.js?v=3.2"></script>
-<script src="js/world.js?v=3.2"></script>
-<script src="js/effects.js?v=3.2"></script>
-<script src="js/juice.js?v=3.2"></script>
-<script src="js/level.js?v=3.2"></script>
-<script src="js/input.js?v=3.2"></script>
-<script src="js/ui.js?v=3.2"></script>
+<script src="js/config.js?v=3.3"></script>
+<script src="js/audio.js?v=3.3"></script>
+<script src="js/scene.js?v=3.3"></script>
+<script src="js/world.js?v=3.3"></script>
+<script src="js/effects.js?v=3.3"></script>
+<script src="js/juice.js?v=3.3"></script>
+<script src="js/level.js?v=3.3"></script>
+<script src="js/input.js?v=3.3"></script>
+<script src="js/ui.js?v=3.3"></script>
 
 <!-- Features: shield, lives, ads, run flow (see features/README.md) -->
-<script src="features/config.js?v=3.2"></script>
-<script src="features/storage.js?v=3.2"></script>
-<script src="features/pause.js?v=3.2"></script>
-<script src="features/ads/ads-config.js?v=3.2"></script>
-<script src="features/ads/ads-demo.js?v=3.2"></script>
-<script src="features/ads/ads-web.js?v=3.2"></script>
-<script src="features/ads/ads-applixir.js?v=3.2"></script>
-<script src="features/ads/ads-admob.js?v=3.2"></script>
-<script src="features/ads/ads.js?v=3.2"></script>
-<script src="features/shield.js?v=3.2"></script>
-<script src="features/lives.js?v=3.2"></script>
-<script src="features/run.js?v=3.2"></script>
-<script src="js/title.js?v=3.2"></script>
+<script src="features/config.js?v=3.3"></script>
+<script src="features/storage.js?v=3.3"></script>
+<script src="features/pause.js?v=3.3"></script>
+<script src="features/ads/ads-config.js?v=3.3"></script>
+<script src="features/ads/ads-demo.js?v=3.3"></script>
+<script src="features/ads/ads-web.js?v=3.3"></script>
+<script src="features/ads/ads-applixir.js?v=3.3"></script>
+<script src="features/ads/ads-admob.js?v=3.3"></script>
+<script src="features/ads/ads.js?v=3.3"></script>
+<script src="features/shield.js?v=3.3"></script>
+<script src="features/lives.js?v=3.3"></script>
+<script src="features/run.js?v=3.3"></script>
+<script src="js/title.js?v=3.3"></script>
 
 <!-- Main loop (boots the game) -->
-<script src="js/game.js?v=3.2"></script>
+<script src="js/game.js?v=3.3"></script>
 </body>
 </html>

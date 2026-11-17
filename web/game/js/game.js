@@ -178,6 +178,21 @@ function hitsGate(sp) {
         && pos.y - ballRadius < GATE_TOP_Y - 0.2;
 }
 
+// Best clear time per difficulty + sector, kept on this device
+function saveBestTime(diff, sector, time) {
+    const KEY = 'neonCoreBestTimes';
+    let all = {};
+    try { all = JSON.parse(localStorage.getItem(KEY)) || {}; } catch (e) {}
+    const id = `${diff}-${sector}`;
+    const prev = all[id];
+    const isNew = prev === undefined || time < prev;
+    if (isNew) {
+        all[id] = time;
+        try { localStorage.setItem(KEY, JSON.stringify(all)); } catch (e) {}
+    }
+    return { isNew, prev, best: isNew ? time : prev };
+}
+
 function showLevelComplete() {
     isPlaying = false; playWin();
     keys.w = keys.a = keys.s = keys.d = keys.space = false;
@@ -217,6 +232,19 @@ function showLevelComplete() {
     countUp('lc-time', timeTaken, (v) => `${v.toFixed(1)}s`);
     countUp('lc-score', levelScore, (v) => `+${Math.round(v).toLocaleString('en-US')}`);
     countUp('lc-total', totalScore, (v) => Math.round(v).toLocaleString('en-US'), totalScore - levelScore);
+
+    // Debrief stats (all real numbers from this sector)
+    const record = saveBestTime(selectedDifficulty, level, timeTaken);
+    document.getElementById('lc-record').classList.toggle('show', record.isNew);
+    document.getElementById('lc-best').innerText = record.isNew ? (record.prev ? `was ${record.prev.toFixed(1)}s` : 'first clear') : `best ${record.best.toFixed(1)}s`;
+    document.getElementById('lc-rings').innerText = `${pad2(ringsCollected)}/${pad2(targetRings)}`;
+    document.getElementById('lc-rings-pct').innerText = `${targetRings ? Math.round(ringsCollected / targetRings * 100) : 100}%`;
+    const gatesTotal = spikes.length;
+    const gatesHit = spikes.filter(s => s.userData.dead).length;
+    countUp('lc-gates', gatesTotal - gatesHit, (v) => String(Math.round(v)));
+    document.getElementById('lc-gates-of').innerText = gatesTotal ? `of ${gatesTotal}` : 'none here';
+    document.getElementById('lc-lives').innerText = Lives.count;
+    document.getElementById('lc-shields').innerText = `${Shield.count} ${Shield.count === 1 ? 'shield' : 'shields'}`;
 
     showOnly('level-menu');
 }

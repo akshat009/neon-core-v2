@@ -262,3 +262,188 @@ body.menu-open #mobile-controls { visibility: hidden; }
     .result-menu .btn { min-height: 44px; padding: 10px 16px; margin-bottom: 8px; }
     .result-menu .btn-secondary { min-height: 40px; padding: 9px 16px; }
 }
+
+/* =========================================================
+   Victory / sector debrief (#level-menu)
+   ========================================================= */
+
+.victory-menu .v-wrap {
+    width: 100%;
+    max-width: 420px;
+    margin: auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+/* ---------- Emblem ---------- */
+
+.v-hero { position: relative; width: 190px; height: 190px; margin: 0 auto 4px; }
+.v-halo {
+    position: absolute; inset: -22%;
+    background: radial-gradient(circle, rgba(255, 63, 180, 0.32) 0%, rgba(41, 243, 255, 0.18) 38%, transparent 66%);
+    filter: blur(6px);
+    animation: v-breathe 3s ease-in-out infinite;
+}
+.v-emblem {
+    position: relative;
+    width: 100%; height: 100%;
+    filter: drop-shadow(0 0 10px rgba(41, 243, 255, 0.6)) drop-shadow(0 0 22px rgba(255, 63, 180, 0.35));
+    animation: v-pop 0.7s cubic-bezier(0.2, 1.4, 0.4, 1) both;
+}
+.v-spin, .v-spin-rev { transform-box: fill-box; transform-origin: center; }
+.v-spin { animation: v-rot 22s linear infinite; }
+.v-spin-rev { animation: v-rot 14s linear infinite reverse; }
+.v-word { font: 800 17px var(--font-hud); letter-spacing: 2px; fill: #eafcff; }
+.v-sparks circle { animation: v-twinkle 1.6s ease-in-out infinite; }
+.v-sparks circle:nth-child(2n) { animation-delay: 0.5s; }
+.v-sparks circle:nth-child(3n) { animation-delay: 1s; }
+
+/* ---------- Title + rating ---------- */
+
+.v-body { width: 100%; text-align: center; }
+.victory-menu .r-eyebrow { margin-bottom: 6px; }
+.v-title {
+    margin: 0 0 12px;
+    font: 800 28px var(--font-hud);
+    letter-spacing: 0.1em;
+    background: linear-gradient(90deg, #29f3ff, #b38bff 55%, #ff3fb4);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    filter: drop-shadow(0 0 14px rgba(155, 92, 255, 0.45));
+}
+.v-rating {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    padding: 6px 14px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid var(--t-line);
+    border-radius: 999px;
+}
+.v-rating #stars-display.r-stars { margin: 0; gap: 6px; }
+.v-rating .r-star svg { width: 22px; height: 22px; }
+.v-rating #remark-txt.r-remark { margin: 0; padding: 0; border: none; font-size: 11px; }
+
+/* ---------- Debrief card ---------- */
+
+.v-card {
+    margin: 16px 0 14px;
+    padding: 16px;
+    text-align: left;
+    background: linear-gradient(180deg, rgba(12, 22, 36, 0.92), rgba(6, 11, 20, 0.92));
+    border: 1px solid var(--t-line);
+    border-left: 2px solid var(--neon);
+    clip-path: polygon(0 0, calc(100% - 14px) 0, 100% 14px, 100% 100%, 0 100%);
+}
+.v-card small {
+    display: block;
+    font: 600 10px var(--font-hud);
+    letter-spacing: 0.16em;
+    color: var(--t-faint);
+}
+.v-score-row { display: flex; align-items: flex-end; justify-content: space-between; gap: 10px; }
+.v-score {
+    display: block;
+    margin-top: 4px;
+    font: 800 34px var(--font-hud);
+    letter-spacing: 0.02em;
+    color: var(--t-ink);
+    text-shadow: 0 0 18px rgba(41, 243, 255, 0.3);
+}
+.v-record {
+    display: none;
+    flex: none;
+    margin-bottom: 6px;
+    padding: 5px 9px;
+    font: 700 10px var(--font-hud);
+    letter-spacing: 0.14em;
+    color: #ffc85a;
+    border: 1px solid rgba(255, 200, 90, 0.7);
+    border-radius: 4px;
+    background: rgba(255, 180, 60, 0.08);
+}
+.v-record.show { display: inline-block; animation: v-record 1.2s ease-in-out infinite alternate; }
+
+.v-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 14px 0 12px; }
+.v-grid > div {
+    padding: 10px 12px;
+    background: rgba(255, 255, 255, 0.025);
+    border: 1px solid var(--t-line);
+    border-radius: 6px;
+}
+.v-grid b {
+    display: block;
+    margin: 5px 0 2px;
+    font: 700 20px var(--font-hud);
+    color: var(--t-ink);
+}
+.v-grid em {
+    display: block;
+    min-height: 1em;
+    font: 600 12px var(--font-ui);
+    font-style: normal;
+    letter-spacing: 0.04em;
+    color: var(--t-muted);
+}
+.v-total {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-top: 12px;
+    border-top: 1px solid var(--t-line);
+    font: 600 11px var(--font-hud);
+    letter-spacing: 0.16em;
+    color: var(--t-faint);
+}
+.v-total b { font: 800 17px var(--font-hud); letter-spacing: 0.04em; color: var(--neon); }
+
+/* ---------- Buttons ---------- */
+
+.v-actions { display: grid; grid-template-columns: auto 1fr; gap: 10px; width: 100%; }
+.victory-menu .btn.v-menu {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    width: auto;
+    margin: 0;
+    min-height: 56px;
+    padding: 0 16px;
+}
+.victory-menu .v-menu svg { width: 16px; height: 16px; }
+.victory-menu .btn.v-next { margin: 0; min-height: 56px; font-size: 16px; }
+.victory-menu .btn.v-next::after { content: ' »'; letter-spacing: 0; }
+
+/* ---------- Motion ---------- */
+
+@keyframes v-pop { from { opacity: 0; transform: scale(0.6) rotate(-8deg); } to { opacity: 1; transform: none; } }
+@keyframes v-rot { to { transform: rotate(360deg); } }
+@keyframes v-breathe { 0%, 100% { opacity: 0.75; transform: scale(0.96); } 50% { opacity: 1; transform: scale(1.04); } }
+@keyframes v-twinkle { 0%, 100% { opacity: 0.2; } 50% { opacity: 1; } }
+@keyframes v-record { from { box-shadow: 0 0 0 rgba(255, 200, 90, 0); } to { box-shadow: 0 0 14px rgba(255, 200, 90, 0.45); } }
+@media (prefers-reduced-motion: reduce) {
+    .v-emblem, .v-halo, .v-spin, .v-spin-rev, .v-sparks circle, .v-record.show { animation: none; }
+}
+
+/* ---------- Phones held sideways: emblem left, debrief right ---------- */
+
+@media (orientation: landscape) and (max-height: 500px) {
+    .victory-menu .v-wrap { flex-direction: row; max-width: 720px; gap: 24px; }
+    .v-hero { width: 150px; height: 150px; flex: none; }
+    .v-title { font-size: 22px; margin-bottom: 8px; }
+    .v-card { margin: 10px 0; padding: 10px 12px; }
+    .v-score { font-size: 26px; }
+    .v-grid { grid-template-columns: repeat(4, 1fr); gap: 6px; margin: 8px 0; }
+    .v-grid > div { padding: 6px 8px; }
+    .v-grid b { font-size: 15px; }
+    .v-grid em { display: none; }
+    .v-total { padding-top: 8px; }
+    .victory-menu .btn.v-menu, .victory-menu .btn.v-next { min-height: 46px; }
+}
+@media (orientation: landscape) and (max-height: 500px) {
+    .v-card small { letter-spacing: 0.08em; white-space: nowrap; }
+}
+@media (min-width: 900px) and (min-height: 700px) {
+    .v-hero { width: 230px; height: 230px; }
+}
