@@ -1,0 +1,449 @@
+/* =========================================================
+   Neon Core — title screen, How to play / Controls sheets
+   One accent colour (cyan); amber only for "watch an ad" rewards.
+   ========================================================= */
+
+:root {
+    --t-ink: #e9f7fb;
+    --t-muted: rgba(200, 226, 236, 0.62);
+    --t-faint: rgba(200, 226, 236, 0.38);
+    --t-line: rgba(140, 220, 240, 0.18);
+    --t-line-strong: rgba(41, 243, 255, 0.55);
+    --t-panel: rgba(6, 12, 22, 0.72);
+    --t-cut: 12px;
+}
+
+/* ---------- Layout ---------- */
+
+#start-menu.title-screen {
+    background: transparent;            /* the live 3D track shows through */
+    display: flex;                      /* run.js sets inline display:flex when it shows this */
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+    padding: calc(56px + var(--safe-t)) calc(20px + var(--safe-r)) calc(22px + var(--safe-b)) calc(20px + var(--safe-l));
+    box-sizing: border-box;
+    animation: t-fade 0.6s ease-out both;
+}
+
+.title-scrim {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background:
+        linear-gradient(180deg, rgba(3, 6, 13, 0.92) 0%, rgba(3, 6, 13, 0.55) 22%, rgba(3, 6, 13, 0) 40%),
+        linear-gradient(0deg, rgba(3, 6, 13, 0.97) 0%, rgba(3, 6, 13, 0.85) 38%, rgba(3, 6, 13, 0) 62%);
+}
+
+.title-head,
+.title-panel {
+    position: relative;               /* above the scrim */
+    width: 100%;
+    max-width: 440px;
+}
+
+.title-head { text-align: center; }
+
+/* ---------- Wordmark ---------- */
+
+.title-eyebrow {
+    margin: 0 0 10px;
+    font: 600 11px var(--font-hud);
+    letter-spacing: 0.42em;
+    color: var(--t-muted);
+}
+
+.title-logo {
+    margin: 0;
+    font-family: var(--font-hud);
+    font-weight: 800;
+    font-size: clamp(44px, 13.5vw, 96px);
+    line-height: 0.95;
+    letter-spacing: 0.06em;
+    color: var(--t-ink);
+    text-shadow: 0 0 28px rgba(41, 243, 255, 0.28);
+}
+.title-logo span {
+    display: block;
+    color: transparent;
+    -webkit-text-stroke: 1.5px var(--neon);
+    text-shadow: 0 0 22px rgba(41, 243, 255, 0.45);
+}
+
+.title-tag {
+    margin: 14px 0 0;
+    font: 600 16px var(--font-ui);
+    letter-spacing: 0.06em;
+    color: var(--t-muted);
+}
+
+/* ---------- Stats row ---------- */
+
+.title-stats {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1.25fr);
+    margin-bottom: 18px;
+    border-top: 1px solid var(--t-line);
+    border-bottom: 1px solid var(--t-line);
+}
+
+.t-stat {
+    position: relative;
+    padding: 11px 12px 12px;
+    text-align: left;
+}
+.t-stat + .t-stat { border-left: 1px solid var(--t-line); }
+
+.t-stat small {
+    display: block;
+    margin-bottom: 4px;
+    font: 600 10px var(--font-hud);
+    letter-spacing: 0.14em;
+    color: var(--t-faint);
+    white-space: nowrap;
+}
+.t-stat b {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font: 700 16px var(--font-hud);
+    letter-spacing: 0.04em;
+    color: var(--t-ink);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.t-wide { display: none; }
+@media (min-width: 430px) { .t-wide { display: inline; } }
+.t-stat b svg { width: 16px; height: 16px; color: var(--shield); }
+
+.t-shield { padding-right: 60px; }
+.t-ad-btn {
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    height: 32px;
+    padding: 0 10px;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font: 700 13px var(--font-hud);
+    color: #1a1000;
+    background: linear-gradient(90deg, var(--reward-a), var(--reward-b));
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+.t-ad-btn .play { margin: 0; font-size: 10px; }
+.t-ad-btn:active { transform: translateY(-50%) scale(0.95); }
+
+/* ---------- Segmented pickers (difficulty, stick sensitivity) ---------- */
+
+.t-label {
+    margin: 0 0 8px;
+    text-align: left;
+    font: 600 10px var(--font-hud);
+    letter-spacing: 0.22em;
+    color: var(--t-faint);
+}
+
+.t-seg {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    margin-bottom: 14px;
+    padding: 3px;
+    gap: 3px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--t-line);
+    border-radius: 6px;
+}
+.t-seg-5 { grid-template-columns: repeat(5, 1fr); margin-bottom: 6px; }
+
+.t-seg .diff-btn,
+.t-seg .sens-step {
+    width: auto;
+    height: 40px;
+    padding: 0;
+    font: 700 13px var(--font-hud);
+    letter-spacing: 0.14em;
+    color: var(--t-muted);
+    background: transparent;
+    border: none;
+    border-radius: 4px;
+    box-shadow: none;
+    text-shadow: none;
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s;
+}
+.t-seg .diff-btn.active,
+.t-seg .sens-step.active {
+    color: var(--neon);
+    background: rgba(41, 243, 255, 0.12);
+    box-shadow: inset 0 0 0 1px var(--t-line-strong);
+    text-shadow: none;
+}
+
+.t-scale {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 20px;
+    font: 600 12px var(--font-ui);
+    letter-spacing: 0.08em;
+    color: var(--t-faint);
+}
+
+/* ---------- Play button ---------- */
+
+.t-play {
+    position: relative;
+    width: 100%;
+    height: 62px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    font: 800 18px var(--font-hud);
+    letter-spacing: 0.3em;
+    padding-left: 0.3em;               /* balance the trailing letter-spacing */
+    white-space: nowrap;
+    color: #02141a;
+    background: var(--neon);
+    border: none;
+    cursor: pointer;
+    clip-path: polygon(var(--t-cut) 0, 100% 0, 100% calc(100% - var(--t-cut)), calc(100% - var(--t-cut)) 100%, 0 100%, 0 var(--t-cut));
+    box-shadow: 0 0 0 transparent;
+    transition: transform 0.12s ease, filter 0.2s;
+    filter: drop-shadow(0 6px 18px rgba(41, 243, 255, 0.28));
+}
+#start-btn.t-play::before {
+    content: '';
+    width: 0;
+    height: 0;
+    border-style: solid;
+    border-width: 7px 0 7px 11px;
+    border-color: transparent transparent transparent currentColor;
+}
+.t-play:hover { filter: drop-shadow(0 6px 24px rgba(41, 243, 255, 0.45)); }
+.t-play:active { transform: scale(0.98); }
+.t-play-sm { height: 50px; font-size: 15px; margin-top: 4px; }
+
+#start-menu .continue-info {
+    margin: 10px 0 0;
+    text-align: center;
+    font: 600 12px var(--font-hud);
+    letter-spacing: 0.18em;
+    color: var(--t-muted);
+    text-shadow: none;
+}
+
+.t-link {
+    display: none;                    /* run.js shows it when a run is saved */
+    margin: 8px auto 0;
+    padding: 6px 10px;
+    font: 700 12px var(--font-hud);
+    letter-spacing: 0.18em;
+    color: var(--t-muted);
+    background: none;
+    border: none;
+    text-decoration: underline;
+    text-underline-offset: 4px;
+    text-decoration-color: var(--t-faint);
+    cursor: pointer;
+}
+
+/* ---------- How to play / Controls chips ---------- */
+
+.t-actions {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 16px;
+}
+.t-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    height: 38px;
+    padding: 0 14px;
+    font: 700 11px var(--font-hud);
+    letter-spacing: 0.18em;
+    color: var(--t-muted);
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--t-line);
+    border-radius: 999px;
+    cursor: pointer;
+}
+.t-chip svg { width: 16px; height: 16px; }
+.t-chip:hover { color: var(--t-ink); border-color: rgba(140, 220, 240, 0.4); }
+.t-chip.touch-only { display: none; }
+body.touch .t-chip.touch-only { display: inline-flex; }
+
+/* ---------- Sheets ---------- */
+
+.t-sheet {
+    position: absolute;
+    inset: 0;
+    z-index: 70;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    padding: 16px;
+    padding-bottom: calc(16px + var(--safe-b));
+    box-sizing: border-box;
+    background: rgba(2, 4, 9, 0.72);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.2s, visibility 0.2s;
+}
+.t-sheet.open { opacity: 1; visibility: visible; }
+
+.t-sheet-card {
+    width: 100%;
+    max-width: 440px;
+    max-height: 100%;
+    overflow-y: auto;
+    padding: 20px 20px 18px;
+    box-sizing: border-box;
+    color: var(--t-ink);
+    background: linear-gradient(180deg, rgba(12, 22, 36, 0.98), rgba(6, 11, 20, 0.98));
+    border: 1px solid var(--t-line);
+    border-top: 2px solid var(--neon);
+    border-radius: 10px;
+    transform: translateY(16px);
+    transition: transform 0.25s ease;
+}
+.t-sheet.open .t-sheet-card { transform: none; }
+
+.t-sheet-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 14px;
+}
+.t-sheet-head h2 {
+    margin: 0;
+    font: 800 16px var(--font-hud);
+    letter-spacing: 0.22em;
+}
+.t-close {
+    width: 36px;
+    height: 36px;
+    display: grid;
+    place-items: center;
+    padding: 0;
+    color: var(--t-muted);
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid var(--t-line);
+    border-radius: 50%;
+    cursor: pointer;
+}
+.t-close svg { width: 16px; height: 16px; }
+
+.t-rules {
+    list-style: none;
+    margin: 0 0 12px;
+    padding: 0;
+}
+.t-rules li {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--t-line);
+}
+.t-rules li:last-child { border-bottom: none; }
+.t-rules b {
+    display: block;
+    font: 700 15px var(--font-ui);
+    letter-spacing: 0.04em;
+    color: var(--t-ink);
+}
+.t-rules span:not(.t-ico) {
+    display: block;
+    font: 600 14px/1.35 var(--font-ui);
+    color: var(--t-muted);
+}
+
+.t-ico {
+    flex: none;
+    width: 38px;
+    height: 38px;
+    display: grid;
+    place-items: center;
+    border-radius: 8px;
+    background: color-mix(in srgb, currentColor 10%, transparent);
+}
+.t-ico svg { width: 22px; height: 22px; }
+.i-data   { color: #5ff8ff; }
+.i-mine   { color: #ff4a5e; }
+.i-shield { color: var(--shield); }
+.i-life   { color: #c8fbff; }
+.i-micro  { color: #45ff6a; }
+.i-heavy  { color: #ffa12e; }
+
+.t-controls {
+    margin: 0 0 14px;
+    padding: 10px 12px;
+    font: 600 14px var(--font-ui);
+    color: var(--t-muted);
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 6px;
+}
+.t-controls b { color: var(--t-ink); }
+body.touch .t-controls.touch-only { display: block; }
+body.touch .no-touch { display: none; }
+
+@keyframes t-fade {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+/* ---------- Wide screens: console-style, menu on the left ---------- */
+
+@media (min-width: 900px) and (min-height: 560px) {
+    #start-menu.title-screen {
+        align-items: flex-start;
+        padding: calc(64px + var(--safe-t)) 72px calc(56px + var(--safe-b));
+    }
+    .title-scrim {
+        background:
+            linear-gradient(90deg, rgba(3, 6, 13, 0.95) 0%, rgba(3, 6, 13, 0.82) 30%, rgba(3, 6, 13, 0) 58%),
+            linear-gradient(0deg, rgba(3, 6, 13, 0.6) 0%, rgba(3, 6, 13, 0) 30%);
+    }
+    .title-head { text-align: left; max-width: 520px; }
+    .title-logo { font-size: 88px; }
+    .title-panel { max-width: 420px; }
+    .t-actions { justify-content: flex-start; }
+    #start-menu .continue-info { text-align: left; }
+    .t-link { margin-left: 0; padding-left: 0; }
+    .t-sheet { align-items: center; }
+}
+
+/* ---------- Phones held sideways: title left, menu right ---------- */
+
+@media (orientation: landscape) and (max-height: 500px) {
+    #start-menu.title-screen {
+        flex-direction: row;
+        align-items: center;
+        gap: 28px;
+        padding: calc(64px + var(--safe-t)) calc(24px + var(--safe-r)) calc(14px + var(--safe-b)) calc(24px + var(--safe-l));
+    }
+    .title-scrim {
+        background: linear-gradient(90deg, rgba(3, 6, 13, 0.6) 0%, rgba(3, 6, 13, 0.1) 32%, rgba(3, 6, 13, 0.1) 40%, rgba(3, 6, 13, 0.95) 52%, rgba(3, 6, 13, 0.97) 100%);
+    }
+    .title-eyebrow { margin-bottom: 6px; font-size: 10px; }
+    .title-head { flex: 1; text-align: left; }
+    .title-logo { font-size: clamp(36px, 8vw, 56px); }
+    .title-tag { margin-top: 8px; font-size: 14px; }
+    .title-panel { flex: 1; max-height: 100%; overflow-y: auto; margin-top: -24px; }
+    .title-stats { margin-bottom: 10px; }
+    .t-stat { padding: 7px 10px 8px; }
+    .t-seg { margin-bottom: 10px; }
+    .t-seg .diff-btn { height: 34px; }
+    .t-play { height: 50px; font-size: 16px; }
+    .t-actions { margin-top: 10px; }
+    .t-sheet { align-items: center; }
+}
