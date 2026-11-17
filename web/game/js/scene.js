@@ -87,6 +87,20 @@ function scaleBoxUVs(geo, w, h, d) {
     uv.needsUpdate = true;
 }
 
+// Distance from each vertex to the two ends of a track piece (aEnd.x = far end the ball rolls
+// towards (-z), aEnd.y = near end). Linear along z, so it interpolates exactly; the road shader
+// uses it to mark where a platform stops, so gaps read clearly even on a dim phone screen.
+function addEndDistances(geo, length) {
+    const pos = geo.attributes.position;
+    const ends = new Float32Array(pos.count * 2);
+    for (let i = 0; i < pos.count; i++) {
+        const z = pos.getZ(i);
+        ends[i * 2] = z + length / 2;
+        ends[i * 2 + 1] = length / 2 - z;
+    }
+    geo.setAttribute('aEnd', new THREE.BufferAttribute(ends, 2));
+}
+
 // Thick glowing outline: one thin cylinder per edge, merged into one geometry.
 // (WebGL lines are always 1px wide, so wireframes look weak on phones.)
 function tubeEdges(srcGeo, radius) {
@@ -123,6 +137,8 @@ function additiveMat(color, opacity) {
 //   top    = glossy dark road, dashed glowing lane lines, neon glow along both edges,
 //            faint grid, pink horizon reflection at grazing angles
 //   sides  = dark panels with a bright top edge and a soft underglow
+//   ends   = amber hazard chevrons and a hot lip where the road drops away; the end wall
+//            facing the camera glows, so the next platform stands out across a gap
 // uTime is set in js/world.js. Fog is applied by hand (same falloff as the scene fog).
 function makeRoadMat(halfWidth, edgeHex, lanes) {
     return new THREE.ShaderMaterial({
@@ -134,9 +150,11 @@ function makeRoadMat(halfWidth, edgeHex, lanes) {
             uLanes: { value: lanes ? 1 : 0 }
         },
         vertexShader: `
-            varying vec3 vLocal; varying vec3 vWorld; varying vec3 vNormalL; varying float vDepth;
+            attribute vec2 aEnd;
+            varying vec3 vLocal; varying vec3 vWorld; varying vec3 vNormalL; varying float vDepth; varying vec2 vEnd;
             void main() {
                 vLocal = position;
+                vEnd = aEnd;
                 vNormalL = normal;
                 vec4 wp = modelMatrix * vec4(position, 1.0);
                 vWorld = wp.xyz;
@@ -146,7 +164,8 @@ function makeRoadMat(halfWidth, edgeHex, lanes) {
             }`,
         fragmentShader: `
             uniform float uTime; uniform float uHalfW; uniform vec3 uEdge; uniform float uLanes;
-            varying vec3 vLocal; varying vec3 vWorld; varying vec3 vNormalL; varying float vDepth;
+            varying vec3 vLocal; varying vec3 vWorld; varying vec3 vNormalL; varying float vDepth; varying vec2 vEnd;
+            const vec3 WARN = vec3(1.0, 0.56, 0.12);
 
             float lineAA(float d, float w) { float fw = fwidth(d); return 1.0 - smoothstep(w, w + fw * 1.5, abs(d)); }
 
@@ -186,6 +205,16 @@ function makeRoadMat(halfWidth, edgeHex, lanes) {
                     // slow light sweeps rolling towards the camera
                     float sweep = fract((z - uTime * 18.0) / 36.0);
                     col += uEdge * smoothstep(0.0, 0.04, sweep) * (1.0 - smoothstep(0.04, 0.16, sweep)) * 0.05;
+
+                    // ---- where the road ends ----
+                    float dFar = vEnd.x, dNear = vEnd.y;
+                    float band = 1.0 - smoothstep(2.8, 3.3, dFar);                  // last ~3 units
+                    float chev = step(0.55, fract((dFar + ax * 0.55) / 1.1));        // V chevrons
+                    col += WARN * chev * band * 0.62;
+                    col += WARN * exp(-dFar * 2.2) * 0.75;                           // warm glow at the drop
+                    col += vec3(1.0, 0.85, 0.6) * lineAA(dFar - 0.14, 0.07) * 1.3;   // hot lip
+                    col += uEdge * exp(-dNear * 3.0) * 0.25;                         // landing edge
+                    col += vec3(0.75, 1.0, 1.0) * lineAA(dNear - 0.14, 0.06) * 0.8;
                 } else if (vNormalL.y < -0.5) {
                     col = vec3(0.004, 0.004, 0.012);                       // underside
                 } else {
@@ -196,6 +225,13 @@ function makeRoadMat(halfWidth, edgeHex, lanes) {
                     col += vec3(1.0, 0.25, 0.7) * smoothstep(-0.38, -0.5, y) * 0.35;   // underglow
                     float u = abs(vNormalL.x) > 0.5 ? vWorld.z : vWorld.x;
                     col += uEdge * lineAA(fract(u / 3.0) - 0.5, 0.01) * 0.12;          // panel seams
+                    if (vNormalL.z > 0.5) {
+                        // end wall facing the camera: the edge of the next platform across a gap
+                        col += uEdge * (0.08 + 0.3 * smoothstep(0.0, 0.5, y));
+                        col += vec3(0.8, 1.0, 1.0) * smoothstep(0.36, 0.5, y) * 0.6;
+                    } else if (vNormalL.z < -0.5) {
+                        col += WARN * smoothstep(0.2, 0.5, y) * 0.5;                   // far wall, seen from below
+                    }
                 }
                 float fogK = exp(-pow(0.02 * vDepth, 2.0));
                 col = mix(vec3(0.03, 0.015, 0.06), col, fogK);
@@ -234,6 +270,7 @@ const railMat = new THREE.ShaderMaterial({
 function createPlatform(length) {
     const geo = new THREE.BoxGeometry(14, 1, length);
     scaleBoxUVs(geo, 14, 1, length);
+    addEndDistances(geo, length);
     const plat = new THREE.Mesh(geo, floorMat);
 
     const railGeo = new THREE.BoxGeometry(0.05, 0.04, length);  // thin bright side rails
@@ -248,6 +285,7 @@ function createPlatform(length) {
 
 const movPlatGeo = new THREE.BoxGeometry(6, 0.5, 4);
 scaleBoxUVs(movPlatGeo, 6, 0.5, 4);
+addEndDistances(movPlatGeo, 4);
 const movPlatFrameGeo = tubeEdges(movPlatGeo, 0.02);
 const movPlatFrameMat = new THREE.MeshBasicMaterial({ color: 0xff3df5 });
 

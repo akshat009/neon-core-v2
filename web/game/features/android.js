@@ -2,13 +2,18 @@
 // Neon Core features — Android Back button / back gesture (@capacitor/app)
 //
 // Only inside the Android app. With a backButton listener registered, Capacitor no
-// longer closes the app on its own, so every case is handled here:
-//   • an ad is showing, or a popup asks for a choice → nothing (no accidental skips)
+// longer closes the app on its own, so every case is handled here. Pressing Back
+// again and again always ends up on the title screen, and from there closes the app:
+//   • demo ad on screen → nothing (it has its own close button)
 //   • How to play / Controls sheet open → close it
-//   • playing → pause;  pause menu open → resume
-//   • sector map → back to the title screen
-//   • sector cleared / game over / run reset → nothing (pick a button on the screen)
-//   • title screen → close the app
+//   • "No shields left" popup → skip it (same as SKIP)
+//   • playing → pause;  pause menu → main menu
+//   • sector cleared / run reset / sector map → main menu
+//   • game over → END RUN (same as the button: shows Run Reset, or the map in a replay)
+//   • title screen → "Press Back again to exit", a second Back within 2s closes the app
+//
+// A real AdMob ad is its own Android screen and takes the Back press itself, so a Back
+// that reaches the page means no ad is showing, even if an ad request is still loading.
 // =========================================================
 
 (function setupAndroidBack() {
@@ -23,15 +28,30 @@
         return !!el && el.style.display !== 'none' && getComputedStyle(el).display !== 'none';
     };
 
+    let exitArmedUntil = 0;
+
+    function exitApp() {
+        App.exitApp().catch(() => {});
+        // exitApp should close the app; if it doesn't, let Android move it to the background
+        setTimeout(() => { App.minimizeApp && App.minimizeApp().catch(() => {}); }, 400);
+    }
+
     function onBack() {
-        if (Ads.busy || document.getElementById('demo-ad').classList.contains('show')) return;
-        if (document.getElementById('shield-offer').classList.contains('show')) return;
+        if (document.getElementById('demo-ad').classList.contains('show')) return;
+        showAdLoading(false);
+
         if (document.querySelector('.t-sheet.open')) { closeSheets(); return; }
-        if (shown('pause-modal')) { togglePauseMenu(); return; }
-        if (isPlaying && !isGameOver) { togglePauseMenu(); return; }
+        if (document.getElementById('shield-offer').classList.contains('show')) { skipShieldOffer(); return; }
+        if (shown('pause-modal')) { goToTitle(); return; }
+        if (shown('gameover-menu')) { skipContinue(); return; }
+        if (shown('level-menu') || shown('restart-menu')) { goToTitle(); return; }
         if (shown('map-menu')) { showOnly('start-menu'); refreshStartMenu(); return; }
-        if (shown('level-menu') || shown('gameover-menu') || shown('restart-menu')) return;
-        if (shown('start-menu')) App.exitApp();
+        if (isPlaying && !isGameOver) { togglePauseMenu(); return; }
+
+        // Title screen (or anything else): two presses to close the app
+        if (performance.now() < exitArmedUntil) { exitApp(); return; }
+        exitArmedUntil = performance.now() + 2000;
+        showAdToast('Press Back again to exit', 2000);
     }
 
     App.addListener('backButton', onBack).catch(() => {});
