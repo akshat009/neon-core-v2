@@ -97,13 +97,14 @@ function updateSquash(dt) {
 
 // ---------- Pickups, hazard gates, nucleus ----------
 
-const MAGNET_RANGE = 2.6;   // extra distance (beyond touching) at which shards start flying in
+// Extra distance (beyond touching) at which shards start flying in: CORES[…].magnet (js/config.js)
 
 function updatePickupsAndMines(dt, t) {
     if (isPlaying && !isGameOver && !Pause.paused && ball.visible) {
         const pull = 1 - Math.pow(0.0005, dt);
+        const reach = ballRadius + 1.2 + (CORES[ballState] || CORES.normal).magnet;
         for (const r of rings) {
-            if (r.position.distanceTo(pos) < ballRadius + 1.2 + MAGNET_RANGE) r.position.lerp(pos, pull);
+            if (r.position.distanceTo(pos) < reach) r.position.lerp(pos, pull);
         }
     }
 
@@ -135,7 +136,7 @@ function applyCameraJuice(dt) {
     camTilt += (-steer * 0.038 - camTilt) * (1 - Math.pow(0.004, dt));      // up to ~2.2°
     camera.rotateZ(camTilt);
 
-    const target = live ? (onGround ? 0 : 4) + (ballState === 'small' ? 3 : 0) : 0;
+    const target = live ? (onGround ? 0 : 4) + (ballState === 'jet' ? 3 : 0) : 0;
     camFovBoost += (target - camFovBoost) * (1 - Math.pow(0.03, dt));
     const fov = initialFov + camFovBoost;
     if (Math.abs(camera.fov - fov) > 0.01) {

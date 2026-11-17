@@ -97,7 +97,7 @@ function generateLevel() {
     ball.position.copy(pos);
     ball.visible = true;
     resetTrail();
-    transformBall('normal');
+    transformBall(Cores.sectorStartCore());   // the core the player last picked (features/cores.js)
 
     let currentZ = 0;
     const plan = trackPlan(cfg, targetRings + 2);
@@ -190,27 +190,16 @@ function generateLevel() {
     clock.start();
 }
 
+// Give the ball a core's size, jump and colour (CORES in js/config.js; speed and steering are
+// read every frame in js/game.js). Switching and trials live in features/cores.js.
 function transformBall(type) {
-    ballState = type;
-    setBallLook(type);
-    if(type === 'big') {
-        ballRadius = 1.4; jumpStrength = 0.55;
-        ball.scale.set(1.4, 1.4, 1.4);
-        document.getElementById('status-txt').innerText = "CORE: HEAVY · HIGH JUMP";
-        document.getElementById('status-txt').style.color = "#ffaa00";
-        hudToast('HEAVY CORE', 'HIGH JUMP', '#ffaa00');
-        playPowerup();
-    } else if(type === 'small') {
-        ballRadius = 0.6; jumpStrength = 0.4;
-        ball.scale.set(0.6, 0.6, 0.6);
-        document.getElementById('status-txt').innerText = "CORE: MICRO · FAST SPEED";
-        document.getElementById('status-txt').style.color = "#00ff00";
-        hudToast('MICRO CORE', 'FAST SPEED', '#4dff88');
-        playPowerup();
-    } else {
-        ballRadius = 1; jumpStrength = 0.48;
-        ball.scale.set(1, 1, 1);
-        document.getElementById('status-txt').innerText = "CORE: STANDARD";
-        document.getElementById('status-txt').style.color = "#00ffff";
-    }
+    const core = CORES[type] || CORES.normal;
+    ballState = CORES[type] ? type : 'normal';
+    setBallLook(ballState);
+    ballRadius = core.radius;
+    jumpStrength = core.jump;
+    ball.scale.setScalar(core.radius);
+    const status = document.getElementById('status-txt');
+    status.innerText = `CORE: ${core.name}`;
+    status.style.color = '#' + core.glow.toString(16).padStart(6, '0');
 }

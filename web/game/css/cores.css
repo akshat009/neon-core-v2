@@ -1,0 +1,262 @@
+/* =========================================================
+   Neon Core — core switcher (HUD) and SHOP (features/cores.js, features/shop.js)
+   Positions come from the touch-cluster variables in css/style.css
+   (--jump-*, --shield-size), so the buttons stay clear of each other.
+   ========================================================= */
+
+:root { --core-size: 56px; }
+
+/* ---------- Title: SECTOR MAP + SHOP side by side ---------- */
+
+.t-ghost-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin-top: 10px;
+}
+.t-ghost-row .t-ghost { margin-top: 0; letter-spacing: 0.12em; gap: 8px; }
+.t-ghost.t-shop { color: #ffe3a6; border-color: rgba(255, 196, 92, 0.45); background: rgba(255, 196, 92, 0.06); }
+.t-ghost.t-shop svg { color: #ffc45c; }
+
+/* ---------- HUD: core button ---------- */
+
+.core-switch {
+    position: absolute;
+    /* desktop: bottom-right, left of the shield button */
+    right: calc(var(--edge) + 20px + var(--shield-size) + 22px + var(--safe-r));
+    bottom: calc(var(--edge) + 28px + var(--safe-b));
+    width: var(--core-size);
+    height: var(--core-size);
+    pointer-events: none;
+}
+.core-switch[hidden] { display: none; }
+
+/* touch, portrait: left of the shield, which sits above the jump button */
+body.touch .core-switch {
+    right: calc(var(--jump-r) + (var(--jump-size) - var(--shield-size)) / 2 + var(--shield-size) + 20px + var(--safe-r));
+    bottom: calc(var(--jump-b) + var(--jump-size) + 34px + (var(--shield-size) - var(--core-size)) / 2 + var(--safe-b));
+}
+/* touch, landscape: above the jump button (the shield is to its left) */
+@media (orientation: landscape) {
+    body.touch .core-switch {
+        right: calc(var(--jump-r) + (var(--jump-size) - var(--core-size)) / 2 + var(--safe-r));
+        bottom: calc(var(--jump-b) + var(--jump-size) + 34px + var(--safe-b));
+    }
+}
+
+.core-btn {
+    --c: #29f3ff;
+    --cd: 0;
+    position: relative;
+    width: 100%;
+    height: 100%;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    background: none;
+    pointer-events: auto;
+    touch-action: none;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+}
+.core-ring {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    border-radius: 50%;
+    border: 2px solid var(--c);
+    background: radial-gradient(circle, color-mix(in srgb, var(--c) 22%, transparent) 0%, rgba(6, 12, 24, 0.85) 72%);
+    box-shadow: 0 0 16px color-mix(in srgb, var(--c) 55%, transparent), inset 0 0 12px color-mix(in srgb, var(--c) 30%, transparent);
+    transition: transform 0.15s ease;
+}
+.core-ring::after {                 /* recharge: a dark wedge that shrinks as the cooldown runs out */
+    content: '';
+    position: absolute;
+    inset: -2px;
+    border-radius: 50%;
+    background: conic-gradient(rgba(3, 6, 13, 0.72) calc(var(--cd) * 360deg), transparent 0);
+    pointer-events: none;
+}
+.core-dot {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 30%, #ffffff, var(--c) 45%, color-mix(in srgb, var(--c) 40%, #000) 100%);
+    box-shadow: 0 0 10px var(--c);
+}
+.core-name {
+    position: absolute;
+    left: 50%;
+    bottom: calc(100% + 4px);
+    transform: translateX(-50%);
+    white-space: nowrap;
+    font: 700 11px var(--font-hud);
+    letter-spacing: 1.5px;
+    color: var(--c);
+    text-shadow: 0 0 6px var(--c);
+}
+.core-btn:active .core-ring { transform: scale(0.92); }
+.core-btn.cooling .core-name { opacity: 0.6; }
+.core-btn.nudge .core-ring { animation: core-nudge 0.35s ease-out; }
+.core-btn.ready .core-ring { animation: core-ready 0.5s ease-out; }
+@keyframes core-nudge { 25% { transform: translateX(-4px); } 50% { transform: translateX(4px); } 75% { transform: translateX(-2px); } }
+@keyframes core-ready { 40% { transform: scale(1.14); box-shadow: 0 0 28px var(--c); } }
+
+/* ---------- HUD: core picker ----------
+   A row of orbs to the left of the core button, level with it, so it never covers the ball.
+   The current core isn't listed, so at most 4 orbs (fits a 360px wide phone). */
+
+.core-tray {
+    position: absolute;
+    right: calc(100% + 10px);
+    bottom: -6px;
+    display: flex;
+    flex-direction: row-reverse;        /* nearest the thumb first */
+    gap: 8px;
+    pointer-events: none;
+    opacity: 0;
+    transform: translateX(10px);
+    transition: opacity 0.15s, transform 0.15s;
+}
+.core-tray.open { opacity: 1; transform: none; pointer-events: auto; }
+/* touch, portrait: only ~170px left of the button, so 3 per row and the rest wraps upwards */
+@media (orientation: portrait) {
+    body.touch .core-tray { flex-wrap: wrap-reverse; width: 162px; gap: 10px 6px; }
+    body.touch .core-opt { width: 50px; }
+    body.touch .core-opt .core-orb { width: 46px; height: 46px; }
+}
+/* touch, landscape: lift the row so its labels clear the shield label */
+@media (orientation: landscape) {
+    body.touch .core-tray { bottom: 12px; }
+}
+
+.core-opt {
+    --c: #29f3ff;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+    width: 52px;
+    padding: 0;
+    background: none;
+    border: 0;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+}
+.core-opt .core-orb {
+    display: grid;
+    place-items: center;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    border: 2px solid var(--c);
+    background: rgba(5, 10, 20, 0.9);
+    box-shadow: 0 0 14px color-mix(in srgb, var(--c) 50%, transparent), 0 6px 14px rgba(0, 0, 0, 0.5);
+}
+.core-opt .core-dot { width: 20px; height: 20px; }
+.core-opt b {
+    font: 700 9px var(--font-hud);
+    letter-spacing: 0;
+    color: var(--c);
+    text-shadow: 0 0 6px rgba(0, 0, 0, 0.9), 0 0 4px var(--c);
+    white-space: nowrap;
+}
+.core-opt small {                       /* FREE TRY tag */
+    position: absolute;
+    top: -8px;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 2px 4px;
+    font: 800 8px/1 var(--font-hud);
+    letter-spacing: 0.5px;
+    white-space: nowrap;
+    color: #1a1000;
+    background: #ffc45c;
+    border-radius: 3px;
+}
+.core-opt kbd {                         /* keyboard shortcut (not on touch screens) */
+    position: absolute;
+    top: -4px;
+    right: -2px;
+    min-width: 16px;
+    height: 16px;
+    font: 700 10px/16px var(--font-hud);
+    text-align: center;
+    color: #03060d;
+    background: var(--c);
+    border-radius: 8px;
+}
+body.touch .core-opt kbd { display: none; }
+.core-opt:active .core-orb { transform: scale(0.9); }
+.core-tray.cooling .core-opt { opacity: 0.45; }
+@media (hover: hover) { .core-opt:hover .core-orb { box-shadow: 0 0 22px var(--c); } }
+
+/* ---------- SHOP sheet ---------- */
+
+.shop-card .t-sheet-head { gap: 10px; }
+.shop-balance {
+    margin-left: auto;
+    padding: 5px 10px;
+    font: 700 12px var(--font-hud);
+    letter-spacing: 1px;
+    color: #ffe3a6;
+    background: rgba(255, 196, 92, 0.08);
+    border: 1px solid rgba(255, 196, 92, 0.35);
+    border-radius: 14px;
+    white-space: nowrap;
+}
+.shop-balance b { color: #fff; }
+.shop-hint { margin: -4px 0 10px; font: 600 13px/1.4 var(--font-ui); color: var(--t-muted); }
+
+.shop-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 18px; }
+.shop-item {
+    --c: #29f3ff;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 10px 10px 12px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--t-line);
+    border-left: 3px solid var(--c);
+    border-radius: 8px;
+}
+.shop-orb {
+    flex: none;
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 30%, #ffffff, var(--c) 40%, color-mix(in srgb, var(--c) 35%, #000) 100%);
+    box-shadow: 0 0 14px color-mix(in srgb, var(--c) 70%, transparent);
+}
+.shop-orb.is-shield, .shop-orb.is-life { border-radius: 8px; transform: rotate(45deg) scale(0.8); }
+.shop-info { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.shop-info b { font: 700 14px var(--font-hud); letter-spacing: 1.5px; color: var(--c); }
+.shop-plus, .shop-minus { font: 600 13px/1.3 var(--font-ui); }
+.shop-plus { color: #c9f7d8; }
+.shop-minus { color: #ffb3c1; }
+.shop-buy {
+    flex: none;
+    min-width: 96px;
+    min-height: 44px;
+    padding: 0 12px;
+    font: 800 13px var(--font-hud);
+    letter-spacing: 1px;
+    color: #1a1000;
+    background: linear-gradient(90deg, #ffd166, #ffad1f);
+    border: 0;
+    border-radius: 6px;
+    cursor: pointer;
+    white-space: nowrap;
+}
+.shop-buy.is-short { color: rgba(255, 220, 160, 0.75); background: rgba(255, 196, 92, 0.08); border: 1px solid rgba(255, 196, 92, 0.3); }
+.shop-buy.is-equip { color: var(--neon); background: rgba(41, 243, 255, 0.08); border: 1px solid var(--t-line-strong); }
+.shop-buy.is-on { color: rgba(220, 245, 255, 0.7); background: transparent; border: 1px solid var(--t-line); cursor: default; }
+.shop-item.owned .shop-orb { box-shadow: 0 0 18px var(--c); }
+
+@media (max-width: 380px) {
+    .shop-item { gap: 9px; padding: 9px 8px 9px 10px; }
+    .shop-orb { width: 28px; height: 28px; }
+    .shop-buy { min-width: 84px; padding: 0 8px; font-size: 12px; }
+}

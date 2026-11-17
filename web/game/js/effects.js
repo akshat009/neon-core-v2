@@ -315,7 +315,8 @@ function updateEffects(dt, timeScale) {
     ballMat.uniforms.uTime.value = t;
     for (const k in POWERUP_MATS) if (POWERUP_MATS[k].ball) POWERUP_MATS[k].ball.uniforms.uTime.value = t;
     ballGlow.material.opacity = 0.18 + Math.sin(t * 6) * 0.04;
-    ballMat.uniforms.uBlink.value = invulnTime > 0 ? (Math.sin(t * 28) > 0 ? 1 : 0.25) : 1;   // blink while protected
+    ballMat.uniforms.uBlink.value = Cores.phase > 0 ? 0.45 + Math.sin(t * 12) * 0.15     // Phantom: see-through
+        : invulnTime > 0 ? (Math.sin(t * 28) > 0 ? 1 : 0.25) : 1;                          // blink while protected
 
     // Light trail + tiny ground sparks
     if (!Pause.paused) updateTrail(dt);

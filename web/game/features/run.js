@@ -75,8 +75,10 @@ function startNewRun() {
     practice = null;
     level = 1;
     Lives.adContinues = 0;
-    setLives(FEATURES.livesPerRun);
+    const bonus = takeBonusLife();                  // +1 life bought in the SHOP (features/shop.js)
+    setLives(FEATURES.livesPerRun + bonus);
     beginSector();
+    if (bonus) setTimeout(() => hudToast('+1 LIFE', 'SHOP BOOST', '#29f3ff'), 600);
 }
 
 function continueRun() {
