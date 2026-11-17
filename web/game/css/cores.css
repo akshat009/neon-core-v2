@@ -36,11 +36,11 @@ body.touch .core-switch {
     right: calc(var(--jump-r) + (var(--jump-size) - var(--shield-size)) / 2 + var(--shield-size) + 20px + var(--safe-r));
     bottom: calc(var(--jump-b) + var(--jump-size) + 34px + (var(--shield-size) - var(--core-size)) / 2 + var(--safe-b));
 }
-/* touch, landscape: above the jump button (the shield is to its left) */
+/* touch, landscape: left of the shield, which sits up and left of the jump button */
 @media (orientation: landscape) {
     body.touch .core-switch {
-        right: calc(var(--jump-r) + (var(--jump-size) - var(--core-size)) / 2 + var(--safe-r));
-        bottom: calc(var(--jump-b) + var(--jump-size) + 34px + var(--safe-b));
+        right: calc(var(--jump-r) + var(--jump-size) + 26px + var(--shield-size) + 20px + var(--safe-r));
+        bottom: calc(var(--jump-b) + var(--jump-size) * 0.6 + (var(--shield-size) - var(--core-size)) / 2 + var(--safe-b));
     }
 }
 
@@ -98,100 +98,144 @@ body.touch .core-switch {
 }
 .core-btn:active .core-ring { transform: scale(0.92); }
 .core-btn.cooling .core-name { opacity: 0.6; }
+.core-btn[aria-expanded="true"] .core-name { opacity: 0; }     /* the open picker has its own title */
 .core-btn.nudge .core-ring { animation: core-nudge 0.35s ease-out; }
 .core-btn.ready .core-ring { animation: core-ready 0.5s ease-out; }
 @keyframes core-nudge { 25% { transform: translateX(-4px); } 50% { transform: translateX(4px); } 75% { transform: translateX(-2px); } }
 @keyframes core-ready { 40% { transform: scale(1.14); box-shadow: 0 0 28px var(--c); } }
 
 /* ---------- HUD: core picker ----------
-   A row of orbs to the left of the core button, level with it, so it never covers the ball.
-   The current core isn't listed, so at most 4 orbs (fits a 360px wide phone). */
+   One HUD-style panel (cut corners, dark glass, cyan edge — like the sector / time panels)
+   to the left of the core button, with a 2×2 grid of tiles. The current core isn't listed,
+   so there are at most 4 tiles. */
 
 .core-tray {
+    --cut: 10px;
     position: absolute;
     right: calc(100% + 10px);
-    bottom: -6px;
-    display: flex;
-    flex-direction: row-reverse;        /* nearest the thumb first */
-    gap: 8px;
+    bottom: -8px;
+    z-index: 0;
+    display: grid;
+    grid-template-columns: repeat(2, 72px);
+    gap: 6px;
+    padding: 24px 8px 8px;
+    background: rgba(41, 243, 255, 0.55);             /* acts as the 1.5px border */
+    clip-path: polygon(var(--cut) 0, 100% 0, 100% calc(100% - var(--cut)), calc(100% - var(--cut)) 100%, 0 100%, 0 var(--cut));
+    filter: drop-shadow(0 8px 18px rgba(0, 0, 0, 0.55));
     pointer-events: none;
     opacity: 0;
     transform: translateX(10px);
     transition: opacity 0.15s, transform 0.15s;
 }
+.core-tray::before {                                  /* dark glass inside the border */
+    content: '';
+    position: absolute;
+    inset: 1.5px;
+    z-index: -1;
+    background: linear-gradient(180deg, rgba(16, 34, 50, 0.97), rgba(6, 14, 26, 0.97));
+    clip-path: polygon(calc(var(--cut) - 1px) 0, 100% 0, 100% calc(100% - var(--cut) + 1px), calc(100% - var(--cut) + 1px) 100%, 0 100%, 0 calc(var(--cut) - 1px));
+}
+.core-tray::after {                                   /* header */
+    content: 'SWITCH CORE';
+    position: absolute;
+    top: 7px;
+    left: 12px;
+    font: 700 10px var(--font-hud);
+    letter-spacing: 2px;
+    color: rgba(200, 240, 255, 0.7);
+}
 .core-tray.open { opacity: 1; transform: none; pointer-events: auto; }
-/* touch, portrait: only ~170px left of the button, so 3 per row and the rest wraps upwards */
-@media (orientation: portrait) {
-    body.touch .core-tray { flex-wrap: wrap-reverse; width: 162px; gap: 10px 6px; }
-    body.touch .core-opt { width: 50px; }
-    body.touch .core-opt .core-orb { width: 46px; height: 46px; }
-}
-/* touch, landscape: lift the row so its labels clear the shield label */
-@media (orientation: landscape) {
-    body.touch .core-tray { bottom: 12px; }
-}
+.core-tray:empty { display: none; }
 
 .core-opt {
     --c: #29f3ff;
+    --cut: 6px;
     position: relative;
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 3px;
-    width: 52px;
-    padding: 0;
-    background: none;
+    justify-content: center;
+    gap: 6px;
+    height: 64px;
+    padding: 0 0 4px;
+    background: linear-gradient(180deg, color-mix(in srgb, var(--c) 14%, transparent), rgba(255, 255, 255, 0.02));
     border: 0;
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--c) 40%, transparent), inset 0 -2px 0 var(--c);
+    clip-path: polygon(var(--cut) 0, 100% 0, 100% calc(100% - var(--cut)), calc(100% - var(--cut)) 100%, 0 100%, 0 var(--cut));
     cursor: pointer;
     -webkit-tap-highlight-color: transparent;
 }
-.core-opt .core-orb {
-    display: grid;
-    place-items: center;
-    width: 48px;
-    height: 48px;
-    border-radius: 50%;
-    border: 2px solid var(--c);
-    background: rgba(5, 10, 20, 0.9);
-    box-shadow: 0 0 14px color-mix(in srgb, var(--c) 50%, transparent), 0 6px 14px rgba(0, 0, 0, 0.5);
-}
-.core-opt .core-dot { width: 20px; height: 20px; }
+.core-opt .core-orb { display: block; line-height: 0; }
+.core-opt .core-dot { display: block; width: 22px; height: 22px; }
 .core-opt b {
-    font: 700 9px var(--font-hud);
-    letter-spacing: 0;
+    font: 700 10px var(--font-hud);
+    letter-spacing: 1px;
     color: var(--c);
-    text-shadow: 0 0 6px rgba(0, 0, 0, 0.9), 0 0 4px var(--c);
     white-space: nowrap;
 }
 .core-opt small {                       /* FREE TRY tag */
     position: absolute;
-    top: -8px;
-    left: 50%;
-    transform: translateX(-50%);
+    top: 0;
+    right: 0;
     padding: 2px 4px;
     font: 800 8px/1 var(--font-hud);
     letter-spacing: 0.5px;
-    white-space: nowrap;
     color: #1a1000;
     background: #ffc45c;
-    border-radius: 3px;
 }
 .core-opt kbd {                         /* keyboard shortcut (not on touch screens) */
     position: absolute;
-    top: -4px;
-    right: -2px;
-    min-width: 16px;
-    height: 16px;
-    font: 700 10px/16px var(--font-hud);
+    top: 4px;
+    left: 7px;
+    font: 700 10px var(--font-hud);
+    color: rgba(220, 240, 255, 0.6);
+}
+body.touch .core-opt kbd { display: none; }
+.core-opt:active { transform: scale(0.94); }
+.core-tray.cooling .core-opt { opacity: 0.45; }
+@media (hover: hover) { .core-opt:hover { background: linear-gradient(180deg, color-mix(in srgb, var(--c) 26%, transparent), rgba(255, 255, 255, 0.04)); } }
+
+/* touch, portrait: above the joystick on the left edge, where the ball never is
+   (next to the core button it would cover the ball on narrow phones) */
+@media (orientation: portrait) {
+    body.touch .core-tray {
+        position: fixed;
+        left: calc(var(--edge) + 4px + var(--safe-l));
+        right: auto;
+        bottom: calc(var(--joy-b) + var(--joy-size) + 14px + var(--safe-b));
+        grid-template-columns: repeat(2, 66px);
+        transform: translateY(8px);
+    }
+    body.touch .core-tray.open { transform: none; }
+}
+/* touch, landscape: one row of 4 on the right, above the jump / shield / core buttons
+   (left of the core button it would cover the ball, above the stick it would hit the HUD) */
+@media (orientation: landscape) {
+    body.touch .core-tray {
+        position: fixed;
+        right: calc(var(--edge) + var(--safe-r));
+        bottom: calc(var(--jump-b) + var(--jump-size) + 34px + var(--safe-b));   /* clears the core name */
+        grid-template-columns: repeat(4, 66px);
+        transform: translateY(8px);
+    }
+    body.touch .core-tray.open { transform: none; }
+}
+
+/* Keyboard hint on the core button (desktop): Q = next core */
+.core-key {
+    position: absolute;
+    right: -6px;
+    bottom: -6px;
+    min-width: 18px;
+    height: 18px;
+    font: 800 11px/18px var(--font-hud);
     text-align: center;
     color: #03060d;
     background: var(--c);
-    border-radius: 8px;
+    border-radius: 4px;
+    pointer-events: none;
 }
-body.touch .core-opt kbd { display: none; }
-.core-opt:active .core-orb { transform: scale(0.9); }
-.core-tray.cooling .core-opt { opacity: 0.45; }
-@media (hover: hover) { .core-opt:hover .core-orb { box-shadow: 0 0 22px var(--c); } }
+body.touch .core-key { display: none; }
 
 /* ---------- SHOP sheet ---------- */
 

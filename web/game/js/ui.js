@@ -21,7 +21,9 @@ document.querySelectorAll('.diff-btn').forEach(btn => {
 const pad2 = (n) => String(n).padStart(2, '0');
 
 function updateUI() {
-    document.getElementById('score-txt').innerText = `DATA: ${pad2(ringsCollected)}/${pad2(targetRings)}`;
+    const score = document.getElementById('score-txt');
+    score.innerText = `DATA: ${pad2(ringsCollected)}/${pad2(targetRings)}`;
+    if (ringsCollected > 0) { score.classList.remove('pop'); void score.offsetWidth; score.classList.add('pop'); }   // number "pop" 
     document.getElementById('data-fill').style.width = `${targetRings ? Math.min(ringsCollected / targetRings, 1) * 100 : 0}%`;
     document.getElementById('level-num').innerText = pad2(level);
     document.getElementById('diff-ui-txt').innerText = selectedDifficulty;
