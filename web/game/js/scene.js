@@ -119,11 +119,93 @@ function additiveMat(color, opacity) {
 // Track
 // =========================================================
 
-const floorMat = new THREE.MeshStandardMaterial({
-    color: 0x060b16, roughness: 0.55, metalness: 0.45,
-    emissive: 0xffffff, emissiveMap: gridTex, emissiveIntensity: 0.13
-});
-const edgeMat = new THREE.LineBasicMaterial({ color: 0x00ffff, transparent: true, opacity: 0.45 });
+// Neon highway surface. One shader for every face of a platform box:
+//   top    = glossy dark road, dashed glowing lane lines, neon glow along both edges,
+//            faint grid, pink horizon reflection at grazing angles
+//   sides  = dark panels with a bright top edge and a soft underglow
+// uTime is set in js/world.js. Fog is applied by hand (same falloff as the scene fog).
+function makeRoadMat(halfWidth, edgeHex, lanes) {
+    return new THREE.ShaderMaterial({
+        extensions: { derivatives: true },
+        uniforms: {
+            uTime: { value: 0 },
+            uHalfW: { value: halfWidth },
+            uEdge: { value: new THREE.Color(edgeHex) },
+            uLanes: { value: lanes ? 1 : 0 }
+        },
+        vertexShader: `
+            varying vec3 vLocal; varying vec3 vWorld; varying vec3 vNormalL; varying float vDepth;
+            void main() {
+                vLocal = position;
+                vNormalL = normal;
+                vec4 wp = modelMatrix * vec4(position, 1.0);
+                vWorld = wp.xyz;
+                vec4 mv = viewMatrix * wp;
+                vDepth = -mv.z;
+                gl_Position = projectionMatrix * mv;
+            }`,
+        fragmentShader: `
+            uniform float uTime; uniform float uHalfW; uniform vec3 uEdge; uniform float uLanes;
+            varying vec3 vLocal; varying vec3 vWorld; varying vec3 vNormalL; varying float vDepth;
+
+            float lineAA(float d, float w) { float fw = fwidth(d); return 1.0 - smoothstep(w, w + fw * 1.5, abs(d)); }
+
+            void main() {
+                vec3 col;
+                if (vNormalL.y > 0.5) {
+                    // ---- road top ----
+                    float x = vLocal.x, ax = abs(x), z = vWorld.z;
+                    float edgeDist = uHalfW - ax;
+                    col = mix(vec3(0.010, 0.014, 0.032), vec3(0.030, 0.018, 0.070), smoothstep(uHalfW * 0.2, uHalfW, ax));
+
+                    // faint 2-unit grid
+                    vec2 gp = vec2(x, z) / 2.0;
+                    vec2 gd = abs(fract(gp - 0.5) - 0.5) / fwidth(gp);
+                    col += vec3(0.10, 0.45, 0.65) * (1.0 - min(min(gd.x, gd.y), 1.0)) * 0.07;
+
+                    // neon glow along both edges + a crisp inner line
+                    col += uEdge * exp(-edgeDist * 2.4) * 0.55;
+                    col += uEdge * lineAA(edgeDist - 0.35, 0.025) * 0.9;
+
+                    // dashed lane lines with a soft glow
+                    if (uLanes > 0.5) {
+                        float laneX = uHalfW / 3.0;
+                        float dl = ax - laneX;
+                        float dash = step(0.42, fract(z / 4.0));
+                        col += vec3(0.55, 0.95, 1.0) * lineAA(dl, 0.045) * dash * 0.95;
+                        col += uEdge * exp(-abs(dl) * 5.0) * 0.06;
+                        // centre line: thin, magenta
+                        col += vec3(1.0, 0.25, 0.7) * lineAA(x, 0.02) * step(0.5, fract(z / 2.0 + 0.25)) * 0.45;
+                    }
+
+                    // glossy reflection of the pink horizon at grazing angles
+                    vec3 v = normalize(cameraPosition - vWorld);
+                    float fres = pow(1.0 - max(v.y, 0.0), 4.0);
+                    col += vec3(0.55, 0.10, 0.45) * fres * 0.55;
+
+                    // slow light sweeps rolling towards the camera
+                    float sweep = fract((z - uTime * 18.0) / 36.0);
+                    col += uEdge * smoothstep(0.0, 0.04, sweep) * (1.0 - smoothstep(0.04, 0.16, sweep)) * 0.05;
+                } else if (vNormalL.y < -0.5) {
+                    col = vec3(0.004, 0.004, 0.012);                       // underside
+                } else {
+                    // ---- sides ----
+                    float y = vLocal.y;                                      // -0.5 .. 0.5
+                    col = mix(vec3(0.006, 0.006, 0.02), vec3(0.02, 0.02, 0.05), y + 0.5);
+                    col += uEdge * smoothstep(0.38, 0.5, y) * 0.9;           // bright top edge
+                    col += vec3(1.0, 0.25, 0.7) * smoothstep(-0.38, -0.5, y) * 0.35;   // underglow
+                    float u = abs(vNormalL.x) > 0.5 ? vWorld.z : vWorld.x;
+                    col += uEdge * lineAA(fract(u / 3.0) - 0.5, 0.01) * 0.12;          // panel seams
+                }
+                float fogK = exp(-pow(0.02 * vDepth, 2.0));
+                col = mix(vec3(0.03, 0.015, 0.06), col, fogK);
+                gl_FragColor = vec4(col, 1.0);
+            }`
+    });
+}
+const floorMat = makeRoadMat(7, 0x29f3ff, true);
+const movFloorMat = makeRoadMat(3, 0xff3df5, false);
+const edgeMat = new THREE.LineBasicMaterial({ color: 0x00ffff, transparent: true, opacity: 0.18 });
 // Side rails: light packets race along them towards the camera (uTime set in js/world.js)
 const railMat = new THREE.ShaderMaterial({
     uniforms: { uTime: { value: 0 }, uColor: { value: new THREE.Color(0x5ff8ff) } },
@@ -147,7 +229,6 @@ const railMat = new THREE.ShaderMaterial({
             gl_FragColor = vec4(col * fogK, 1.0);
         }`
 });
-const laneMat = new THREE.MeshBasicMaterial({ color: 0x1aa6c8, transparent: true, opacity: 0.45 });
 
 // Main platform: 14 wide, 1 tall. Collision code reads geometry.parameters, so it stays a BoxGeometry.
 function createPlatform(length) {
@@ -161,12 +242,6 @@ function createPlatform(length) {
         rail.position.set(x, 0.52, 0);
         plat.add(rail);
     }
-    const laneGeo = new THREE.BoxGeometry(0.022, 0.01, length); // hairline lane markers
-    for (const x of [-2.35, 2.35]) {
-        const lane = new THREE.Mesh(laneGeo, laneMat);
-        lane.position.set(x, 0.506, 0);
-        plat.add(lane);
-    }
     decoratePlatform(plat, length);   // neon arch (js/world.js)
     return plat;
 }
@@ -177,7 +252,7 @@ const movPlatFrameGeo = tubeEdges(movPlatGeo, 0.02);
 const movPlatFrameMat = new THREE.MeshBasicMaterial({ color: 0xff3df5 });
 
 function createMovingPlatform() {
-    const mPlat = new THREE.Mesh(movPlatGeo, floorMat);
+    const mPlat = new THREE.Mesh(movPlatGeo, movFloorMat);
     mPlat.add(new THREE.Mesh(movPlatFrameGeo, movPlatFrameMat));
     return mPlat;
 }

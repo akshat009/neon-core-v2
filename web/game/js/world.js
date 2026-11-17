@@ -125,7 +125,8 @@ function placeBuilding(i, z) {
     b.z = z;
     b.w = 5 + Math.random() * 9;
     b.d = 5 + Math.random() * 9;
-    b.h = 20 + Math.random() * 60 * (Math.random() < 0.25 ? 1.5 : 1);
+    // Every roof stays well above the track: a roof near or below it would look like a platform
+    b.h = 62 + Math.random() * 45 * (Math.random() < 0.25 ? 1.6 : 1);
     _p.set(b.x, -45, b.z);
     _s.set(b.w, b.h, b.d);
     _m.compose(_p, _q, _s);
@@ -197,5 +198,7 @@ function updateWorld(dt) {
     sky.position.copy(camera.position);
     skyMat.uniforms.uTime.value = t;
     railMat.uniforms.uTime.value = t;
+    floorMat.uniforms.uTime.value = t;
+    movFloorMat.uniforms.uTime.value = t;
     updateCity();
 }
