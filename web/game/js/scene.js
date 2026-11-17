@@ -196,12 +196,23 @@ const mineMat = new THREE.MeshStandardMaterial({ color: 0x6a0014, emissive: 0xff
 const mineFrameGeo = tubeEdges(mineShape, 0.014);
 const mineFrameMat = new THREE.MeshBasicMaterial({ color: 0xff3a50 });
 
+// Red warning glow on the floor under every mine (one shared material, pulsed in js/juice.js)
+const mineFloorMat = new THREE.MeshBasicMaterial({ map: glowTex, color: 0xff1030, transparent: true, opacity: 0.5, depthWrite: false });
+const mineFloorGeo = new THREE.PlaneGeometry(3.4, 3.4);
+
+// children[0] = the spinning, hovering body (js/juice.js); the group itself stays level
 function createMine() {
     const g = new THREE.Group();
+    const inner = new THREE.Group();
     const body = new THREE.Mesh(mineShape, mineMat);
     const frame = new THREE.Mesh(mineFrameGeo, mineFrameMat);
     body.scale.y = frame.scale.y = 1.15;
-    g.add(body, frame, glowSprite(0xff1030, 2.2, 0.2));
+    inner.add(body, frame);
+    const floor = new THREE.Mesh(mineFloorGeo, mineFloorMat);
+    floor.rotation.x = -Math.PI / 2;
+    floor.position.y = 0.53 - 1.2;               // mines sit at y 1.2, the track top is y 0.5
+    g.add(inner, glowSprite(0xff1030, 2.2, 0.2), floor);
+    g.userData.phase = Math.random() * Math.PI * 2;
     return g;
 }
 
@@ -241,14 +252,26 @@ const ballMat = new THREE.ShaderMaterial({
     uniforms: {
         uTime:  { value: 0 },
         uBlink: { value: 1 },
-        uColor: { value: new THREE.Color(BALL_LOOKS.normal.glow) }
+        uColor: { value: new THREE.Color(BALL_LOOKS.normal.glow) },
+        uSquash: { value: 0 },   // > 0 squashes on landing, < 0 stretches while falling (js/juice.js)
+        uRadius: { value: 1 }
     },
     extensions: { derivatives: true },
+    transparent: true,           // a slightly see-through shell shows the energy nucleus inside
     vertexShader: `
+        uniform float uSquash; uniform float uRadius;
         varying vec3 vPos; varying vec3 vNormal; varying vec3 vView;
         void main() {
             vPos = position;
-            vec4 mv = modelViewMatrix * vec4(position, 1.0);
+            // Squash / stretch along world Y, so it works however the ball has rolled
+            vec4 wp = modelMatrix * vec4(position, 1.0);
+            vec3 c = (modelMatrix * vec4(0.0, 0.0, 0.0, 1.0)).xyz;
+            vec3 d = wp.xyz - c;
+            d.y *= 1.0 - uSquash;
+            d.xz *= 1.0 + uSquash * 0.45;
+            wp.xyz = c + d;
+            wp.y -= uRadius * max(uSquash, 0.0);          // keep the bottom on the floor
+            vec4 mv = viewMatrix * wp;
             vNormal = normalize(normalMatrix * normal);
             vView = normalize(-mv.xyz);
             gl_Position = projectionMatrix * mv;
@@ -288,7 +311,8 @@ const ballMat = new THREE.ShaderMaterial({
 
             float rim = pow(1.0 - facing, 3.0);
             col += uColor * min(lines, 1.3) * 1.7 + uColor * rim * 0.7;
-            gl_FragColor = vec4(col * uBlink, 1.0);
+            float alpha = clamp(0.72 + min(lines, 1.0) * 0.28 + rim * 0.3, 0.0, 1.0);
+            gl_FragColor = vec4(col * uBlink, alpha);
         }`
 });
 
@@ -298,6 +322,13 @@ const ball = new THREE.Mesh(ballGeo, ballMat);
 const ballGlow = glowSprite(BALL_LOOKS.normal.glow, 2.7, 0.18);
 ball.add(ballGlow);
 
+// Energy nucleus inside the shell: a small icosahedron cage that spins against the roll
+const nucleusMat = new THREE.MeshBasicMaterial({ color: BALL_LOOKS.normal.glow });
+const nucleus = new THREE.Group();
+nucleus.add(new THREE.Mesh(tubeEdges(new THREE.IcosahedronGeometry(0.42, 0), 0.018), nucleusMat));
+nucleus.add(new THREE.Mesh(new THREE.IcosahedronGeometry(0.14, 0), nucleusMat));
+ball.add(nucleus);
+
 const coreLight = new THREE.PointLight(0x00ffff, 1.3, 12);
 ball.add(coreLight);
 scene.add(ball);
@@ -306,6 +337,7 @@ function setBallLook(type) {
     const look = BALL_LOOKS[type] || BALL_LOOKS.normal;
     ballMat.uniforms.uColor.value.setHex(look.glow);
     ballGlow.material.color.setHex(look.glow);
+    nucleusMat.color.setHex(look.glow);
     coreLight.color.setHex(look.light);
     if (typeof trailMat !== 'undefined') trailMat.uniforms.uColor.value.setHex(look.glow);
 }
