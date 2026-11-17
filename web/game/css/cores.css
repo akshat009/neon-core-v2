@@ -36,11 +36,11 @@ body.touch .core-switch {
     right: calc(var(--jump-r) + (var(--jump-size) - var(--shield-size)) / 2 + var(--shield-size) + 20px + var(--safe-r));
     bottom: calc(var(--jump-b) + var(--jump-size) + 34px + (var(--shield-size) - var(--core-size)) / 2 + var(--safe-b));
 }
-/* touch, landscape: above the jump button (the shield is to its left) */
+/* touch, landscape: left of the shield, which sits up and left of the jump button */
 @media (orientation: landscape) {
     body.touch .core-switch {
-        right: calc(var(--jump-r) + (var(--jump-size) - var(--core-size)) / 2 + var(--safe-r));
-        bottom: calc(var(--jump-b) + var(--jump-size) + 34px + var(--safe-b));
+        right: calc(var(--jump-r) + var(--jump-size) + 26px + var(--shield-size) + 20px + var(--safe-r));
+        bottom: calc(var(--jump-b) + var(--jump-size) * 0.6 + (var(--shield-size) - var(--core-size)) / 2 + var(--safe-b));
     }
 }
 
@@ -104,8 +104,8 @@ body.touch .core-switch {
 @keyframes core-ready { 40% { transform: scale(1.14); box-shadow: 0 0 28px var(--c); } }
 
 /* ---------- HUD: core picker ----------
-   A row of orbs to the left of the core button, level with it, so it never covers the ball.
-   The current core isn't listed, so at most 4 orbs (fits a 360px wide phone). */
+   A compact 2×2 grid of orbs to the left of the core button, so it never covers the ball.
+   The current core isn't listed, so at most 4 orbs: 2 per row, the second row above. */
 
 .core-tray {
     position: absolute;
@@ -113,22 +113,20 @@ body.touch .core-switch {
     bottom: -6px;
     display: flex;
     flex-direction: row-reverse;        /* nearest the thumb first */
-    gap: 8px;
+    flex-wrap: wrap-reverse;            /* 2 per row, the next row goes up */
+    width: calc(2 * 52px + 8px);
+    gap: 10px 8px;
     pointer-events: none;
     opacity: 0;
     transform: translateX(10px);
     transition: opacity 0.15s, transform 0.15s;
 }
 .core-tray.open { opacity: 1; transform: none; pointer-events: auto; }
-/* touch, portrait: only ~170px left of the button, so 3 per row and the rest wraps upwards */
+/* touch, portrait: slightly smaller orbs on narrow phones */
 @media (orientation: portrait) {
-    body.touch .core-tray { flex-wrap: wrap-reverse; width: 162px; gap: 10px 6px; }
+    body.touch .core-tray { width: calc(2 * 50px + 6px); gap: 10px 6px; }
     body.touch .core-opt { width: 50px; }
     body.touch .core-opt .core-orb { width: 46px; height: 46px; }
-}
-/* touch, landscape: lift the row so its labels clear the shield label */
-@media (orientation: landscape) {
-    body.touch .core-tray { bottom: 12px; }
 }
 
 .core-opt {
