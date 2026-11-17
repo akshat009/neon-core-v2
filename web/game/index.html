@@ -6,9 +6,10 @@
     <meta name="theme-color" content="#03060d">
     <title>Neon Core</title>
     <link rel="stylesheet" href="vendor/fonts/fonts.css">
-    <link rel="stylesheet" href="css/style.css?v=2.5">
-    <link rel="stylesheet" href="features/features.css?v=2.5">
-    <link rel="stylesheet" href="css/title.css?v=2.5">
+    <link rel="stylesheet" href="css/style.css?v=2.6">
+    <link rel="stylesheet" href="features/features.css?v=2.6">
+    <link rel="stylesheet" href="css/title.css?v=2.6">
+    <link rel="stylesheet" href="css/menus.css?v=2.6">
 </head>
 <body>
 
@@ -145,58 +146,63 @@
 </div>
 
 <!-- Level complete menu -->
-<div id="level-menu" class="fullscreen-menu">
-    <div class="menu-box glass-panel">
-        <h1 id="lc-title">SECTOR SECURED</h1>
-        <div id="stars-display">⭐⭐⭐</div>
-        <div id="remark-txt">OPTIMAL PERFORMANCE</div>
+<div id="level-menu" class="fullscreen-menu result-menu">
+    <div class="menu-box r-card">
+        <p class="r-eyebrow"><span id="lc-sector">SECTOR 01</span> · <span id="lc-diff">MEDIUM</span></p>
+        <h1 id="lc-title">SECTOR CLEARED</h1>
+        <div id="stars-display" class="r-stars" aria-label="Stars"></div>
+        <div id="remark-txt" class="r-remark">OPTIMAL</div>
 
-        <div class="rules-list stats-list">
-            <p>DIFFICULTY: <b id="lc-diff" class="c-magenta">MEDIUM</b></p>
-            <p>CYCLE TIME: <b id="lc-time">0.0s</b></p>
-            <p>DATA REWARD: <b id="lc-score" class="highlight">+0</b></p>
-            <p>TOTAL ARCHIVE: <b id="lc-total">0</b></p>
+        <div class="r-stats">
+            <div><small>TIME</small><b id="lc-time">0.0s</b></div>
+            <div><small>REWARD</small><b id="lc-score" class="r-accent">+0</b></div>
+            <div><small>TOTAL DATA</small><b id="lc-total">0</b></div>
         </div>
 
-        <button id="next-level-btn" class="btn">NEXT SECTOR</button>
-        <button id="exit-btn" class="btn btn-secondary">DISCONNECT</button>
+        <button id="next-level-btn" class="btn r-next">NEXT SECTOR</button>
+        <button id="exit-btn" class="btn btn-secondary">MAIN MENU</button>
     </div>
 </div>
 
 <!-- Pause / ESC Exit Confirmation menu -->
-<div id="pause-modal" class="fullscreen-menu" style="display: none;">
-    <div class="menu-box glass-panel">
-        <h1>SYSTEM PAUSED</h1>
-        <p class="menu-subtitle">[ MISSION ON HOLD ]</p>
-        <p class="pause-desc">DISCONNECT FROM SECTOR AND EXIT TO MENU?</p>
-        <button id="resume-btn" class="btn">RESUME MISSION</button>
-        <button id="pause-exit-btn" class="btn btn-secondary">EXIT TO MENU</button>
+<div id="pause-modal" class="fullscreen-menu result-menu" style="display: none;">
+    <div class="menu-box r-card">
+        <p class="r-eyebrow">RUN ON HOLD</p>
+        <h1>PAUSED</h1>
+        <p class="pause-desc">Your progress is saved at the start of every sector.</p>
+        <button id="resume-btn" class="btn r-next">RESUME</button>
+        <button id="pause-exit-btn" class="btn btn-secondary">MAIN MENU</button>
     </div>
 </div>
 
 <!-- Out of lives (features/run.js) -->
-<div id="gameover-menu" class="fullscreen-menu">
-    <div class="menu-box glass-panel danger">
-        <h1>SYSTEM FAILURE</h1>
+<div id="gameover-menu" class="fullscreen-menu result-menu">
+    <div class="menu-box r-card danger">
+        <p class="r-eyebrow">NO LIVES LEFT</p>
+        <h1>CORE DOWN</h1>
         <p id="death-reason">Connection lost.</p>
-        <p class="go-stats">NO LIVES LEFT · SECTOR <b id="go-sector">01</b> · DATA <b id="go-data">00/05</b></p>
-        <button id="continue-ad-btn" class="btn btn-reward"><span class="play">▶</span> WATCH AD · +1 LIFE &amp; CONTINUE</button>
+        <div class="r-stats">
+            <div><small>SECTOR</small><b id="go-sector">01</b></div>
+            <div><small>SHARDS</small><b id="go-data">00/05</b></div>
+            <div><small>TOTAL DATA</small><b id="go-total">0</b></div>
+        </div>
+        <button id="continue-ad-btn" class="btn btn-reward"><span class="play">▶</span> WATCH AD · +1 LIFE</button>
         <button id="skip-continue-btn" class="btn btn-secondary">SKIP</button>
-        <p class="go-total">ARCHIVED DATA: <b id="go-total" class="c-red">0</b></p>
     </div>
 </div>
 
 <!-- Ad skipped → back to Sector 1, with a banner ad (features/run.js) -->
-<div id="restart-menu" class="fullscreen-menu">
-    <div class="menu-box glass-panel">
+<div id="restart-menu" class="fullscreen-menu result-menu">
+    <div class="menu-box r-card">
+        <p class="r-eyebrow">RUN OVER</p>
         <h1>RUN RESET</h1>
-        <p class="restart-note">You skipped the ad, so this run starts again from <b class="c-cyan">Sector 1</b>.</p>
-        <div class="rules-list stats-list">
-            <p>REACHED: <b>SECTOR <span id="rs-sector">01</span></b></p>
-            <p>BEST: <b>SECTOR <span id="rs-best">01</span></b></p>
-            <p>TOTAL ARCHIVE: <b id="rs-total" class="highlight">0</b></p>
+        <p class="restart-note">This run starts again from <b>Sector 1</b>.</p>
+        <div class="r-stats">
+            <div><small>REACHED</small><b id="rs-sector">01</b></div>
+            <div><small>BEST</small><b id="rs-best">01</b></div>
+            <div><small>TOTAL DATA</small><b id="rs-total" class="r-accent">0</b></div>
         </div>
-        <button id="restart-btn" class="btn">RESTART FROM SECTOR 1</button>
+        <button id="restart-btn" class="btn r-next">PLAY AGAIN</button>
     </div>
 </div>
 
@@ -302,30 +308,30 @@
 <script src="vendor/three/UnrealBloomPass.js"></script>
 
 <!-- Game scripts (order matters: each file uses globals from the ones above it) -->
-<script src="js/config.js?v=2.5"></script>
-<script src="js/audio.js?v=2.5"></script>
-<script src="js/scene.js?v=2.5"></script>
-<script src="js/effects.js?v=2.5"></script>
-<script src="js/level.js?v=2.5"></script>
-<script src="js/input.js?v=2.5"></script>
-<script src="js/ui.js?v=2.5"></script>
+<script src="js/config.js?v=2.6"></script>
+<script src="js/audio.js?v=2.6"></script>
+<script src="js/scene.js?v=2.6"></script>
+<script src="js/effects.js?v=2.6"></script>
+<script src="js/level.js?v=2.6"></script>
+<script src="js/input.js?v=2.6"></script>
+<script src="js/ui.js?v=2.6"></script>
 
 <!-- Features: shield, lives, ads, run flow (see features/README.md) -->
-<script src="features/config.js?v=2.5"></script>
-<script src="features/storage.js?v=2.5"></script>
-<script src="features/pause.js?v=2.5"></script>
-<script src="features/ads/ads-config.js?v=2.5"></script>
-<script src="features/ads/ads-demo.js?v=2.5"></script>
-<script src="features/ads/ads-web.js?v=2.5"></script>
-<script src="features/ads/ads-applixir.js?v=2.5"></script>
-<script src="features/ads/ads-admob.js?v=2.5"></script>
-<script src="features/ads/ads.js?v=2.5"></script>
-<script src="features/shield.js?v=2.5"></script>
-<script src="features/lives.js?v=2.5"></script>
-<script src="features/run.js?v=2.5"></script>
-<script src="js/title.js?v=2.5"></script>
+<script src="features/config.js?v=2.6"></script>
+<script src="features/storage.js?v=2.6"></script>
+<script src="features/pause.js?v=2.6"></script>
+<script src="features/ads/ads-config.js?v=2.6"></script>
+<script src="features/ads/ads-demo.js?v=2.6"></script>
+<script src="features/ads/ads-web.js?v=2.6"></script>
+<script src="features/ads/ads-applixir.js?v=2.6"></script>
+<script src="features/ads/ads-admob.js?v=2.6"></script>
+<script src="features/ads/ads.js?v=2.6"></script>
+<script src="features/shield.js?v=2.6"></script>
+<script src="features/lives.js?v=2.6"></script>
+<script src="features/run.js?v=2.6"></script>
+<script src="js/title.js?v=2.6"></script>
 
 <!-- Main loop (boots the game) -->
-<script src="js/game.js?v=2.5"></script>
+<script src="js/game.js?v=2.6"></script>
 </body>
 </html>
