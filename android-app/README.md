@@ -27,7 +27,10 @@ npm run sync          # copy ../web/game into the app (debug: Google test ads) +
 npm run open          # opens Android Studio → Run ▶ on a phone or emulator
 ```
 
-Run `npm run sync` again after every change in `../web/game`. CI builds a debug APK on every PR (`.github/workflows/android-build.yml`); download it from the run's artifacts.
+Run `npm run sync` again after every change in `../web/game`. CI builds a debug APK on every PR (`.github/workflows/android-build.yml`); download it from the run's artifacts (a zip).
+
+**Latest APK for the phone:** every push to `main` also puts the debug APK (Google test ads) on the `apk-latest` pre-release as a plain `.apk`. Open this link on the phone to download and install it:
+https://github.com/akshat009/neon-core-v2/releases/download/apk-latest/neon-core-debug.apk
 
 ## What the app shell does
 
