@@ -21,6 +21,52 @@ let currentTimeStr = "0.0";
 let timerRunning = false;   // the sector timer starts on the first move, not at spawn
 const clock = new THREE.Clock();
 
+// ---------- Track plan: gaps and platform lengths ----------
+// Every gap must need a jump, and every gap must be clearable with one:
+//   • Rolling off an edge, the ball (centre at y 1.5) still lands if it reaches the next platform
+//     before dropping below y 0.2: 1.3 = 0.5 · 0.02 · t² → t ≈ 11.4 frames. At the fastest speed
+//     (micro core, ×1.4) that distance plus a margin is the shortest gap.
+//   • A normal jump (0.48 up, gravity 0.02) stays up 48 frames; the heavy core (0.55, ×0.85 speed)
+//     covers about the same. The longest gap is 65% of that reach, so a jump started a little
+//     late still makes it.
+const GRAVITY = 0.02;
+function gapLimits(speed) {
+    const fastest = speed * 1.4;
+    const minGap = fastest * 11.4 * 1.25 + 0.6;
+    const reach = (2 * 0.48 / GRAVITY) * speed;
+    const maxGap = Math.max(minGap + 1.5, reach * 0.65);
+    return { minGap, maxGap };
+}
+
+function trackPlan(cfg, segments) {
+    const { minGap, maxGap } = gapLimits(maxSpeed);
+    const bias = Math.min(cfg.gapBias + level * 0.05, 0.9);
+    const shrink = Math.min(level * 0.4, 4);                 // platforms get a bit shorter each sector
+    const lenMin = Math.max(cfg.lenMin - shrink, 5);
+    const lenMax = Math.max(cfg.lenMax - shrink, lenMin + 6);
+    const plan = [];
+    let lastGap = -1;
+    for (let i = 0; i < segments; i++) {
+        let length;
+        if (i === 0) length = lenMax + 4;                                        // runway to land on
+        else if (Math.random() < cfg.stoneChance) length = 4.5 + Math.random() * 2.5;   // stepping stone
+        else length = lenMin + Math.random() * (lenMax - lenMin);
+
+        let gap = 0;
+        if (i > 0) {
+            // Lean towards the long end with the bias, with plenty of spread either way,
+            // and never repeat almost the same gap twice in a row
+            let t = Math.min(Math.max(bias + (Math.random() - 0.5) * 0.9, 0), 1);
+            gap = minGap + (maxGap - minGap) * t;
+            if (lastGap >= 0 && Math.abs(gap - lastGap) < 1) gap = gap > (minGap + maxGap) / 2 ? gap - 1.6 : gap + 1.6;
+            gap = Math.min(Math.max(gap, minGap), maxGap);
+            lastGap = gap;
+        }
+        plan.push({ length, gap });
+    }
+    return plan;
+}
+
 function generateLevel() {
     [platforms, edges, rings, spikes, movPlatforms, powerups].forEach(arr => arr.forEach(obj => scene.remove(obj)));
     platforms = []; edges = []; rings = []; spikes = []; movPlatforms = []; powerups = [];
@@ -37,10 +83,20 @@ function generateLevel() {
     transformBall('normal');
 
     let currentZ = 0;
-    for(let i=0; i < targetRings + 2; i++) {
-        let length = Math.max(cfg.lengthBase - (level * 0.5), 8);
-        let gap = (i===0) ? 0 : cfg.gapBase + Math.min(level * cfg.gapScale, 15);
+    const plan = trackPlan(cfg, targetRings + 2);
+    let ringsPlaced = 0;
+    for(let i=0; i < plan.length; i++) {
+        const length = plan[i].length;
+        const gap = plan[i].gap;
         currentZ -= gap;
+
+        // Some gaps carry a data ring in the air: only a jump through it collects it
+        const airRing = i > 1 && gap > 0 && ringsPlaced < targetRings && Math.random() < cfg.airRingChance;
+        if (airRing) {
+            const r = createData(i * 0.7);
+            r.position.set(Math.random() * 6 - 3, 3.4, currentZ + gap / 2);
+            scene.add(r); rings.push(r); ringsPlaced++;
+        }
 
         // Moving platform inside a wide gap
         if(gap > 6 && Math.random() < cfg.movPlatChance + (level*0.02)) {
@@ -60,19 +116,22 @@ function generateLevel() {
         pEdge.position.copy(plat.position);
         scene.add(pEdge); edges.push(pEdge);
 
-        if(i > 0 && i <= targetRings) {
-            // Data pickup
-            let r = createData(i * 1.3);
-            r.position.set(Math.random()*8 - 4, 1.5, currentZ - length/2);
-            scene.add(r); rings.push(r);
+        if(i > 0) {
+            // Data pickup on the platform (until the sector has all of its rings)
+            if (ringsPlaced < targetRings) {
+                let r = createData(i * 1.3);
+                r.position.set(Math.random()*8 - 4, 1.5, currentZ - length/2);
+                scene.add(r); rings.push(r); ringsPlaced++;
+            }
 
-            // Mines
-            if (Math.random() < cfg.spikeChance + (level*0.05)) {
+            // Hazard gates: only on platforms long enough to land, react and dodge,
+            // and never right at either end (where you take off or land)
+            if (length >= 9 && Math.random() < cfg.spikeChance + (level*0.05)) {
                 let numSpikes = Math.floor(Math.random() * (level + (selectedDifficulty==='HARD'?2:0)));
                 numSpikes = Math.min(numSpikes, 6);
                 for(let s=0; s<numSpikes; s++) {
                     let sp = createMine();
-                    sp.position.set(Math.random()*10 - 5, 1.2, currentZ - Math.random()*length);
+                    sp.position.set(Math.random()*10 - 5, 1.2, currentZ - 3 - Math.random() * (length - 6));
 
                     if(selectedDifficulty === 'HARD' || level > 5) {
                         if(Math.random() > 0.5) {
@@ -93,6 +152,15 @@ function generateLevel() {
         }
         currentZ -= length;
     }
+
+    // Never fewer rings than the sector asks for (air rings can leave the last platforms short)
+    for (let k = platforms.length - 1; ringsPlaced < targetRings && k > 0; k--) {
+        const p = platforms[k];
+        const r = createData(k * 1.9);
+        r.position.set(Math.random()*8 - 4, 1.5, p.position.z + 2);
+        scene.add(r); rings.push(r); ringsPlaced++;
+    }
+    targetRings = rings.length;
 
     updateUI();
     levelStartTime = Date.now();
