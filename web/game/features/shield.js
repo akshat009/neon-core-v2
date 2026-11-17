@@ -114,7 +114,7 @@ async function watchShieldOfferAd() {
 function skipShieldOffer() {
     if (!shieldOffer) return;
     const mine = closeShieldOffer();
-    loseLife('LASER COLLISION!', { mine: mine });   // freezes again for the respawn
+    loseLife('You crashed into a hazard gate.', { mine: mine });   // freezes again for the respawn
     resumeGame('shield-offer');
 }
 

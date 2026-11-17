@@ -28,7 +28,7 @@ function renderLives() {
 
 // Fall off the track (called from js/game.js)
 function onFall() {
-    loseLife('GRID BREACH DETECTED!', {});
+    loseLife('You fell off the track.', {});
 }
 
 function loseLife(reason, opts) {

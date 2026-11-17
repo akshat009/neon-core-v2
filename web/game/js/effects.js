@@ -341,7 +341,6 @@ function updateEffects(dt, timeScale) {
         inner.rotation.x += 0.02 * timeScale; inner.rotation.y += 0.05 * timeScale;
         p.userData.core.rotation.y -= 0.09 * timeScale;    // inner cube spins the other way
     }
-    mineMat.emissiveIntensity = 0.3 + Math.sin(t * 4) * 0.12;
 
     // Landing ring under the ball
     const surf = ball.visible ? surfaceUnderBall() : null;

@@ -190,28 +190,79 @@ function createData(phase) {
     return g;
 }
 
-// Red hurdles: dark faceted octahedron with sharp red edges
-const mineShape = new THREE.OctahedronGeometry(0.95);
-const mineMat = new THREE.MeshStandardMaterial({ color: 0x6a0014, emissive: 0xff0022, emissiveIntensity: 0.3, roughness: 0.25, metalness: 0.5, flatShading: true });
-const mineFrameGeo = tubeEdges(mineShape, 0.014);
-const mineFrameMat = new THREE.MeshBasicMaterial({ color: 0xff3a50 });
-
-// Red warning glow on the floor under every mine (one shared material, pulsed in js/juice.js)
+// Red warning glow on the floor under every hazard (one shared material, pulsed in js/juice.js)
 const mineFloorMat = new THREE.MeshBasicMaterial({ map: glowTex, color: 0xff1030, transparent: true, opacity: 0.5, depthWrite: false });
-const mineFloorGeo = new THREE.PlaneGeometry(3.4, 3.4);
+const mineFloorGeo = new THREE.PlaneGeometry(4.2, 2.6);
 
-// children[0] = the spinning, hovering body (js/juice.js); the group itself stays level
+// ---------- Hazard gates (the red hurdles) ----------
+// A neon frame standing across the track with scrolling hazard stripes inside.
+// Hurdles are placed at y 1.2 (js/level.js); the gate stands on the track top (y 0.5).
+// The hit box in js/game.js (hitsGate) uses these sizes.
+const GATE_W = 2.8, GATE_H = 2.1, GATE_D = 0.26;
+const GATE_BASE = 0.5 - 1.2;                    // track top, relative to the hurdle's position
+const GATE_TOP_Y = 0.5 + GATE_H;                // world height of the top bar
+
+function makeHazardTexture() {
+    const c = document.createElement('canvas'); c.width = 256; c.height = 64;
+    const g = c.getContext('2d');
+    g.clearRect(0, 0, 256, 64);
+    for (let x = -64, i = 0; x < 320; x += 32, i++) {   // diagonal bands, tile seamlessly every 64px
+        g.fillStyle = i % 2 ? 'rgba(255, 50, 70, 0.95)' : 'rgba(255, 140, 50, 0.95)';
+        g.beginPath();
+        g.moveTo(x, 64); g.lineTo(x + 18, 64); g.lineTo(x + 18 + 64, 0); g.lineTo(x + 64, 0);
+        g.closePath(); g.fill();
+    }
+    const tex = new THREE.CanvasTexture(c);
+    tex.wrapS = THREE.RepeatWrapping;
+    return tex;
+}
+const hazardTex = makeHazardTexture();
+hazardTex.repeat.set(GATE_W / 1.4, 1);
+
+const gateFrameMat = new THREE.MeshBasicMaterial({ color: 0xff3a50 });
+const gateTrimMat  = new THREE.MeshBasicMaterial({ color: 0xff9a3c });
+const gateStripeMat = new THREE.MeshBasicMaterial({ map: hazardTex, transparent: true, opacity: 0.85, side: THREE.DoubleSide, depthWrite: false, blending: THREE.AdditiveBlending });
+const gateFillMat = new THREE.MeshBasicMaterial({ color: 0xff1030, transparent: true, opacity: 0.08, side: THREE.DoubleSide, depthWrite: false, blending: THREE.AdditiveBlending });
+const gateScanMat = new THREE.MeshBasicMaterial({ color: 0xffc070, transparent: true, opacity: 0.9, blending: THREE.AdditiveBlending, depthWrite: false });
+
+const gateFrameGeo = tubeEdges(new THREE.BoxGeometry(GATE_W, GATE_H, GATE_D), 0.035);
+const gatePostGeo  = new THREE.BoxGeometry(0.16, GATE_H + 0.06, GATE_D + 0.12);
+const gateStripeGeo = new THREE.PlaneGeometry(GATE_W - 0.24, 0.62);
+const gateFillGeo  = new THREE.PlaneGeometry(GATE_W - 0.1, GATE_H - 0.1);
+const gateScanGeo  = new THREE.BoxGeometry(GATE_W - 0.2, 0.04, 0.04);
+const gatePostMat  = new THREE.MeshStandardMaterial({ color: 0x1a0308, emissive: 0xff2040, emissiveIntensity: 0.35, roughness: 0.4, metalness: 0.6 });
+
+// children[0] = the gate body (js/juice.js animates its scan line); the group never rotates
 function createMine() {
     const g = new THREE.Group();
-    const inner = new THREE.Group();
-    const body = new THREE.Mesh(mineShape, mineMat);
-    const frame = new THREE.Mesh(mineFrameGeo, mineFrameMat);
-    body.scale.y = frame.scale.y = 1.15;
-    inner.add(body, frame);
+    const gate = new THREE.Group();
+    gate.position.y = GATE_BASE + GATE_H / 2;
+
+    gate.add(new THREE.Mesh(gateFrameGeo, gateFrameMat));
+    gate.add(new THREE.Mesh(gateFillGeo, gateFillMat));
+    for (const sx of [-1, 1]) {                                   // solid side posts
+        const post = new THREE.Mesh(gatePostGeo, gatePostMat);
+        post.position.x = sx * (GATE_W / 2 - 0.06);
+        gate.add(post);
+    }
+    for (const y of [GATE_H / 2 - 0.46, -GATE_H / 2 + 0.46]) {    // hazard bands top and bottom
+        const band = new THREE.Mesh(gateStripeGeo, gateStripeMat);
+        band.position.y = y;
+        gate.add(band);
+    }
+    const trim = new THREE.Mesh(new THREE.BoxGeometry(GATE_W + 0.1, 0.06, GATE_D + 0.1), gateTrimMat);
+    trim.position.y = GATE_H / 2 + 0.03;
+    gate.add(trim);
+    const scan = new THREE.Mesh(gateScanGeo, gateScanMat);       // light that sweeps up and down
+    gate.add(scan);
+    gate.userData.scan = scan;
+
+    const glow = glowSprite(0xff1030, 4.2, 0.22);
+    glow.position.y = gate.position.y;
     const floor = new THREE.Mesh(mineFloorGeo, mineFloorMat);
     floor.rotation.x = -Math.PI / 2;
-    floor.position.y = 0.53 - 1.2;               // mines sit at y 1.2, the track top is y 0.5
-    g.add(inner, glowSprite(0xff1030, 2.2, 0.2), floor);
+    floor.position.y = GATE_BASE + 0.03;
+    g.add(gate, glow, floor);
     g.userData.phase = Math.random() * Math.PI * 2;
     return g;
 }
