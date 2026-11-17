@@ -16,7 +16,7 @@ function isNativeApp() {
 }
 
 function pickAdNetwork() {
-    if (isNativeApp()) return ADS_CONFIG.admob.rewardedId ? 'admob' : 'demo';
+    if (isNativeApp()) return ADMOB.rewardedId ? 'admob' : 'demo';
     const lx = ADS_CONFIG.applixir;
     if (lx.apiKey && (!lx.allowedHosts.length || lx.allowedHosts.includes(location.hostname))) return 'applixir';
     return ADS_CONFIG.web.adsenseClient ? 'web' : 'demo';
