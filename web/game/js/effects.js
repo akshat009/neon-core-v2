@@ -224,7 +224,7 @@ function updateTrail(dt) {
     for (let i = 0; i < n; i++) {
         const q = trailPts[i], u = n > 1 ? i / (TRAIL_POINTS - 1) : 0, k = i * 6, t = i * 4;
         trailPos[k] = q.x; trailPos[k + 1] = q.y; trailPos[k + 2] = q.z;
-        trailPos[k + 3] = q.x; trailPos[k + 4] = q.y + q.h; trailPos[k + 5] = q.z;
+        trailPos[k + 3] = q.x; trailPos[k + 4] = q.y + q.h * (1 - u * 0.85); trailPos[k + 5] = q.z;   // tapers to the tail
         trailUV[t] = u; trailUV[t + 1] = 0; trailUV[t + 2] = u; trailUV[t + 3] = 1;
     }
     trailGeo.attributes.position.needsUpdate = true;
@@ -327,6 +327,7 @@ function updateEffects(dt, timeScale) {
         }
     }
     updateParticles(dt, timeScale);
+    updateJuice(dt, timeScale);
 
     // Pickups bob and spin (inner part only, so collision positions stay exact)
     for (const r of rings) {
@@ -352,8 +353,8 @@ function updateEffects(dt, timeScale) {
         groundRing.visible = groundGlow.visible = true;
         groundRing.position.set(pos.x, surf + 0.03, pos.z);
         groundGlow.position.set(pos.x, surf + 0.02, pos.z);
-        groundRing.scale.setScalar(ballRadius * (1 + h * 0.08));
-        groundGlow.scale.setScalar(ballRadius);
+        groundRing.scale.setScalar(ballRadius * Math.max(1 - h * 0.08, 0.4));   // shrinks as the ball rises
+        groundGlow.scale.setScalar(ballRadius * Math.max(1 - h * 0.08, 0.4));
         groundRing.material.color.setHex(look.glow);
         groundGlow.material.color.setHex(look.glow);
         groundRing.material.opacity = 0.75 * fade;

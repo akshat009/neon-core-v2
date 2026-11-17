@@ -41,6 +41,7 @@ function animate() {
         camera.position.lerp(new THREE.Vector3(ball.position.x, ball.position.y + 7, ball.position.z + 10), 0.1 * (dt*60 || 1));
         camera.lookAt(ball.position.x, ball.position.y, ball.position.z - 5);
     }
+    applyCameraJuice(dt);   // strafe tilt + jump FOV (js/juice.js)
     applyCameraShake(dt);
 
     updateEffects(dt, timeScale);
@@ -48,6 +49,7 @@ function animate() {
 }
 
 function stepPhysics(timeScale) {
+    const wasGrounded = onGround;
     if(invulnTime > 0) invulnTime -= timeScale / 60;   // respawn / shield grace time
 
     // --- Movement (keyboard gives -1/0/1, touch joystick gives analog values) ---
@@ -75,6 +77,7 @@ function stepPhysics(timeScale) {
     pos.y += vel.y * timeScale;
     pos.z += vel.z * timeScale;
 
+    const fallSpeed = -vel.y;              // before the floor zeroes it (landing effects)
     onGround = false; isOnMovingPlat = false;
 
     // --- Platform collisions ---
@@ -102,6 +105,8 @@ function stepPhysics(timeScale) {
         }
     }
 
+    if(onGround && !wasGrounded && fallSpeed > 0.12) onLanding(fallSpeed);   // squash + shockwave (js/juice.js)
+
     if(pos.y < -3) { onFall(); return; }   // costs a life (features/lives.js)
     if(pos.x > 6) { pos.x = 6; vel.x = 0; }
     if(pos.x < -6) { pos.x = -6; vel.x = 0; }
@@ -120,6 +125,7 @@ function stepPhysics(timeScale) {
     for(let i = rings.length - 1; i >= 0; i--) {
         if(pos.distanceTo(rings[i].position) < ballRadius + 1.2) {
             burstData(rings[i].position);
+            flashRing(rings[i].position, 0x6ff8ff);
             scene.remove(rings[i]); rings.splice(i, 1); ringsCollected++; updateUI(); playCoin();
             if(ringsCollected >= targetRings) showLevelComplete();
         }
@@ -129,6 +135,8 @@ function stepPhysics(timeScale) {
     for(let i = powerups.length - 1; i >= 0; i--) {
         if(pos.distanceTo(powerups[i].position) < ballRadius + 1) {
             burstPowerup(powerups[i].position, powerups[i].userData.type);
+            flashRing(powerups[i].position, POWERUP_COLORS[powerups[i].userData.type], 1.4);
+            addShake(0.25);
             transformBall(powerups[i].userData.type);
             scene.remove(powerups[i]); powerups.splice(i, 1);
         }
@@ -140,12 +148,24 @@ function stepPhysics(timeScale) {
             sp.position.x += sp.userData.speed * sp.userData.dir * timeScale;
             if(sp.position.x > sp.userData.endX || sp.position.x < sp.userData.startX) sp.userData.dir *= -1;
         }
-        sp.rotation.y += 0.02 * timeScale; sp.rotation.x += 0.02 * timeScale;
         if(isPlaying && !sp.userData.dead && invulnTime <= 0 && pos.distanceTo(sp.position) < ballRadius + 0.8) {
             onHurdleHit(sp);                              // shield or life (features/shield.js)
             if(Pause.paused || !isPlaying) return;
         }
     }
+}
+
+// Numbers on the level-complete card tick up instead of appearing at once
+function countUp(id, to, format, from = 0, ms = 700) {
+    const el = document.getElementById(id);
+    const start = performance.now();
+    const step = (now) => {
+        const k = Math.min((now - start) / ms, 1);
+        el.innerText = format(from + (to - from) * (1 - Math.pow(1 - k, 3)));
+        if (k < 1) requestAnimationFrame(step);
+    };
+    el.innerText = format(from);
+    requestAnimationFrame(step);
 }
 
 function showLevelComplete() {
@@ -165,7 +185,8 @@ function showLevelComplete() {
     if(timeTaken <= parTime3Stars) { stars = 3; remark = "OPTIMAL"; }
     else if(timeTaken <= parTime2Stars) { stars = 2; remark = "EFFICIENT"; }
 
-    const STAR_SVG = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.8l2.7 5.9 6.4.7-4.8 4.3 1.4 6.3L12 16.8 6.3 20l1.4-6.3L2.9 9.4l6.4-.7z" fill="currentColor"/></svg>';
+    // Rating emblems: the same diamond shape as the data shards
+    const STAR_SVG = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 1.5 21 12 12 22.5 3 12z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M12 6.2 16.6 12 12 17.8 7.4 12z" fill="currentColor"/></svg>';
     let starHtml = "";
     for(let i=0; i<3; i++) starHtml += `<span class="r-star ${i < stars ? 'on' : 'off'}">${STAR_SVG}</span>`;
 
@@ -183,9 +204,9 @@ function showLevelComplete() {
     document.getElementById('remark-txt').dataset.tier = stars;
 
     document.getElementById('lc-diff').innerText = selectedDifficulty;
-    document.getElementById('lc-time').innerText = `${timeTaken}s`;
-    document.getElementById('lc-score').innerText = `+${levelScore}`;
-    document.getElementById('lc-total').innerText = totalScore.toLocaleString('en-US');
+    countUp('lc-time', timeTaken, (v) => `${v.toFixed(1)}s`);
+    countUp('lc-score', levelScore, (v) => `+${Math.round(v).toLocaleString('en-US')}`);
+    countUp('lc-total', totalScore, (v) => Math.round(v).toLocaleString('en-US'), totalScore - levelScore);
 
     showOnly('level-menu');
 }

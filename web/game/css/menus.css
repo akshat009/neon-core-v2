@@ -4,6 +4,9 @@
    cyan accent, amber only for watch-an-ad rewards, red for failure.
    ========================================================= */
 
+/* No mouse pointer over the track while a sector is being played (js/juice.js) */
+body.cursor-hidden canvas { cursor: none; }
+
 /* The HUD and touch controls hide behind the result screens (js/title.js) */
 body.menu-open #ui,
 body.menu-open #mobile-controls { visibility: hidden; }
