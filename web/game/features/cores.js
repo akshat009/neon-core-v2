@@ -8,8 +8,10 @@
 // • After a switch there is a cooldown (5s, Phantom 12s), so the player has to plan ahead
 //   instead of swapping for every single obstacle.
 // • Phantom: for 1.5s after switching to it the ball passes through hazard gates.
-// • The orange / green track boxes give a free try of Titan / Jet (even if not owned),
-//   until the player switches to another core. A box doesn't start the cooldown.
+// • The orange / green track boxes are stored as charges of Titan / Jet (saved, up to
+//   FEATURES.maxCoreCharges each). Picking a charged core in the picker uses one charge; it
+//   stays until the player switches to another core. If the player already owns that core,
+//   the box refills the switch recharge instead.
 // • A sector starts with the core the player last switched to.
 // =========================================================
 
@@ -17,7 +19,7 @@ const Cores = {
     cooldown: 0,          // seconds until the player can switch again
     cooldownMax: 0,
     phase: 0,             // Phantom: seconds left of passing through gates
-    trial: null,          // core id from a track box this sector (not owned)
+    borrowed: null,       // core in use from a stored charge (not owned), until switching away
 
     owns(id) { return id === 'normal' || SaveData.data.cores.includes(id); },
 
@@ -26,18 +28,19 @@ const Cores = {
         return this.owns(e) ? e : 'normal';
     },
 
-    // Cores the player can switch to right now, in CORE_ORDER (+ the free try, if any)
+    charges(id) { return SaveData.data.charges[id] || 0; },
+
+    // Cores the player can switch to right now, in CORE_ORDER: owned ones, the ones with stored
+    // charges from track boxes, and the borrowed one in use
     available() {
-        const list = CORE_ORDER.filter(id => this.owns(id));
-        if (this.trial && !list.includes(this.trial)) list.push(this.trial);
-        return list;
+        return CORE_ORDER.filter(id => this.owns(id) || this.charges(id) > 0 || id === this.borrowed);
     },
 
     // Called from generateLevel() (js/level.js) at the start of every sector
     sectorStartCore() {
         this.cooldown = 0;
         this.phase = 0;
-        this.trial = null;
+        this.borrowed = null;
         closeCoreTray();
         renderCoreHud();
         return this.equipped;
@@ -55,7 +58,13 @@ function switchCore(id) {
     if (Cores.cooldown > 0) { nudgeCoreButton(); return false; }
 
     const core = CORES[id];
-    if (Cores.trial && id !== Cores.trial) Cores.trial = null;    // the free try ends when you switch away
+    if (!Cores.owns(id)) {                                        // not bought: uses one stored charge
+        SaveData.data.charges[id] = Cores.charges(id) - 1;
+        SaveData.save();
+        Cores.borrowed = id;
+    } else {
+        Cores.borrowed = null;                                    // the borrowed core ends when you switch away
+    }
     transformBall(id);
     Cores.cooldown = Cores.cooldownMax = core.cooldown;
     Cores.phase = core.phase;
@@ -65,7 +74,7 @@ function switchCore(id) {
     }
     flashRing(pos, core.glow, 1.3);
     playSwitch();
-    haptic(18);
+    haptic('medium');
     hudToast(`${core.name} CORE`, core.perk.toUpperCase(), hexColor(core.glow));
     closeCoreTray();
     renderCoreHud();
@@ -73,16 +82,26 @@ function switchCore(id) {
     return true;
 }
 
-// Orange / green track box (js/game.js): a free try of Titan / Jet
+// Orange / green track box (js/game.js): store a charge of Titan / Jet to use any time.
+// Already own that core? Then the box refills the switch recharge instead.
 function pickupCore(boxType) {
     const id = boxType === 'big' ? 'titan' : 'jet';
     const core = CORES[id];
-    if (ballState !== id) transformBall(id);
-    if (!Cores.owns(id)) Cores.trial = id;
     playPowerup();
-    haptic(18);
-    hudToast(`${core.name} CORE`, Cores.owns(id) ? core.perk.toUpperCase() : 'FREE TRY · ' + core.perk.toUpperCase(), hexColor(core.glow));
+    haptic('medium');
+    if (Cores.owns(id)) {
+        Cores.cooldown = 0;
+        renderCoreHud();
+        flashCoreReady();
+        hudToast('CORE RECHARGED', 'SWITCH ANY TIME', hexColor(core.glow));
+        return;
+    }
+    const before = Cores.charges(id);
+    SaveData.data.charges[id] = Math.min(before + 1, FEATURES.maxCoreCharges);
+    SaveData.save();
     renderCoreHud();
+    flashCoreReady();
+    hudToast(`+1 ${core.name} CHARGE`, before >= FEATURES.maxCoreCharges ? 'STORE IS FULL' : 'USE IT FROM THE CORE BUTTON', hexColor(core.glow));
 }
 
 // Every physics step (js/game.js): count down the cooldown and the Phantom phase
@@ -118,9 +137,11 @@ function renderCoreHud() {
     coreTray.innerHTML = list.map((id, i) => {
         if (id === ballState) return '';
         const c = CORES[id];
-        const trial = id === Cores.trial ? '<small>FREE TRY</small>' : '';
-        return `<button class="core-opt" data-core="${id}" style="--c:${hexColor(c.glow)}" aria-label="${c.name}: ${c.perk}">`
-             + `<span class="core-orb" aria-hidden="true"><span class="core-dot"></span></span><b>${c.short}</b>${trial}<kbd aria-hidden="true">${i + 1}</kbd></button>`;
+        const left = Cores.owns(id) ? 0 : Cores.charges(id);          // stored charges from track boxes
+        const badge = left > 0 ? `<small>×${left}</small>` : '';
+        const label = `${c.name}: ${c.perk}${left > 0 ? `. ${left} stored ${left === 1 ? 'charge' : 'charges'}` : ''}`;
+        return `<button class="core-opt" data-core="${id}" style="--c:${hexColor(c.glow)}" aria-label="${label}">`
+             + `<span class="core-orb" aria-hidden="true"><span class="core-dot"></span></span><b>${c.short}</b>${badge}<kbd aria-hidden="true">${i + 1}</kbd></button>`;
     }).join('');
 }
 

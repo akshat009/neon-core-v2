@@ -3,12 +3,16 @@
 // Web Audio API (no audio files: nothing to license, nothing added to the app size).
 //
 //   Settings  music / sound effects / vibration on-off (saved), the mute button mutes all
-//   Music     4-chord synthwave loop (Am F C G, 104 BPM). Menus: pads + soft bass.
+//   Music     4-chord synthwave loop (Am F C G, 124 BPM). Menus: pads, bass, soft arp and hats.
 //             Playing: + drums, arpeggio and a lead every other pass. Paused: muffled.
 //             The mode follows the game state by itself (Music.tick).
 //   SFX       jump, landing, data (pitch climbs on quick pickups), core switch, shield,
 //             crash, sector cleared, menu clicks
-//   haptic()  short vibrations on phones
+//   haptic()  vibration: the native Haptics plugin in the Android app (it brings the VIBRATE
+//             permission), navigator.vibrate in mobile browsers
+//
+// Phone speakers barely play anything below ~150 Hz, so the bass sits an octave higher than
+// usual and the kick has a click on top: otherwise the music is inaudible on a phone.
 // =========================================================
 
 let audioCtx;
@@ -29,10 +33,34 @@ const Settings = {
 };
 Settings.load();
 
-// Short vibration on phones (ignored where not supported)
-function haptic(pattern) {
-    if (!Settings.data.vibration || !navigator.vibrate) return;
-    try { navigator.vibrate(pattern); } catch (e) {}
+// Vibration. kind: light (data) · medium (landing, core switch) · heavy (shield) ·
+// error (life lost) · success (sector cleared)
+const HAPTICS = {
+    light:   { impact: 'LIGHT',  ms: 30 },
+    medium:  { impact: 'MEDIUM', ms: 45 },
+    heavy:   { impact: 'HEAVY',  ms: 70 },
+    error:   { notification: 'ERROR',   ms: [70, 60, 140] },
+    success: { notification: 'SUCCESS', ms: [40, 60, 60] }
+};
+let hapticsPlugin = null;
+function nativeHaptics() {
+    if (hapticsPlugin === null) {
+        const cap = window.Capacitor;
+        const register = (window.capacitorExports && window.capacitorExports.registerPlugin) || (cap && cap.registerPlugin);
+        hapticsPlugin = cap && cap.isNativePlatform && cap.isNativePlatform() && register ? register('Haptics') : false;
+    }
+    return hapticsPlugin;
+}
+function haptic(kind) {
+    const h = HAPTICS[kind] || HAPTICS.light;
+    if (!Settings.data.vibration) return;
+    const native = nativeHaptics();
+    if (native) {
+        const done = h.impact ? native.impact({ style: h.impact }) : native.notification({ type: h.notification });
+        done.catch(() => { try { navigator.vibrate && navigator.vibrate(h.ms); } catch (e) {} });
+        return;
+    }
+    try { navigator.vibrate && navigator.vibrate(h.ms); } catch (e) {}
 }
 
 // ---------- Audio graph: sfx + music → compressor → speakers ----------
@@ -79,8 +107,8 @@ function applyVolumes() {
     if (!audioCtx) return;
     const t = audioCtx.currentTime;
     master.gain.setTargetAtTime(0.9, t, 0.05);
-    sfxBus.gain.setTargetAtTime(Settings.data.sfx ? 0.9 : 0, t, 0.05);
-    musicBus.gain.setTargetAtTime(Settings.data.music ? 0.32 : 0, t, 0.15);
+    sfxBus.gain.setTargetAtTime(Settings.data.sfx ? 1.5 : 0, t, 0.05);   // sits on top of the music
+    musicBus.gain.setTargetAtTime(Settings.data.music ? 0.8 : 0, t, 0.15);
 }
 
 // The first tap or key press anywhere starts the sound (browsers need a user gesture)
@@ -153,8 +181,8 @@ function playSynth(freq, type, duration, vol = 0.1) { tone(freq, type, duration,
 // ---------- Sound effects ----------
 
 function playJump() {
-    tone(300, 'sine', 0.16, 0.16, { slideTo: 760, slideTime: 0.12 });
-    noise(0.12, 0.05, { type: 'highpass', freq: 1800, freqTo: 5000 });
+    tone(300, 'sine', 0.16, 0.22, { slideTo: 760, slideTime: 0.12 });
+    noise(0.12, 0.08, { type: 'highpass', freq: 1800, freqTo: 5000 });
 }
 
 function playLand(hit) {                       // hit 0..0.8 (js/juice.js onLanding)
@@ -169,8 +197,8 @@ function playCoin() {                          // pitch climbs on quick pickups,
     coinChain = now - lastCoinAt < 1600 ? Math.min(coinChain + 1, 7) : 0;
     lastCoinAt = now;
     const f = 1046 * Math.pow(2, [0, 2, 4, 7, 9, 12, 14, 16][coinChain] / 12);
-    tone(f, 'triangle', 0.28, 0.1);
-    tone(f * 1.5, 'sine', 0.38, 0.05, { delay: 0.045 });
+    tone(f, 'triangle', 0.28, 0.17);
+    tone(f * 1.5, 'sine', 0.38, 0.08, { delay: 0.045 });
     noise(0.05, 0.02, { type: 'highpass', freq: 6000 });
 }
 
@@ -224,7 +252,7 @@ const CHORDS = [
 const LEAD = { 0: 76, 6: 74, 8: 72, 12: 71, 16: 72, 22: 74, 24: 76, 28: 79, 32: 79, 38: 77, 40: 76, 44: 74, 48: 74, 52: 72, 56: 71, 60: 67 };
 
 const Music = {
-    bpm: 104,
+    bpm: 124,
     step: 0,
     nextTime: 0,
     timer: null,
@@ -234,7 +262,7 @@ const Music = {
     start() {
         if (this.timer || !audioCtx) return;
         const mk = (v) => { const g = audioCtx.createGain(); g.gain.value = v; g.connect(musicBus); return g; };
-        this.layers = { pad: mk(0.55), bass: mk(0.5), drums: mk(0), arp: mk(0), lead: mk(0) };
+        this.layers = { pad: mk(0.8), bass: mk(0.75), drums: mk(0.35), arp: mk(0.35), lead: mk(0) };
         this.layers.arp.connect(echo); this.layers.lead.connect(echo);
         this.nextTime = audioCtx.currentTime + 0.1;
         this.timer = setInterval(() => this.tick(), 25);
@@ -252,10 +280,11 @@ const Music = {
         this.mode = mode;
         const t = audioCtx.currentTime, L = this.layers;
         const play = mode === 'play';
-        L.drums.gain.setTargetAtTime(play ? 0.9 : 0, t, 0.25);
-        L.arp.gain.setTargetAtTime(play ? 0.55 : 0, t, 0.4);
-        L.lead.gain.setTargetAtTime(play ? 0.45 : 0, t, 0.4);
-        L.bass.gain.setTargetAtTime(play ? 0.7 : 0.45, t, 0.3);
+        // Menus keep a light beat (hats + soft kick) so they don't feel slow; a run gets everything
+        L.drums.gain.setTargetAtTime(play ? 1.0 : 0.35, t, 0.25);
+        L.arp.gain.setTargetAtTime(play ? 0.9 : 0.35, t, 0.4);
+        L.lead.gain.setTargetAtTime(play ? 0.8 : 0, t, 0.4);
+        L.bass.gain.setTargetAtTime(play ? 1.0 : 0.75, t, 0.3);
         musicFilter.frequency.setTargetAtTime(mode === 'pause' ? 650 : 18000, t, 0.2);
     },
 
@@ -275,17 +304,22 @@ const Music = {
     playStep(s, t, sd) {
         const bar = Math.floor(s / 16) % 4, i = s % 16, chord = CHORDS[bar], L = this.layers;
         // Pad: the whole chord at the start of each bar
-        if (i === 0) chord.tones.forEach((n, k) => this.note(L.pad, NOTE(n), t, sd * 16, 0.05, 'sawtooth', { attack: 0.5, cutoff: 1400, detune: k % 2 ? 7 : -7 }));
-        // Bass: driving eighths, octave jump on the off-beat
-        if (i % 2 === 0) this.note(L.bass, NOTE(chord.root + (i % 4 === 2 ? 12 : 0)), t, sd * 1.6, 0.16, 'sawtooth', { cutoff: 520 });
+        if (i === 0) chord.tones.forEach((n, k) => this.note(L.pad, NOTE(n), t, sd * 16, 0.07, 'sawtooth', { attack: 0.35, cutoff: 1800, detune: k % 2 ? 7 : -7 }));
+        // Bass: driving eighths an octave up (phone speakers can't play the low one), plus a
+        // quiet sub for headphones; octave jump on the off-beat
+        if (i % 2 === 0) {
+            const n = chord.root + 12 + (i % 4 === 2 ? 12 : 0);
+            this.note(L.bass, NOTE(n), t, sd * 1.6, 0.13, 'sawtooth', { cutoff: 1300 });
+            this.note(L.bass, NOTE(n - 12), t, sd * 1.6, 0.09, 'triangle', { cutoff: 400 });
+        }
         // Arpeggio: chord tones going up in sixteenths
-        this.note(L.arp, NOTE(chord.tones[i % 3] + 12), t, sd * 0.9, 0.035, 'square', { cutoff: 2600 });
+        this.note(L.arp, NOTE(chord.tones[i % 3] + 12), t, sd * 0.9, 0.06, 'square', { cutoff: 3400 });
         // Lead on the second half of the loop
-        if (s >= 64 && LEAD[s - 64] !== undefined) this.note(L.lead, NOTE(LEAD[s - 64]), t, sd * 3.5, 0.05, 'sawtooth', { attack: 0.02, cutoff: 3200, detune: 5 });
+        if (s >= 64 && LEAD[s - 64] !== undefined) this.note(L.lead, NOTE(LEAD[s - 64]), t, sd * 3.5, 0.085, 'sawtooth', { attack: 0.02, cutoff: 3800, detune: 5 });
         // Drums: four on the floor, snare on 2 and 4, off-beat hats
         if (i % 4 === 0) this.kick(t);
         if (i === 4 || i === 12) this.snare(t);
-        if (i % 2 === 1) this.hat(t, i % 4 === 3 ? 0.05 : 0.03);
+        if (i % 2 === 1) this.hat(t, i % 4 === 3 ? 0.08 : 0.05);
     },
 
     note(bus, freq, t, dur, vol, type, o) {
@@ -302,19 +336,30 @@ const Music = {
 
     kick(t) {
         const osc = audioCtx.createOscillator(), g = audioCtx.createGain();
-        osc.frequency.setValueAtTime(140, t);
-        osc.frequency.exponentialRampToValueAtTime(40, t + 0.12);
-        g.gain.setValueAtTime(0.5, t);
+        osc.frequency.setValueAtTime(160, t);
+        osc.frequency.exponentialRampToValueAtTime(45, t + 0.12);
+        g.gain.setValueAtTime(0.7, t);
         g.gain.exponentialRampToValueAtTime(0.0001, t + 0.28);
         osc.connect(g); g.connect(this.layers.drums);
         osc.start(t); osc.stop(t + 0.3);
+        // Click on top: the part of a kick that phone speakers can actually play
+        const src = audioCtx.createBufferSource(); src.buffer = noiseBuf;
+        const f = audioCtx.createBiquadFilter(); f.type = 'bandpass'; f.frequency.value = 2500; f.Q.value = 1;
+        const cg = audioCtx.createGain();
+        cg.gain.setValueAtTime(0.25, t); cg.gain.exponentialRampToValueAtTime(0.0001, t + 0.025);
+        src.connect(f); f.connect(cg); cg.connect(this.layers.drums);
+        src.start(t, Math.random() * 0.5); src.stop(t + 0.03);
+        const punch = audioCtx.createOscillator(), pg = audioCtx.createGain();
+        punch.frequency.setValueAtTime(320, t); punch.frequency.exponentialRampToValueAtTime(120, t + 0.05);
+        pg.gain.setValueAtTime(0.3, t); pg.gain.exponentialRampToValueAtTime(0.0001, t + 0.07);
+        punch.connect(pg); pg.connect(this.layers.drums); punch.start(t); punch.stop(t + 0.08);
     },
 
     snare(t) {
         const src = audioCtx.createBufferSource(); src.buffer = noiseBuf;
         const f = audioCtx.createBiquadFilter(); f.type = 'bandpass'; f.frequency.value = 1800; f.Q.value = 0.7;
         const g = audioCtx.createGain();
-        g.gain.setValueAtTime(0.22, t);
+        g.gain.setValueAtTime(0.32, t);
         g.gain.exponentialRampToValueAtTime(0.0001, t + 0.18);
         src.connect(f); f.connect(g); g.connect(this.layers.drums);
         src.start(t, Math.random() * 0.5); src.stop(t + 0.2);
@@ -347,6 +392,6 @@ function renderSettings() {
 document.querySelectorAll('.set-opt').forEach((b) => b.addEventListener('click', () => {
     Settings.set(b.dataset.setting, b.dataset.on === '1');
     renderSettings();
-    if (b.dataset.setting === 'vibration' && b.dataset.on === '1') haptic(25);   // feel it once
+    if (b.dataset.setting === 'vibration' && b.dataset.on === '1') haptic('medium');   // feel it once
 }));
 renderSettings();

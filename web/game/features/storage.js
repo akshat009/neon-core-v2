@@ -9,6 +9,7 @@
 //   equippedCore the core a sector starts with (the one the player last switched to)
 //   bonusLife   1 = an extra life bought for the next new run
 //   tips        tutorial tips already shown (features/tutorial.js)
+//   charges     stored core charges from track boxes, e.g. { titan: 2, jet: 1 }
 //
 // The lifetime score ("TOTAL ARCHIVE") stays in its own key, see js/config.js.
 // =========================================================
@@ -17,7 +18,7 @@ const SAVE_KEY = 'neonCoreSave.v1';
 
 const SaveData = {
     data: { shields: FEATURES.dailyFreeShields, shieldDay: '', run: null, bestSector: 1,
-            cores: ['normal'], equippedCore: 'normal', bonusLife: 0, tips: {} },
+            cores: ['normal'], equippedCore: 'normal', bonusLife: 0, tips: {}, charges: {} },
 
     load() {
         try {
