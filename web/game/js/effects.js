@@ -235,7 +235,7 @@ function updateTrail(dt) {
 // ---------- Camera shake ----------
 
 let shakeAmount = 0;
-function addShake(a) { shakeAmount = Math.max(shakeAmount, a); }
+function addShake(a) { if (!reducedMotion.matches) shakeAmount = Math.max(shakeAmount, a); }
 function applyCameraShake(dt) {
     if (shakeAmount < 0.001) return;
     camera.position.x += (Math.random() - 0.5) * shakeAmount;

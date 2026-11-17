@@ -15,6 +15,17 @@
     --safe-r: env(safe-area-inset-right, 0px);
     --safe-b: env(safe-area-inset-bottom, 0px);
     --safe-l: env(safe-area-inset-left, 0px);
+
+    /* HUD layout: every HUD position is worked out from these, not hand-tuned */
+    --edge: 16px;                   /* gap from the screen edge */
+    --btn: 44px;                    /* pause / mute: 44px minimum touch target */
+    --btn-gap: 8px;
+    --ctl-w: calc(var(--btn) * 2 + var(--btn-gap));   /* width of the pause + mute pair */
+    --jump-size: 116px;             /* touch cluster: jump button, shield sits beside it */
+    --jump-r: 30px;
+    --jump-b: 30px;
+    --shield-size: 56px;
+    --banner-h: 0px;                /* height of the banner ad on screen (features/ads/*.js) */
 }
 
 body {
@@ -87,10 +98,11 @@ body {
 .sys-label {
     position: absolute;
     bottom: 6px;
-    font: 600 9px var(--font-hud);
+    font: 600 11px var(--font-hud);
     letter-spacing: 2px;
-    color: rgba(170, 235, 255, 0.5);
+    color: rgba(170, 235, 255, 0.6);
 }
+body.touch .sys-label { display: none; }    /* would sit under the thumbs */
 .sys-label.left  { left: 12px; }
 .sys-label.right { right: 12px; }
 
@@ -98,16 +110,25 @@ body {
 
 .hud-left {
     position: absolute;
-    top: calc(20px + var(--safe-t));
-    left: calc(24px + var(--safe-l));
+    top: calc(var(--edge) + 4px + var(--safe-t));
+    left: calc(var(--edge) + 8px + var(--safe-l));
     width: min(300px, 40vw);
+    z-index: 0;
+}
+.hud-left::before {           /* soft dark glass so the text reads over the bright sun */
+    content: '';
+    position: absolute;
+    z-index: -1;
+    inset: -18px -40px -18px -30px;
+    background: radial-gradient(farthest-side at 35% 50%, rgba(3, 6, 13, 0.78) 0%, rgba(3, 6, 13, 0.6) 55%, rgba(3, 6, 13, 0) 100%);
+    pointer-events: none;
 }
 
 #score-txt {
     font: 700 clamp(16px, 2.4vw, 26px)/1 var(--font-hud);
     letter-spacing: 2px;
     color: var(--neon-text);
-    text-shadow: 0 0 10px rgba(41, 243, 255, 0.85), 0 0 24px rgba(41, 243, 255, 0.35);
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.9), 0 0 10px rgba(41, 243, 255, 0.85), 0 0 24px rgba(41, 243, 255, 0.35);
 }
 
 .data-bar {
@@ -138,19 +159,18 @@ body {
 
 #status-txt {
     margin-top: 8px;
-    font: 700 11px var(--font-ui);
+    font: 700 13px var(--font-ui);
     letter-spacing: 2px;
     color: #00ffff;
     text-shadow: 0 0 6px currentColor;
-    opacity: 0.9;
 }
 
 /* ---------- Top-right: sector + time panels ---------- */
 
 .hud-right {
     position: absolute;
-    top: calc(16px + var(--safe-t));
-    right: calc(126px + var(--safe-r));   /* leaves room for the pause and mute buttons */
+    top: calc(var(--edge) + var(--safe-t));
+    right: calc(var(--edge) + var(--ctl-w) + 12px + var(--safe-r));   /* left of the pause + mute pair */
     display: flex;
     flex-direction: column;
     align-items: flex-end;
@@ -194,7 +214,7 @@ body {
     margin-right: 10px;
     padding: 2px 5px;
     vertical-align: middle;
-    font: 700 9px/1 var(--font-hud);
+    font: 700 11px/1 var(--font-hud);
     letter-spacing: 1px;
     color: #03060d;
     background: var(--neon);
@@ -202,22 +222,55 @@ body {
     transform: translateY(-2px);
 }
 
+/* ---------- Middle-of-screen message (core changed form, js/ui.js hudToast) ---------- */
+
+.hud-toast {
+    --toast-c: var(--neon);
+    position: absolute;
+    left: 50%;
+    top: max(32%, calc(var(--safe-t) + 150px));
+    transform: translate(-50%, 8px) scale(0.92);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    padding: 10px 22px 11px;
+    white-space: nowrap;
+    background: linear-gradient(90deg, transparent, rgba(3, 8, 16, 0.78) 18%, rgba(3, 8, 16, 0.78) 82%, transparent);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.25s, transform 0.25s cubic-bezier(0.2, 0.9, 0.3, 1.3);
+}
+.hud-toast.show { opacity: 1; transform: translate(-50%, 0) scale(1); }
+.hud-toast b {
+    font: 800 clamp(20px, 3vw, 28px)/1 var(--font-hud);
+    letter-spacing: 3px;
+    color: var(--toast-c);
+    text-shadow: 0 0 12px var(--toast-c), 0 0 28px var(--toast-c);
+}
+.hud-toast span {
+    font: 700 13px/1 var(--font-hud);
+    letter-spacing: 4px;
+    color: #eafcff;
+    opacity: 0.9;
+}
+
 /* ---------- Mute & Pause buttons (sits above menus too) ---------- */
 
 #top-controls {
     position: absolute;
-    top: calc(16px + var(--safe-t));
-    right: calc(18px + var(--safe-r));
+    top: calc(var(--edge) + var(--safe-t));
+    right: calc(var(--edge) + var(--safe-r));
     z-index: 60;
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: var(--btn-gap);
 }
 
 .icon-btn {
     --cut: 8px;
-    width: 44px;
-    height: 44px;
+    width: var(--btn);
+    height: var(--btn);
     padding: 0;
     display: grid;
     place-items: center;
@@ -496,42 +549,10 @@ body {
     text-shadow: 0 0 15px rgba(41, 243, 255, 0.7);
 }
 
-/* ---------- Joystick sensitivity picker (start menu, touch only) ---------- */
+/* ---------- Shown on touch screens only ---------- */
 
 .touch-only { display: none; }
 body.touch .touch-only { display: flex; }
-
-.sens-row {
-    align-items: center;
-    justify-content: space-between;
-    gap: 10px;
-    margin: -4px 0 12px;
-}
-.sens-label {
-    font-family: var(--font-hud);
-    font-size: 11px;
-    font-weight: 700;
-    letter-spacing: 2px;
-    color: rgba(200, 240, 255, 0.75);
-}
-.sens-steps { display: flex; gap: 5px; }
-.sens-step {
-    width: 32px;
-    height: 30px;
-    padding: 0;
-    font: 800 14px var(--font-hud);
-    color: #9adfe6;
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid #44575c;
-    border-radius: 5px;
-    cursor: pointer;
-}
-.sens-step.active {
-    color: #00ffff;
-    border-color: #00ffff;
-    background: rgba(0, 255, 255, 0.18);
-    box-shadow: 0 0 10px rgba(0, 255, 255, 0.35);
-}
 
 /* =========================================================
    Touch controls
@@ -616,10 +637,10 @@ body.touch .touch-only { display: flex; }
 
 #btn-jump {
     position: absolute;
-    right: calc(30px + var(--safe-r));
-    bottom: calc(30px + var(--safe-b));
-    width: 116px;
-    height: 116px;
+    right: calc(var(--jump-r) + var(--safe-r));
+    bottom: calc(var(--jump-b) + var(--safe-b));
+    width: var(--jump-size);
+    height: var(--jump-size);
     padding: 0;
     border-radius: 50%;
     pointer-events: auto;
@@ -670,34 +691,22 @@ body.touch .touch-only { display: flex; }
     .rules-list.stats-list p b { font-size: 16px; }
     .btn { font-size: 16px; padding: 13px 20px; }
 
-    .hud-left { max-width: 38vw; left: calc(14px + var(--safe-l)); top: calc(14px + var(--safe-t)); }
-    #score-txt { font-size: 13px; letter-spacing: 1px; }
-    .data-bar { height: 9px; margin-top: 6px; }
-    #status-txt { font-size: 9px; letter-spacing: 1px; }
-
-    #top-controls {
-        right: calc(10px + var(--safe-r));
-        top: calc(14px + var(--safe-t));
-        gap: 6px;
-    }
-    #top-controls .icon-btn {
-        width: 36px;
-        height: 36px;
-    }
-    #top-controls .icon-btn svg {
-        width: 18px;
-        height: 18px;
-    }
+    /* Top bar: data on the left; pause + mute on the right with sector and time under them */
+    :root { --edge: 12px; }
+    .hud-left { width: min(210px, 54vw); top: calc(var(--edge) + 2px + var(--safe-t)); left: calc(var(--edge) + 2px + var(--safe-l)); }
+    #score-txt { font-size: 16px; letter-spacing: 1px; }
+    .data-bar { height: 10px; margin-top: 7px; }
+    #status-txt { font-size: 12px; letter-spacing: 1px; margin-top: 7px; }
 
     .hud-right {
-        right: calc(94px + var(--safe-r));   /* cleanly avoids the 2 buttons (36px + 6px + 36px + 10px margin = 88px) */
-        top: calc(14px + var(--safe-t));
-        gap: 5px;
+        top: calc(var(--edge) + var(--btn) + 8px + var(--safe-t));
+        right: calc(var(--edge) + var(--safe-r));
+        gap: 6px;
     }
     .hud-panel {
         min-width: 0;
-        padding: 6px 10px 7px 10px;
-        font-size: 11px;
+        padding: 6px 10px 8px 12px;
+        font-size: 13px;
         letter-spacing: 1px;
         --cut: 6px;
     }
@@ -706,26 +715,28 @@ body.touch .touch-only { display: flex; }
         right: 6px;
         bottom: 2px;
     }
-    .diff-chip {
-        margin-right: 4px;
-        padding: 2px 4px;
-        font-size: 7.5px;
+    .diff-chip {                    /* own line above SECTOR so the panel stays narrow */
+        display: table;
+        margin: 0 0 5px auto;
+        padding: 2px 5px;
+        font-size: 10px;
+        transform: none;
     }
 
     .sys-label { display: none; }
 
     #joystick { width: 136px; height: 136px; left: calc(22px + var(--safe-l)); bottom: calc(34px + var(--safe-b)); }
     #joy-knob { width: 58px; height: 58px; left: calc(50% - 29px); top: calc(50% - 29px); }
-    #btn-jump { width: 100px; height: 100px; right: calc(26px + var(--safe-r)); bottom: calc(40px + var(--safe-b)); font-size: 13px; }
+    :root { --jump-size: 100px; --jump-r: 26px; --jump-b: 40px; --shield-size: 54px; }
+    #btn-jump { font-size: 13px; }
     #btn-jump svg { width: 34px; height: 34px; }
 }
 
 /* Short landscape screens (most phones sideways) */
 @media (orientation: landscape) and (max-height: 500px) {
-    .hud-left { top: calc(16px + var(--safe-t)); }
+    :root { --jump-size: 100px; --jump-b: 32px; --shield-size: 54px; }
     #joystick { width: 132px; height: 132px; bottom: calc(30px + var(--safe-b)); }
     #joy-knob { width: 56px; height: 56px; left: calc(50% - 28px); top: calc(50% - 28px); }
-    #btn-jump { width: 100px; height: 100px; bottom: calc(32px + var(--safe-b)); }
     #btn-jump svg { width: 34px; height: 34px; }
 
     /* menus must fit a ~360-420px tall screen */
@@ -742,8 +753,6 @@ body.touch .touch-only { display: flex; }
     #stars-display { font-size: 26px; margin: 4px 0; }
     #remark-txt { font-size: 17px; margin-bottom: 8px; }
     .btn { font-size: 15px; padding: 10px 20px; margin-bottom: 8px; }
-    .sens-row { margin: -2px 0 8px; }
-    .sens-step { height: 26px; }
 }
 
 /* =========================================================
@@ -835,3 +844,69 @@ body.touch .touch-only { display: flex; }
     }
 }
 
+
+/* =========================================================
+   Menus fit any screen: scroll when the content is taller than
+   the screen (small phones, short landscape, large font size)
+   ========================================================= */
+
+.fullscreen-menu {
+    box-sizing: border-box;
+    max-height: 100vh;
+    max-height: 100dvh;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+    justify-content: safe center;           /* never push the top out of reach */
+}
+.fullscreen-menu > * { flex-shrink: 0; }
+.fullscreen-menu::-webkit-scrollbar { width: 0; height: 0; }
+
+/* =========================================================
+   Accessibility
+   ========================================================= */
+
+/* Text only screen readers get (#sr-live) */
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+/* Keyboard focus. Clipped buttons (pause, mute, panels) can't show an outline, so they glow. */
+button:focus-visible,
+a:focus-visible,
+[role="radio"]:focus-visible {
+    outline: 2px solid #ffffff;
+    outline-offset: 3px;
+}
+.icon-btn:focus-visible {
+    outline: none;
+    color: #ffffff;
+    box-shadow: inset 0 0 0 2px #ffffff;
+    filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.7));
+}
+/* Buttons with cut corners clip any outline, so they get a ring on the inside instead */
+.btn:focus-visible,
+.t-play:focus-visible,
+.v-double:focus-visible {
+    outline: none;
+    box-shadow: inset 0 0 0 3px #ffffff, 0 0 18px rgba(255, 255, 255, 0.35) !important;   /* beats per-screen button styles */
+}
+[tabindex="-1"]:focus { outline: none; }      /* dialog titles get focus only to be read out */
+
+/* Reduce motion: no looping or bouncing CSS animation (camera effects: js/ui.js reducedMotion) */
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+}

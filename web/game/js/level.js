@@ -196,19 +196,21 @@ function transformBall(type) {
     if(type === 'big') {
         ballRadius = 1.4; jumpStrength = 0.55;
         ball.scale.set(1.4, 1.4, 1.4);
-        document.getElementById('status-txt').innerText = "CHASSIS: HEAVY (HIGH JUMP)";
+        document.getElementById('status-txt').innerText = "CORE: HEAVY · HIGH JUMP";
         document.getElementById('status-txt').style.color = "#ffaa00";
+        hudToast('HEAVY CORE', 'HIGH JUMP', '#ffaa00');
         playPowerup();
     } else if(type === 'small') {
         ballRadius = 0.6; jumpStrength = 0.4;
         ball.scale.set(0.6, 0.6, 0.6);
-        document.getElementById('status-txt').innerText = "CHASSIS: MICRO (FAST SPEED)";
+        document.getElementById('status-txt').innerText = "CORE: MICRO · FAST SPEED";
         document.getElementById('status-txt').style.color = "#00ff00";
+        hudToast('MICRO CORE', 'FAST SPEED', '#4dff88');
         playPowerup();
     } else {
         ballRadius = 1; jumpStrength = 0.48;
         ball.scale.set(1, 1, 1);
-        document.getElementById('status-txt').innerText = "CHASSIS: STANDARD";
+        document.getElementById('status-txt').innerText = "CORE: STANDARD";
         document.getElementById('status-txt').style.color = "#00ffff";
     }
 }

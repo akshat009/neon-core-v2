@@ -29,6 +29,8 @@ function showOnly(id) {
     if (id !== 'restart-menu' && id !== 'pause-modal') {
         Ads.hideBanner();
     }
+    if (id && id !== 'start-menu') focusDialog(document.getElementById(id));
+    else releaseDialog();
 }
 
 function savedRun() {
@@ -223,11 +225,13 @@ function togglePauseMenu() {
         resumeGame('esc-pause');
         modal.style.display = 'none';
         Ads.hideBanner();
+        releaseDialog();
     } else {
         pauseGame('esc-pause');
         lockInput();
         modal.style.display = 'flex';
         Ads.showBanner('pause');
+        focusDialog(modal);
     }
 }
 
@@ -236,6 +240,7 @@ attachButtonAction('resume-btn', () => {
     const modal = document.getElementById('pause-modal');
     if (modal) modal.style.display = 'none';
     Ads.hideBanner();
+    releaseDialog();
     resumeGame('esc-pause');
 });
 

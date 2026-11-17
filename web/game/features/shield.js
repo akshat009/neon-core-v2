@@ -42,7 +42,9 @@ const Shield = {
 function renderShieldUI() {
     const n = Shield.count;
     document.getElementById('shield-count').textContent = n;
-    document.getElementById('shield-btn').classList.toggle('empty', n <= 0);
+    const btn = document.getElementById('shield-btn');
+    btn.classList.toggle('empty', n <= 0);
+    btn.setAttribute('aria-label', n > 0 ? `Shields: ${n}. Tap to watch an ad for one more.` : 'No shields. Watch an ad for a shield.');
     document.getElementById('menu-shield-count').textContent = n;
 }
 
@@ -71,6 +73,7 @@ function offerShield(mine) {
     Ads.prepareRewarded('shield');
     shieldOffer = { mine: mine, left: FEATURES.shieldOfferSeconds, timer: null };
     document.getElementById('shield-offer').classList.add('show');
+    focusDialog(document.getElementById('shield-offer'));
     startOfferCountdown();
 }
 
@@ -87,6 +90,7 @@ function startOfferCountdown() {
 function closeShieldOffer() {
     clearInterval(shieldOffer.timer);
     document.getElementById('shield-offer').classList.remove('show');
+    releaseDialog();
     const mine = shieldOffer.mine;
     shieldOffer = null;
     return mine;
@@ -108,6 +112,7 @@ async function watchShieldOfferAd() {
         // Ad closed early: back to the offer with a fresh timer
         shieldOffer.left = FEATURES.shieldOfferSeconds;
         document.getElementById('shield-offer').classList.add('show');
+        focusDialog(document.getElementById('shield-offer'));
         startOfferCountdown();
     }
 }

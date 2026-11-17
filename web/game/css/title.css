@@ -447,3 +447,17 @@ body.touch .no-touch { display: none; }
     .t-actions { margin-top: 10px; }
     .t-sheet { align-items: center; }
 }
+
+/* ---------- Touch targets: at least 44px to tap, even where the button looks smaller ---------- */
+
+.t-ad-btn, .t-chip, .t-close, .t-link,
+.t-seg .diff-btn, .t-seg .sens-step { position: relative; }
+
+.t-ad-btn::after, .t-chip::after, .t-close::after, .t-link::after,
+.t-seg .diff-btn::after, .t-seg .sens-step::after {
+    content: '';
+    position: absolute;
+    inset: -6px;                 /* 32px "+1" -> 44px, 36px close -> 48px */
+}
+.t-seg .diff-btn::after,
+.t-seg .sens-step::after { inset: -5px 0; }      /* grow up and down only: neighbours touch sideways */
