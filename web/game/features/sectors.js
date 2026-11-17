@@ -18,6 +18,35 @@ const SectorProgress = {
             const raw = JSON.parse(localStorage.getItem(this.KEY));
             if (raw) for (const d in this.data) this.data[d] = raw[d] || {};
         } catch (e) {}
+        this.importEarlierClears();
+    },
+
+    // Sectors cleared before the map existed have no record yet. Count them as cleared:
+    //  • every sector before the one a saved run is on (same difficulty)
+    //  • every sector with a time saved by the first victory screen (key "DIFF-sector")
+    // Stars weren't kept then, so these show "CLEARED" until they're replayed.
+    importEarlierClears() {
+        let changed = false;
+        const run = SaveData.data.run;
+        if (run && this.data[run.difficulty]) {
+            for (let s = 1; s < run.sector; s++) {
+                if (!this.data[run.difficulty][s]) { this.data[run.difficulty][s] = { best: null, stars: 0 }; changed = true; }
+            }
+        }
+        try {
+            const old = JSON.parse(localStorage.getItem('neonCoreBestTimes')) || {};
+            for (const key in old) {
+                const [diff, sec] = key.split('-');
+                const time = Number(old[key]);
+                if (!this.data[diff] || !(time > 0)) continue;
+                const cur = this.data[diff][sec];
+                if (!cur || cur.best === null || time < cur.best) {
+                    this.data[diff][sec] = { best: time, stars: cur ? cur.stars : 0 };
+                    changed = true;
+                }
+            }
+        } catch (e) {}
+        if (changed) this.save();
     },
     save() { try { localStorage.setItem(this.KEY, JSON.stringify(this.data)); } catch (e) {} },
 
@@ -26,13 +55,14 @@ const SectorProgress = {
     // Called when a sector is cleared. Keeps the best time and the most stars.
     record(diff, sector, stars, time) {
         const prev = this.get(diff, sector);
-        const isNew = !prev || time < prev.best;
+        const prevBest = prev && prev.best !== null ? prev.best : undefined;
+        const isNew = prevBest === undefined || time < prevBest;
         this.data[diff][sector] = {
-            best: isNew ? time : prev.best,
+            best: isNew ? time : prevBest,
             stars: Math.max(stars, prev ? prev.stars : 0)
         };
         this.save();
-        return { isNew, prev: prev ? prev.best : undefined, best: isNew ? time : prev.best };
+        return { isNew, prev: prevBest, best: isNew ? time : prevBest };
     },
 
     highestCleared(diff) {
@@ -75,7 +105,9 @@ function renderSectorMap() {
         if (state === 'cleared') {
             let d = '';
             for (let i = 0; i < 3; i++) d += `<span class="m-dia ${i < p.stars ? 'on' : ''}">${DIAMOND}</span>`;
-            sub = `<span class="m-dias">${d}</span><span class="m-best">best ${p.best.toFixed(1)}s</span>`;
+            const rating = p.stars ? `<span class="m-dias">${d}</span>` : '<span class="m-tag m-done">CLEARED</span>';
+            const best = p.best !== null ? `best ${p.best.toFixed(1)}s` : 'replay for stars';
+            sub = `${rating}<span class="m-best">${best}</span>`;
         } else if (state === 'next') {
             const tag = s === unlocked ? 'NEXT' : 'NOT CLEARED';
             sub = `<span class="m-tag">${tag}</span><span class="m-best">${ringsInSector(mapDiff, s)} rings</span>`;
@@ -115,7 +147,7 @@ function updateMapFooter() {
     const p = SectorProgress.get(mapDiff, mapSelected);
     document.getElementById('map-sel-label').textContent = `SECTOR ${pad2(mapSelected)} · ${mapDiff}`;
     document.getElementById('map-sel-info').textContent = p
-        ? `${p.stars}/3 stars · best ${p.best.toFixed(1)}s · ${ringsInSector(mapDiff, mapSelected)} rings`
+        ? `${p.stars ? p.stars + '/3 stars' : 'Cleared'} · ${p.best !== null ? 'best ' + p.best.toFixed(1) + 's' : 'no best time yet'} · ${ringsInSector(mapDiff, mapSelected)} rings`
         : `Not cleared yet · ${ringsInSector(mapDiff, mapSelected)} rings`;
     document.getElementById('map-play').textContent = p ? `REPLAY SECTOR ${pad2(mapSelected)}` : `PLAY SECTOR ${pad2(mapSelected)}`;
 }
