@@ -42,7 +42,7 @@ function loseLife(reason, opts) {
     Lives.lastWasFall = !opts.mine;
     if (opts.mine) { opts.mine.userData.dead = true; shatterMine(opts.mine); }
     playDie();
-    haptic([50, 40, 70]);
+    haptic('error');
     setLives(Lives.count - 1);
     flashLives();
     if (Lives.count > 0) announce(`Life lost. ${Lives.count} ${Lives.count === 1 ? 'life' : 'lives'} left.`);

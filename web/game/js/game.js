@@ -129,7 +129,7 @@ function stepPhysics(timeScale) {
         if(pos.distanceTo(rings[i].position) < ballRadius + 1.2) {
             burstData(rings[i].position);
             flashRing(rings[i].position, 0x6ff8ff);
-            scene.remove(rings[i]); rings.splice(i, 1); ringsCollected++; updateUI(); playCoin(); haptic(8);
+            scene.remove(rings[i]); rings.splice(i, 1); ringsCollected++; updateUI(); playCoin(); haptic('light');
             if(ringsCollected >= targetRings) showLevelComplete();
         }
     }
@@ -203,7 +203,7 @@ function hitsGate(sp) {
 }
 
 function showLevelComplete() {
-    isPlaying = false; playWin(); haptic([20, 40, 30]);
+    isPlaying = false; playWin(); haptic('success');
     keys.w = keys.a = keys.s = keys.d = keys.space = false;
 
     let timeTaken = parseFloat(currentTimeStr);

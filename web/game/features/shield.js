@@ -61,7 +61,7 @@ function absorbHit(mine) {
     shieldPop();
     invulnTime = Math.max(invulnTime, FEATURES.shieldGraceSeconds);
     playShieldBreak();
-    haptic(30);
+    haptic('heavy');
 }
 
 // ---------- "No shields left" offer ----------

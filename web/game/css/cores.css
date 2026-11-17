@@ -280,6 +280,7 @@ body.touch .core-key { display: none; }
 .shop-plus, .shop-minus { font: 600 13px/1.3 var(--font-ui); }
 .shop-plus { color: #c9f7d8; }
 .shop-minus { color: #ffb3c1; }
+.shop-store { font: 700 11px/1.3 var(--font-hud); letter-spacing: 0.5px; color: #ffc45c; }
 .shop-buy {
     flex: none;
     min-width: 96px;

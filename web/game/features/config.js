@@ -16,5 +16,6 @@ const FEATURES = {
     reviveDataCost: 500,             // game over: spend this much Data instead of watching an ad
     shopShieldPrice: 1000,           // SHOP: +1 shield (core prices are in CORES, js/config.js)
     shopLifePrice: 1500,             // SHOP: start the next new run with one extra life (one at a time)
-    coreTrayCloseMs: 3500            // the core picker closes by itself after this long
+    coreTrayCloseMs: 3500,           // the core picker closes by itself after this long
+    maxCoreCharges: 5                // track boxes store up to this many charges of each core
 };

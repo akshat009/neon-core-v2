@@ -34,6 +34,7 @@ function renderShop() {
              + `<div class="shop-info"><b>${c.name}</b>`
              + `<span class="shop-plus">+ ${c.perk}</span>`
              + (id === 'normal' ? '' : `<span class="shop-minus">− ${c.flaw}</span>`)
+             + (!owned && Cores.charges(id) > 0 ? `<span class="shop-store">×${Cores.charges(id)} stored from track boxes</span>` : '')
              + `</div>${btn}</div>`;
     }).join('');
 
@@ -60,7 +61,7 @@ function notEnough(price) {
 
 function afterPurchase(text) {
     playPowerup();
-    haptic(25);
+    haptic('medium');
     announce(text);
     renderShop();
     refreshStartMenu();
