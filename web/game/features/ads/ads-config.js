@@ -13,8 +13,9 @@ const ADS_CONFIG = {
         // Ad unit IDs from your AdMob account. Google's official TEST IDs are filled in for now:
         // they always serve test ads, so it's safe to tap them while developing.
         // Before publishing: put your own IDs here and set testing to false.
-        rewardedId: 'ca-app-pub-3940256099942544/5224354917',
-        bannerId:   'ca-app-pub-3940256099942544/6300978111',
+        rewardedId:     'ca-app-pub-3940256099942544/5224354917',
+        bannerId:       'ca-app-pub-3940256099942544/6300978111',
+        interstitialId: 'ca-app-pub-3940256099942544/1033173712',
         testing: true
         // The AdMob APP ID (ca-app-pub-…~…) goes in
         // android-app/android/app/src/main/res/values/strings.xml → admob_app_id

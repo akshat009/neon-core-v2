@@ -68,6 +68,7 @@ const AppLixirAds = {
         });
     },
 
+    showInterstitial() { return Promise.resolve('unavailable'); },   // AppLixir only serves rewarded video
     showBanner() {},
     hideBanner() {}
 };

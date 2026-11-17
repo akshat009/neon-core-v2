@@ -381,3 +381,6 @@ body.touch #shield-btn {
     .modal-card { padding: 12px 16px 10px; }
     .modal-card p { margin-bottom: 10px; }
 }
+
+/* Demo interstitial: no close button for the first seconds (features/ads/ads-demo.js) */
+.demo-ad.no-skip .demo-ad-close { visibility: hidden; }

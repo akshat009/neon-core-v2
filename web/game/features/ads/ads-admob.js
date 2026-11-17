@@ -96,6 +96,25 @@ const AdMobAds = {
         return how === 'failed' ? 'unavailable' : 'dismissed';
     },
 
+    // Skippable interstitial between sectors. Resolves when it closes (or can't show).
+    async showInterstitial() {
+        if (!(await this.init()) || !ADS_CONFIG.admob.interstitialId) return 'unavailable';
+        const AdMob = this.getPlugin();
+        try {
+            await AdMob.prepareInterstitial({ adId: ADS_CONFIG.admob.interstitialId, isTesting: ADS_CONFIG.admob.testing });
+        } catch (e) { return 'unavailable'; }
+        let finish;
+        const closed = new Promise((resolve) => { finish = resolve; });
+        const listeners = await Promise.all([
+            AdMob.addListener('interstitialAdDismissed', () => finish('closed')),
+            AdMob.addListener('interstitialAdFailedToShow', () => finish('failed'))
+        ]);
+        AdMob.showInterstitial().catch(() => finish('failed'));
+        const how = await closed;
+        listeners.forEach((l) => { try { l.remove(); } catch (e) {} });
+        return how === 'failed' ? 'unavailable' : 'viewed';
+    },
+
     showBanner() {
         this.init().then((ok) => {
             if (!ok) return;

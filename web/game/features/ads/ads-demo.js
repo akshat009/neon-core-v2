@@ -22,6 +22,7 @@ const DemoAds = {
             let left = total, earned = false;
 
             el.dataset.placement = placement;
+            el.querySelector('h3').textContent = 'Your AdMob rewarded video plays here';
             status.textContent = 'Rewarded video · watch till the end to get the reward';
             fill.style.width = '0%';
             count.textContent = Math.ceil(left);
@@ -46,6 +47,41 @@ const DemoAds = {
                 this.finish = null;
                 el.classList.remove('show', 'done');
                 resolve(earned ? 'viewed' : 'dismissed');
+            };
+            this.finish = finish;
+        });
+    },
+
+    // Interstitial: skippable after 3 seconds, no reward
+    showInterstitial(placement) {
+        return new Promise((resolve) => {
+            const el = document.getElementById('demo-ad');
+            const fill = document.getElementById('demo-ad-fill');
+            const count = document.getElementById('demo-ad-count');
+            const status = document.getElementById('demo-ad-status');
+            const total = FEATURES.demoAdSeconds, skipAfter = 3;
+            let left = total, t = 0;
+            el.dataset.placement = placement;
+            el.querySelector('h3').textContent = 'Your AdMob interstitial plays here';
+            el.classList.add('interstitial');
+            status.textContent = `Interstitial · you can skip in ${skipAfter}s`;
+            fill.style.width = '0%';
+            count.textContent = Math.ceil(left);
+            el.classList.remove('done');
+            el.classList.add('show', 'no-skip');
+            const timer = setInterval(() => {
+                t += 0.1; left = Math.max(total - t, 0);
+                fill.style.width = `${(t / total) * 100}%`;
+                count.textContent = Math.ceil(left);
+                if (t >= skipAfter) { el.classList.remove('no-skip'); status.textContent = 'Interstitial · tap ✕ to skip'; }
+                if (left <= 0) finish();
+            }, 100);
+            const finish = () => {
+                if (t < skipAfter) return;                 // close is disabled for the first seconds
+                clearInterval(timer);
+                this.finish = null;
+                el.classList.remove('show', 'done', 'interstitial', 'no-skip');
+                resolve('viewed');
             };
             this.finish = finish;
         });

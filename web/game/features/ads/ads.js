@@ -30,9 +30,13 @@ const Ads = {
         try { AD_NETWORKS[this.network].prepareRewarded(placement); } catch (e) {}
     },
 
+    lastAdAt: 0,              // any fullscreen ad (rewarded or interstitial), for pacing
+    clearsSinceInterstitial: 0,
+
     async showRewarded(placement) {
         if (this.busy) return false;
         this.busy = true;
+        this.lastAdAt = Date.now();
         setGameAudio(false);
         let result = 'unavailable';
         try {
@@ -48,6 +52,27 @@ const Ads = {
         return result === 'viewed';
     },
 
+    // Called after every cleared sector, when the player moves on. Shows a skippable interstitial
+    // after every Nth clear, never after a fail and never too soon after another ad.
+    async maybeInterstitial(placement) {
+        this.clearsSinceInterstitial++;
+        const due = this.clearsSinceInterstitial >= FEATURES.interstitialEverySectors;
+        const rested = Date.now() - this.lastAdAt >= FEATURES.interstitialMinGapSeconds * 1000;
+        if (!due || !rested || this.busy || adsRemoved()) return;
+        const net = AD_NETWORKS[this.network];
+        if (!net.showInterstitial) return;
+        this.busy = true;
+        setGameAudio(false);
+        try {
+            const r = await net.showInterstitial(placement);
+            if (r === 'viewed') { this.clearsSinceInterstitial = 0; this.lastAdAt = Date.now(); }
+        } catch (e) {
+        } finally {
+            setGameAudio(true);
+            this.busy = false;
+        }
+    },
+
     showBanner(placement) {
         try { AD_NETWORKS[this.network].showBanner(placement); } catch (e) {}
     },
@@ -56,6 +81,11 @@ const Ads = {
         try { AD_NETWORKS[this.network].hideBanner(); } catch (e) {}
     }
 };
+
+// "Remove Ads" purchase (coming with Google Play billing): forced ads off, rewarded ads stay opt-in
+function adsRemoved() {
+    try { return localStorage.getItem('neonCoreNoAds') === '1'; } catch (e) { return false; }
+}
 
 function setGameAudio(on) {
     if (!audioCtx || isMuted) return;
