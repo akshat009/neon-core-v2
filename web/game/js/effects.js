@@ -313,6 +313,7 @@ function updateEffects(dt, timeScale) {
 
     // Ball circuit pulse + faint halo
     ballMat.uniforms.uTime.value = t;
+    for (const k in POWERUP_MATS) if (POWERUP_MATS[k].ball) POWERUP_MATS[k].ball.uniforms.uTime.value = t;
     ballGlow.material.opacity = 0.18 + Math.sin(t * 6) * 0.04;
     ballMat.uniforms.uBlink.value = invulnTime > 0 ? (Math.sin(t * 28) > 0 ? 1 : 0.25) : 1;   // blink while protected
 
@@ -340,8 +341,9 @@ function updateEffects(dt, timeScale) {
     for (const p of powerups) {
         const inner = p.userData.inner;
         inner.position.y = Math.sin(t * 1.8 + p.userData.phase) * 0.18;
-        inner.rotation.x += 0.02 * timeScale; inner.rotation.y += 0.05 * timeScale;
-        p.userData.core.rotation.y -= 0.09 * timeScale;    // inner cube spins the other way
+        inner.rotation.y = Math.sin(t * 1.3 + p.userData.phase) * 0.7;   // sways, icon stays readable
+        p.userData.core.rotation.z += 0.012 * timeScale;                  // hex frame turns slowly
+        if (p.userData.orb) p.userData.orb.rotation.x -= 0.05 * timeScale;   // hologram ball rolls
     }
 
     // Landing ring under the ball
