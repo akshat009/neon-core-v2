@@ -387,25 +387,87 @@ function createMine() {
     return g;
 }
 
-// Power-up boxes: orange = heavy (high jump), green = micro (fast). Cube-in-cube outline.
+// Core morphs (the items that change the ball): a hex frame holding a small hologram of the
+// ball form you will turn into, over a light beam, with an icon on the floor pad.
+//   orange "big"   = heavy core: bigger, jumps higher  → big orange ball, up-arrows
+//   green  "small" = micro core: smaller, faster       → small green ball, lightning bolt
 const POWERUP_COLORS = { big: 0xffa12e, small: 0x45ff6a };
-const boxShape = new THREE.BoxGeometry(1.3, 1.3, 1.3);
-const boxFrameGeo = tubeEdges(boxShape, 0.018);
-const boxInnerFrameGeo = tubeEdges(new THREE.BoxGeometry(0.6, 0.6, 0.6), 0.012);
-const powerupFrameMats = { big: new THREE.MeshBasicMaterial({ color: POWERUP_COLORS.big }), small: new THREE.MeshBasicMaterial({ color: POWERUP_COLORS.small }) };
-const powerupFillMats = { big: additiveMat(POWERUP_COLORS.big, 0.045), small: additiveMat(POWERUP_COLORS.small, 0.045) };
 
+function makePowerupIcon(type) {
+    const c = document.createElement('canvas'); c.width = c.height = 256;
+    const g = c.getContext('2d');
+    g.lineCap = g.lineJoin = 'round';
+    const glow = type === 'big' ? '#ff8a1a' : '#2dff6a';
+    const main = type === 'big' ? '#ffc070' : '#9dffb4';
+    const draw = (width, color, blur) => {
+        g.shadowColor = glow; g.shadowBlur = blur;
+        g.strokeStyle = color; g.fillStyle = color; g.lineWidth = width;
+        if (type === 'big') {                                    // two stacked up-arrows
+            for (const y of [0, 62]) {
+                g.beginPath(); g.moveTo(62, 140 + y - 30); g.lineTo(128, 74 + y - 30); g.lineTo(194, 140 + y - 30); g.stroke();
+            }
+        } else {                                                 // lightning bolt
+            g.beginPath();
+            g.moveTo(150, 34); g.lineTo(78, 140); g.lineTo(126, 140); g.lineTo(104, 224);
+            g.lineTo(182, 112); g.lineTo(132, 112); g.closePath();
+            if (width > 8) g.stroke(); else g.fill();
+        }
+    };
+    draw(26, main, 24);        // thick glowing stroke
+    draw(8, '#ffffff', 6);     // bright core
+    return new THREE.CanvasTexture(c);
+}
+
+const hexFrameGeo = tubeEdges(new THREE.CylinderGeometry(0.86, 0.86, 0.16, 6).rotateX(Math.PI / 2), 0.022);
+const hexFillGeo = new THREE.CircleGeometry(0.84, 6).rotateZ(Math.PI / 2);
+const iconGeo = new THREE.PlaneGeometry(1.1, 1.1).rotateX(-Math.PI / 2);   // lies on the floor pad
+const MORPH_BALL_SIZE = { big: 0.6, small: 0.3 };
+const morphBallGeo = new THREE.SphereGeometry(1, 32, 24);
+const beamGeo = new THREE.CylinderGeometry(0.5, 0.78, 1.0, 24, 1, true);
+const padGeo = new THREE.RingGeometry(0.72, 0.84, 6).rotateX(-Math.PI / 2).rotateY(Math.PI / 6);
+const POWERUP_MATS = {};
+for (const type of ['big', 'small']) {
+    const col = POWERUP_COLORS[type];
+    POWERUP_MATS[type] = {
+        frame: new THREE.MeshBasicMaterial({ color: col }),
+        fill: new THREE.MeshBasicMaterial({ color: col, transparent: true, opacity: 0.12, blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide }),
+        icon: new THREE.MeshBasicMaterial({ map: makePowerupIcon(type), transparent: true, opacity: 0.85, blending: THREE.AdditiveBlending, depthWrite: false }),
+        ball: null,   // made on first use: a copy of the player ball's material in this colour
+        beam: new THREE.MeshBasicMaterial({ color: col, transparent: true, opacity: 0.1, blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide }),
+        pad: new THREE.MeshBasicMaterial({ color: col, transparent: true, opacity: 0.8, blending: THREE.AdditiveBlending, depthWrite: false })
+    };
+}
+
+// Morphs are placed at y 1.5 (js/level.js); the track top is y 0.5.
+// userData.inner sways and bobs, userData.core (the hex frame) turns,
+// userData.orb (the hologram ball) rolls (js/effects.js).
 function createPowerup(type, phase) {
+    const m = POWERUP_MATS[type];
+    if (!m.ball) {
+        m.ball = ballMat.clone();
+        m.ball.uniforms.uColor.value.setHex(POWERUP_COLORS[type]);
+    }
     const g = new THREE.Group();
     const inner = new THREE.Group();
-    inner.add(new THREE.Mesh(boxShape, powerupFillMats[type]));
-    inner.add(new THREE.Mesh(boxFrameGeo, powerupFrameMats[type]));
-    const core = new THREE.Mesh(boxInnerFrameGeo, powerupFrameMats[type]);
-    core.rotation.set(0.6, 0.6, 0);
-    inner.add(core);
-    inner.add(glowSprite(POWERUP_COLORS[type], 2.0, 0.16));
+    const frame = new THREE.Mesh(hexFrameGeo, m.frame);
+    inner.add(frame);
+    inner.add(new THREE.Mesh(hexFillGeo, m.fill));
+    const orb = new THREE.Mesh(morphBallGeo, m.ball);
+    orb.scale.setScalar(MORPH_BALL_SIZE[type]);
+    inner.add(orb);
+    inner.add(glowSprite(POWERUP_COLORS[type], 2.6, 0.2));
     g.add(inner);
-    g.userData = { type: type, inner: inner, core: core, phase: phase };
+
+    const floorY = 0.5 - 1.5 + 0.03;
+    const beam = new THREE.Mesh(beamGeo, m.beam);       // light beam from the floor up to the frame
+    beam.position.y = -0.5;
+    const pad = new THREE.Mesh(padGeo, m.pad);           // hex ring on the floor
+    pad.position.y = floorY;
+    const icon = new THREE.Mesh(iconGeo, m.icon);        // what the morph does, painted on the pad
+    icon.position.y = floorY + 0.005;
+    g.add(beam, pad, icon);
+
+    g.userData = { type: type, inner: inner, core: frame, orb: orb, phase: phase };
     return g;
 }
 
