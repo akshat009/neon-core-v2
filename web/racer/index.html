@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="theme-color" content="#05030c">
+    <title>Neon Core: Racer (prototype)</title>
+    <link rel="stylesheet" href="../game/vendor/fonts/fonts.css">
+    <link rel="stylesheet" href="racer.css?v=0.1">
+</head>
+<body>
+
+<!-- Prototype of the cyberpunk racer: highway, light-bike, rivals, shock-punch takedowns.
+     Separate from the ball game in ../game/ until it is merged into Neon Core. -->
+
+<div id="hud" class="hud" hidden>
+    <div class="hud-pos"><b id="pos-now">1</b><span>/<i id="pos-of">4</i></span><small>POSITION</small></div>
+    <div class="hud-mid">
+        <div class="hud-progress"><div id="progress-fill"></div><div id="progress-rivals"></div></div>
+        <div id="hud-zone" class="hud-zone">NEON CITY</div>
+    </div>
+    <div class="hud-right">
+        <div class="hud-speed"><b id="speed-now">0</b><small>KM/H</small></div>
+        <div class="hud-cash"><span aria-hidden="true">◈</span> <b id="cash-now">0</b></div>
+    </div>
+</div>
+
+<div id="toast" class="toast" aria-live="polite"></div>
+
+<!-- Touch: steer with the left thumb anywhere on the left half; buttons on the right -->
+<div id="touch" class="touch" hidden>
+    <div id="steer-zone" class="steer-zone"><div id="steer-knob" class="steer-knob"></div><span>◀ STEER ▶</span></div>
+    <button id="btn-punch" class="tbtn punch" aria-label="Shock punch">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M13 2 4 14h7l-1 8 9-12h-7z" fill="currentColor"/></svg>
+        PUNCH
+    </button>
+    <button id="btn-brake" class="tbtn brake" aria-label="Brake">BRAKE</button>
+</div>
+
+<div id="menu" class="menu">
+    <div class="menu-card">
+        <p class="kicker">NEON CORE · RACER PROTOTYPE</p>
+        <h1>NEON <span>RACER</span></h1>
+        <p class="pitch">Race three rivals down the highway. Ride close and <b>shock-punch</b> them off their bikes.</p>
+        <div class="zones">
+            <button class="zone-btn" data-zone="city"><b>NEON CITY</b><small>Cyberpunk megacity</small></button>
+            <button class="zone-btn z-delhi" data-zone="delhi"><b>NEO-DELHI</b><small>India Gate · नियो दिल्ली</small></button>
+            <button class="zone-btn lko" data-zone="lucknow"><b>NEO-LUCKNOW</b><small>Rumi Darwaza · नियो लखनऊ</small></button>
+            <button class="zone-btn z-hyd" data-zone="hyderabad"><b>NEO-HYDERABAD</b><small>Charminar · హైదరాబాద్</small></button>
+            <button class="zone-btn z-jaipur" data-zone="jaipur"><b>NEO-JAIPUR</b><small>Hawa Mahal · पिंक सिटी</small></button>
+            <button class="zone-btn z-chennai" data-zone="chennai"><b>NEO-CHENNAI</b><small>Gopuram · சென்னை</small></button>
+        </div>
+        <p class="controls no-touch"><b>A / D</b> steer · <b>S</b> brake · <b>Space</b> or <b>J</b> punch</p>
+        <p class="controls touch-only">Left thumb: steer · right: PUNCH and BRAKE</p>
+    </div>
+</div>
+
+<div id="result" class="menu" hidden>
+    <div class="menu-card">
+        <p class="kicker" id="res-zone">NEON CITY</p>
+        <h1 id="res-title">1ST PLACE</h1>
+        <div class="res-stats">
+            <div><b id="res-takedowns">0</b><small>TAKEDOWNS</small></div>
+            <div><b id="res-time">0.0s</b><small>TIME</small></div>
+            <div><b id="res-cash">0</b><small>DATA EARNED</small></div>
+        </div>
+        <div class="zones">
+            <button id="res-again" class="zone-btn"><b>RACE AGAIN</b><small>Same city</small></button>
+            <button id="res-menu" class="zone-btn lko"><b>CHANGE CITY</b><small>Pick another zone</small></button>
+        </div>
+    </div>
+</div>
+
+<script src="../game/vendor/three/three.min.js"></script>
+<script src="../game/vendor/three/CopyShader.js"></script>
+<script src="../game/vendor/three/LuminosityHighPassShader.js"></script>
+<script src="../game/vendor/three/EffectComposer.js"></script>
+<script src="../game/vendor/three/RenderPass.js"></script>
+<script src="../game/vendor/three/ShaderPass.js"></script>
+<script src="../game/vendor/three/UnrealBloomPass.js"></script>
+<script src="js/util.js?v=0.1"></script>
+<script src="js/track.js?v=0.1"></script>
+<script src="js/city.js?v=0.1"></script>
+<script src="js/bike.js?v=0.1"></script>
+<script src="js/race.js?v=0.1"></script>
+<script src="js/main.js?v=0.1"></script>
+</body>
+</html>
