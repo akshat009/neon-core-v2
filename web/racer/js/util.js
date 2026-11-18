@@ -1,7 +1,7 @@
 // Neon Core: Racer prototype — shared helpers
 
 const IS_TOUCH = matchMedia('(pointer: coarse)').matches || 'ontouchstart' in window;
-if (IS_TOUCH) document.body.classList.add('touch');
+if (IS_TOUCH) document.body.classList.add('is-touch');
 const QUALITY_LOW = new URLSearchParams(location.search).get('quality') === 'low';
 
 // Seeded random (mulberry32) so a zone builds the same city every time
