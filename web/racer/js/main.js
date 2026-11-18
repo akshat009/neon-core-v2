@@ -103,10 +103,17 @@ function moveSteer(e) {
     steerTouchVal = x;
     knob.style.transform = `translateX(${x * (r.width / 2 - 34)}px)`;
 }
-let brakeTouch = false;
-const brakeBtn = document.getElementById('btn-brake');
-brakeBtn.addEventListener('pointerdown', () => { brakeTouch = true; });
-['pointerup', 'pointercancel', 'pointerleave'].forEach(ev => brakeBtn.addEventListener(ev, () => { brakeTouch = false; }));
+// Hold-buttons (GAS, BRAKE): pressed while a finger is on them
+function holdButton(id, onChange) {
+    const el = document.getElementById(id);
+    const set = (v) => { el.classList.toggle('on', v); onChange(v); };
+    el.addEventListener('pointerdown', (e) => { e.preventDefault(); set(true); });
+    ['pointerup', 'pointercancel', 'pointerleave'].forEach(ev => el.addEventListener(ev, () => set(false)));
+}
+let brakeTouch = false, gasTouch = false;
+holdButton('btn-brake', (v) => { brakeTouch = v; });
+holdButton('btn-gas', (v) => { gasTouch = v; if (v) haptic(15); });
+addEventListener('contextmenu', (e) => e.preventDefault());     // long-press on GAS must not open a menu
 document.getElementById('btn-punch').addEventListener('pointerdown', (e) => { e.preventDefault(); Race.punch(); });
 
 function readInput() {
@@ -115,6 +122,7 @@ function readInput() {
     if (keys.KeyD || keys.ArrowRight) steer += 1;
     Race.input.steer = clamp(steer, -1, 1);
     Race.input.brake = brakeTouch || keys.KeyS || keys.ArrowDown;
+    Race.input.gas = gasTouch || keys.KeyW || keys.ArrowUp;
 }
 
 // ---------- menus ----------

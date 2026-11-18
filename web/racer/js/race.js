@@ -1,7 +1,8 @@
 // Neon Core: Racer prototype — the race: you vs three rivals
 //
 // Everyone rides along the highway at distance s with a sideways offset d (js/track.js).
-//   • Throttle is automatic; steer with the stick / A-D, brake with BRAKE / S.
+//   • Hold GAS (W / ↑) to speed up; let go and the bike coasts down; BRAKE (S / ↓) stops hard.
+//     Steer with the stick / A-D.
 //   • Shock-punch (PUNCH / Space / J): hits the nearest rival beside you. 3 hits = TAKEDOWN:
 //     they crash and lose seconds. Rivals punch back when they ride next to you.
 //   • Rubbing a rail or another bike costs speed.
@@ -9,7 +10,10 @@
 
 const RIDE = {
     maxV: 52,             // m/s at full throttle (≈ 187 km/h on the HUD)
-    accel: 0.9,           // how fast speed reaches its target (per second)
+    accel: 0.9,           // rivals: how fast speed reaches its target (per second)
+    engine: 44,           // player GAS: m/s² from standstill, fading to 0 at top speed (~2.7 s to 90%)
+    drag: 3,              // off the gas: slows by drag + 5% of speed per second (coasting)
+    brakeDecel: 26,       // BRAKE: m/s²
     steerV: 15,           // sideways speed at full stick (m/s)
     punchReachS: 3.4,     // how far ahead/behind a punch reaches (m)
     punchReachD: 3.8,     // how far sideways
@@ -31,11 +35,11 @@ const RIVALS = [
 
 const Race = {
     player: null, rivals: [], t: 0, running: false, finished: false, zone: null,
-    cash: 0, takedowns: 0, startCountdown: 0, input: { steer: 0, brake: false },
+    cash: 0, takedowns: 0, startCountdown: 0, input: { steer: 0, brake: false, gas: false }, gasHint: 0,
 
     start(zoneId, scene) {
         this.zone = zoneId;
-        this.t = 0; this.cash = 0; this.takedowns = 0; this.finished = false;
+        this.t = 0; this.cash = 0; this.takedowns = 0; this.finished = false; this.gasHint = 0;
         this.startCountdown = 3;
         this.running = true;
 
@@ -76,8 +80,14 @@ const Race = {
         P.punchCd = Math.max(0, P.punchCd - dt);
         // slipstream: close behind a rival in the same line → faster (and a chance to punch)
         P.draft = this.rivals.some(R => R.crashed <= 0 && R.s - P.s > 1.5 && R.s - P.s < RIDE.draftLen && Math.abs(R.d - P.d) < RIDE.draftWidth);
-        const target = RIDE.maxV * (this.input.brake ? 0.4 : 1) * (P.stun > 0 ? 0.7 : 1) * (P.draft ? 1 + RIDE.draftBoost : 1) * (1 - Track.slope(P.s) * 0.03);
-        P.v += (target - P.v) * Math.min(1, RIDE.accel * dt * (this.input.brake ? 2.5 : 1));
+        const top = RIDE.maxV * (P.stun > 0 ? 0.7 : 1) * (P.draft ? 1 + RIDE.draftBoost : 1) * (1 - Track.slope(P.s) * 0.03);
+        if (this.input.brake) P.v -= RIDE.brakeDecel * dt;
+        else if (P.v > top) P.v += (top - P.v) * Math.min(1, 1.5 * dt);            // over the limit (stun, draft ended)
+        else if (this.input.gas) P.v += RIDE.engine * (1 - P.v / top) * dt;       // strong pull low down, fades near top
+        else P.v -= (RIDE.drag + P.v * 0.05) * dt;                                // coasting
+        P.v = Math.max(0, P.v);
+        // remind them to hold GAS if they just sit at the line
+        if (!this.gasHint && this.t > 1.2 && P.v < 4) { this.gasHint = 1; showToast('HOLD GAS', IS_TOUCH ? 'RIGHT THUMB' : 'W  OR  ↑'); }
         const steer = P.stun > 0 ? this.input.steer * 0.5 + Math.sin(this.t * 30) * 0.3 : this.input.steer;
         P.vd += (steer * RIDE.steerV - P.vd) * Math.min(1, 10 * dt);
         P.s += P.v * dt;

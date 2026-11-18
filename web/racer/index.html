@@ -6,7 +6,7 @@
     <meta name="theme-color" content="#05030c">
     <title>Neon Core: Racer (prototype)</title>
     <link rel="stylesheet" href="../game/vendor/fonts/fonts.css">
-    <link rel="stylesheet" href="racer.css?v=0.2">
+    <link rel="stylesheet" href="racer.css?v=0.3">
 </head>
 <body>
 
@@ -35,6 +35,10 @@
         PUNCH
     </button>
     <button id="btn-brake" class="tbtn brake" aria-label="Brake">BRAKE</button>
+    <button id="btn-gas" class="tbtn gas" aria-label="Gas: hold to speed up">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 4 11h5v3h6v-3h5zM9 16h6v2H9zm0 3h6v2H9z" fill="currentColor"/></svg>
+        GAS
+    </button>
 </div>
 
 <div id="menu" class="menu">
@@ -50,8 +54,8 @@
             <button class="zone-btn z-jaipur" data-zone="jaipur"><b>NEO-JAIPUR</b><small>Hawa Mahal · पिंक सिटी</small></button>
             <button class="zone-btn z-chennai" data-zone="chennai"><b>NEO-CHENNAI</b><small>Gopuram · சென்னை</small></button>
         </div>
-        <p class="controls no-touch"><b>A / D</b> steer · <b>S</b> brake · <b>Space</b> or <b>J</b> punch</p>
-        <p class="controls touch-only">Left thumb: steer · right: PUNCH and BRAKE</p>
+        <p class="controls no-touch">Hold <b>W / ↑</b> gas · <b>A / D</b> steer · <b>S</b> brake · <b>Space</b> or <b>J</b> punch</p>
+        <p class="controls touch-only">Left thumb: steer · right: hold GAS, PUNCH, BRAKE</p>
     </div>
 </div>
 
@@ -78,11 +82,11 @@
 <script src="../game/vendor/three/RenderPass.js"></script>
 <script src="../game/vendor/three/ShaderPass.js"></script>
 <script src="../game/vendor/three/UnrealBloomPass.js"></script>
-<script src="js/util.js?v=0.2"></script>
-<script src="js/track.js?v=0.2"></script>
-<script src="js/city.js?v=0.2"></script>
-<script src="js/bike.js?v=0.2"></script>
-<script src="js/race.js?v=0.2"></script>
-<script src="js/main.js?v=0.2"></script>
+<script src="js/util.js?v=0.3"></script>
+<script src="js/track.js?v=0.3"></script>
+<script src="js/city.js?v=0.3"></script>
+<script src="js/bike.js?v=0.3"></script>
+<script src="js/race.js?v=0.3"></script>
+<script src="js/main.js?v=0.3"></script>
 </body>
 </html>
