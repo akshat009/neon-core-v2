@@ -90,7 +90,7 @@ body.is-touch .no-touch, body:not(.is-touch) .touch-only { display: none; }
     position: absolute;
     left: calc(14px + var(--safe-l));
     bottom: calc(24px + var(--safe-b));
-    width: min(44vw, 260px);
+    width: min(40vw, 260px);
     height: 92px;
     border-radius: 46px;
     border: 1px solid rgba(25, 240, 255, 0.45);
@@ -123,10 +123,10 @@ body.is-touch .no-touch, body:not(.is-touch) .touch-only { display: none; }
     cursor: pointer;
 }
 .tbtn.punch {
-    right: calc(18px + var(--safe-r));
-    bottom: calc(26px + var(--safe-b));
-    width: 104px;
-    height: 104px;
+    right: calc(114px + var(--safe-r));
+    bottom: calc(24px + var(--safe-b));
+    width: 96px;
+    height: 96px;
     color: #fff;
     border: 3px solid var(--yel);
     background: radial-gradient(circle, rgba(255, 225, 77, 0.35), rgba(30, 10, 5, 0.85) 70%);
@@ -136,8 +136,8 @@ body.is-touch .no-touch, body:not(.is-touch) .touch-only { display: none; }
 .tbtn.punch.ready { animation: ready 0.9s ease-in-out infinite; }
 @keyframes ready { 50% { box-shadow: 0 0 36px var(--yel), 0 0 60px var(--mag); } }
 .tbtn.brake {
-    right: calc(134px + var(--safe-r));
-    bottom: calc(30px + var(--safe-b));
+    right: calc(26px + var(--safe-r));
+    bottom: calc(166px + var(--safe-b));
     width: 66px;
     height: 66px;
     color: #fbb;
@@ -145,6 +145,22 @@ body.is-touch .no-touch, body:not(.is-touch) .touch-only { display: none; }
     background: rgba(30, 5, 10, 0.75);
 }
 .tbtn:active { transform: scale(0.92); }
+/* GAS: a tall pedal under the right thumb — hold it */
+.tbtn.gas {
+    right: calc(16px + var(--safe-r));
+    bottom: calc(22px + var(--safe-b));
+    width: 86px;
+    height: 128px;
+    border-radius: 22px;
+    gap: 2px;
+    align-content: center;
+    color: #dfffea;
+    border: 3px solid #3dff9a;
+    background: linear-gradient(0deg, rgba(61, 255, 154, 0.3), rgba(5, 25, 15, 0.85));
+    box-shadow: 0 0 18px rgba(61, 255, 154, 0.45);
+}
+.tbtn.gas svg { width: 34px; height: 34px; color: #3dff9a; }
+.tbtn.gas.on { transform: scale(0.94); background: linear-gradient(0deg, rgba(61, 255, 154, 0.75), rgba(10, 60, 35, 0.9)); box-shadow: 0 0 30px #3dff9a; }
 
 /* ---------- Menus ---------- */
 
