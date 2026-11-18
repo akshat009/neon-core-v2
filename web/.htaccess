@@ -6,10 +6,12 @@ RewriteCond %{HTTP_HOST} ^(www\.)?asaxenadev\.com$ [NC]
 RewriteRule ^(.*)$ https://play.asaxenadev.com/$1 [R=301,L]
 </IfModule>
 
-# Always check for a fresh index.html. The game's JS/CSS links carry ?v= version numbers,
-# so a stale cached page would keep loading the old game after a deploy.
+# Always check for fresh HTML, JS, CSS and JSON. Hostinger CDN keeps static files at its
+# edge for 2 hours when no Cache-Control is sent, and it served old racer JS/CSS even with a
+# new ?v= on the link. "no-cache" makes the CDN and the browser revalidate with the server on
+# every load (a cheap 304 when nothing changed). Images, fonts and audio keep normal caching.
 <IfModule mod_headers.c>
-    <FilesMatch "\.html?$">
+    <FilesMatch "\.(html?|js|mjs|css|json)$">
         Header set Cache-Control "no-cache, must-revalidate"
         Header unset Expires
     </FilesMatch>
