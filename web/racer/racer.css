@@ -17,7 +17,7 @@ html, body { margin: 0; height: 100%; overflow: hidden; background: var(--ink); 
 canvas { display: block; }
 button { font: inherit; color: inherit; }
 [hidden] { display: none !important; }
-body.touch .no-touch, body:not(.touch) .touch-only { display: none; }
+body.is-touch .no-touch, body:not(.is-touch) .touch-only { display: none; }
 
 /* ---------- HUD ---------- */
 
